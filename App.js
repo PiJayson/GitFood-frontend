@@ -1,6 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 
+import Quagga from 'quagga'; // ES6
+const Quagga = require('quagga').default; // Common JS (important: default)
+
 export default function App() {
   return (
     <View style={styles.container}>
