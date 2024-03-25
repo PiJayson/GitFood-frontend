@@ -17,6 +17,28 @@ export default function App() {
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    
+    sendBarcodeToBackend(data);
+  };
+
+  // Function to send barcode data to the backend
+  const sendBarcodeToBackend = async (barcodeData) => {
+    try {
+		console.log(barcodeData);
+      let response = await fetch('https://gitfood.fun/barcode/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          barcodeNumber: barcodeData,
+          productId: 1,
+        }),
+      });
+      // let responseJson = await response.json();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (hasPermission === null) {
