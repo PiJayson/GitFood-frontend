@@ -25,7 +25,7 @@ export default function App() {
   const sendBarcodeToBackend = async (barcodeData) => {
     try {
 		console.log(barcodeData);
-      let response = await fetch('https://gitfood.fun/barcode/add', {
+      let response = await fetch('https://52.169.1.1:5250/barcode/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

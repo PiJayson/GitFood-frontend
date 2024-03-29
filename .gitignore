@@ -1,5 +1,9 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# server-side
+gitfood.fun.certificate.pem
+gitfood.fun.key
+
 # dependencies
 node_modules/
 
