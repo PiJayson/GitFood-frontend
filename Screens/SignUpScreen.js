@@ -1,4 +1,3 @@
-// LoginScreen.js
 import React, { useState } from "react";
 import {
   TouchableOpacity,
@@ -12,13 +11,15 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LoginScreen = ({ navigation }) => {
+const SignUpScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     // Implement your login logic here
     console.log("Username:", username);
+    console.log("Email:", email);
     console.log("Password:", password);
     // For a real application, you would send the credentials to your server for authentication
     try {
@@ -27,15 +28,15 @@ const LoginScreen = ({ navigation }) => {
         password,
       });
       await AsyncStorage.setItem("jwtToken", response.data.token);
-      navigation.navigate("Home");
+      navigation.navigate("Login");
     } catch (error) {
-      alert("Invalid credentials!");
+      alert("Signup failed!");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Sign up</Text>
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -49,11 +50,11 @@ const LoginScreen = ({ navigation }) => {
         value={password}
         onChangeText={(text) => setPassword(text)}
       />
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Signup" onPress={handleLogin} />
       <View style={styles.row}>
-        <Text>Don’t have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.replace("SignUp")}>
-          <Text style={styles.link}>Sign up</Text>
+        <Text>Already have an account? </Text>
+        <TouchableOpacity onPress={() => navigation.replace("Login")}>
+          <Text style={styles.link}>Login</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -91,4 +92,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default SignUpScreen;
