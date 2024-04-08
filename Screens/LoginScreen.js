@@ -23,11 +23,13 @@ const LoginScreen = ({ navigation }) => {
     console.log("Password:", password);
     // For a real application, you would send the credentials to your server for authentication
     try {
+      console.log("before")
       await RestApiService.login(username, password);
+      console.log("been there");
       navigation.navigate("Home");
     } catch (error) {
+      console.log(error)
       alert("Invalid credentials!");
-	console.log(error);
     }
   };
 

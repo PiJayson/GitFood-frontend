@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'https://gitfood.fun:5255';
+const API_BASE_URL = 'https://52.169.1.1:5250';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -18,18 +18,16 @@ apiClient.interceptors.request.use(async (config) => {
 });
 
 // Register user
-const register = async (username, password) => {
+const register = async (email, password) => {
   twoFactorCode = "string";
-  email = username
   twoFactorRecoveryCode = "string";
   return apiClient.post('/login/register', { email, password, twoFactorCode, twoFactorRecoveryCode });
 };
 
 // Login user
-const login = async (username, password) => {
+const login = async (email, password) => {
   twoFactorCode = "string";
   twoFactorRecoveryCode = "string";
-  email = username
   const response = await apiClient.post('/login', { email, password, twoFactorCode, twoFactorRecoveryCode });
   const { token } = response.data;
   await AsyncStorage.setItem('jwtToken', token);
@@ -37,14 +35,16 @@ const login = async (username, password) => {
 };
 
 // Get barcode name
-const getBarcodeName = async (barcode) => {
-  const response = await apiClient.get(`/barcodes/${barcode}`);
+const getBarcodeName = async (barcodeNumber) => {
+  const response = await apiClient.get(`/barcode/get/${barcodeNumber}`);
   return response.data.name;
 };
 
 // Set barcode name
 const setBarcode = async (barcode, name) => {
-  return apiClient.post('/barcodes', { barcode, name });
+  barcodeNumber = barcode;
+  productId = 1;
+  return apiClient.post('/barcode/add', { barcodeNumber, productId });
 };
 
 export default {
