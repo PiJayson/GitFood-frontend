@@ -22,10 +22,7 @@ const LoginScreen = ({ navigation }) => {
     console.log("Password:", password);
     // For a real application, you would send the credentials to your server for authentication
     try {
-      const response = await axios.post("YOUR_API_ENDPOINT", {
-        username,
-        password,
-      });
+      await RestApiService.login(username, password);
       await AsyncStorage.setItem("jwtToken", response.data.token);
       navigation.navigate("Home");
     } catch (error) {

@@ -10,6 +10,7 @@ import {
 
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RestApiService from "../services/RestApiService";
 
 const SignUpScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -23,10 +24,7 @@ const SignUpScreen = ({ navigation }) => {
     console.log("Password:", password);
     // For a real application, you would send the credentials to your server for authentication
     try {
-      const response = await axios.post("YOUR_API_ENDPOINT", {
-        username,
-        password,
-      });
+      await RestApiService.register(username, password);
       await AsyncStorage.setItem("jwtToken", response.data.token);
       navigation.navigate("Login");
     } catch (error) {
