@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'https://52.169.1.1:5250';
+const API_BASE_URL = 'https://gitfood.fun:5255';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
