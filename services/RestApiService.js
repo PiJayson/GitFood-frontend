@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'https://52.169.1.1:5250';
+const API_BASE_URL = 'https://gitfood.fun:5255';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -20,15 +20,17 @@ apiClient.interceptors.request.use(async (config) => {
 // Register user
 const register = async (username, password) => {
   twoFactorCode = "string";
+  email = username
   twoFactorRecoveryCode = "string";
-  return apiClient.post('/login/register', { username, password, twoFactorCode, twoFactorRecoveryCode });
+  return apiClient.post('/login/register', { email, password, twoFactorCode, twoFactorRecoveryCode });
 };
 
 // Login user
 const login = async (username, password) => {
   twoFactorCode = "string";
   twoFactorRecoveryCode = "string";
-  const response = await apiClient.post('/login', { username, password, twoFactorCode, twoFactorRecoveryCode });
+  email = username
+  const response = await apiClient.post('/login', { email, password, twoFactorCode, twoFactorRecoveryCode });
   const { token } = response.data;
   await AsyncStorage.setItem('jwtToken', token);
   return token;
