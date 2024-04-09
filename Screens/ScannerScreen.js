@@ -1,111 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
-import { Camera } from 'expo-camera';
-import RestApiService from '../services/RestApiService';
+import Quagga from 'quagga';
 
-export default function App() {
-  const [hasPermission, setHasPermission] = useState(null);
+const ScannerScreen = () => {
   const [scanned, setScanned] = useState(false);
-  const [getBarcodeVar, setBarcode] = useState(false);
-  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [barcodeResult, setBarcodeResult] = useState('');
+
+  function initQuagga() {
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector('#scanner-container'),
+        constraints: {
+          facingMode: "environment",
+        },
+      },
+      decoder: {
+        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader"],
+      },
+      locate: true,
+    }, (err) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      Quagga.start();
+    });
+  
+    Quagga.onDetected((data) => {
+      setBarcodeResult(data.codeResult.code);
+      setScanned(true);
+      Quagga.stop();
+    });
+  }
+  
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
+    initQuagga();
+  
+    return () => {
+      Quagga.offDetected();
+      Quagga.stop();
+    };
   }, []);
-
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-
-    if (getBarcodeVar) {
-      RestApiService.getBarcodeName(data);
-      //getBarcodeFromDatabase(data);
-    }
-    else {
-      alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-
-      RestApiService.setBarcode(data, "");
-      sendBarcodeToBackend(data);
-    }
-    
-  };
-
-  const getBarcode = async () => {
-    setBarcode(true);
-    setScanned(false);
-  }
-
-  const getBarcodeFromDatabase = async (barcodeData) => {
-    try {
-      let response = await fetch(`https://gitfood.fun:/barcode/get?barcodeNumber=${barcodeData}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      let responseJson = await response.json();
-      
-      alert('data: ' + JSON.stringify(responseJson));
-    } catch (error) {      
-      alert('server is not working')
-    }
-}
-
-  // Function to send barcode data to the backend
-  const sendBarcodeToBackend = async (barcodeData) => {
-    try {
-      let response = await fetch('https://gitfood.fun/barcode/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          barcodeNumber: barcodeData,
-          productId: 1,
-        }),
-      });
-      // let responseJson = await response.json();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  if (hasPermission === null) {
-    return <View style={styles.container}><Text>Requesting for camera permission</Text></View>;
-  }
-  if (hasPermission === false) {
-    return <View style={styles.container}><Text>No access to camera</Text></View>;
-  }
+  
 
   return (
-    <View style={styles.container}>
-      <Camera
-        style={styles.camera}
-        type={type}
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}>
-      </Camera>
-      {scanned == false && <Button title={'Tap to Scan Again'} onPress={() => {setScanned(false); setBarcode(false);}} />}
-      {scanned && <Button title={'Tap to Get Barcode Info'} onPress={() => getBarcode()} />}
-      <Button title={'Flip Camera'} onPress={() => {
-        setType(
-          type === Camera.Constants.Type.back
-            ? Camera.Constants.Type.front
-            : Camera.Constants.Type.back
-        );
+    <View id="scanner-container" style={styles.container}>
+      {scanned && (
+        <Text style={styles.text}>Result: {barcodeResult}</Text>
+      )}
+      <Button title={'Scan Again'} onPress={() => {
+        setScanned(false);
+        Quagga.stop();
+        Quagga.offDetected();
+        initQuagga();
       }} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  camera: {
-    flex: 1,
-  }
+  scanner: {
+    width: '100%',
+    height: '50%',
+    backgroundColor: 'gray',
+  },
+  text: {
+    margin: 20,
+  },
 });
+
+export default ScannerScreen;
