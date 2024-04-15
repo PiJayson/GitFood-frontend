@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
 import Quagga from 'quagga';
+import RestApiService from '../services/RestApiService';
 
 const ScannerScreen = () => {
   const [scanned, setScanned] = useState(false);
@@ -28,9 +29,21 @@ const ScannerScreen = () => {
       Quagga.start();
     });
   
-    Quagga.onDetected((data) => {
+    Quagga.onDetected(async (data) => {
+      const barcode = data.codeResult.code;
       setBarcodeResult(data.codeResult.code);
       setScanned(true);
+      
+      const barcodeData = await RestApiService.getBarcodeData(data.codeResult.code);
+      if (barcodeData)
+      {
+        setBarcodeResult(JSON.stringify(barcodeData));
+      }
+      else
+      {
+        RestApiService.setBarcode(barcode, "");
+      }
+
       Quagga.stop();
     });
   }
