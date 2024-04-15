@@ -1,74 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
-import Quagga from 'quagga';
+// ScannerScreen.js
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { initScannerService, stopScannerService } from '../services/ScannerService';
 import RestApiService from '../services/RestApiService';
+import ProductForm from './ProductForm';
 
 const ScannerScreen = () => {
   const [scanned, setScanned] = useState(false);
   const [barcodeResult, setBarcodeResult] = useState('');
+  const [isBarcodeFound, setIsBarcodeFound] = useState(true);
+  const scannerRef = useRef(null);
 
-  function initQuagga() {
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        target: document.querySelector('#scanner-container'),
-        constraints: {
-          facingMode: "environment",
-        },
-      },
-      decoder: {
-        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader"],
-      },
-      locate: true,
-    }, (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      Quagga.start();
-    });
-  
-    Quagga.onDetected(async (data) => {
-      const barcode = data.codeResult.code;
-      setBarcodeResult(data.codeResult.code);
-      setScanned(true);
-      
-      const barcodeData = await RestApiService.getBarcodeData(data.codeResult.code);
-      if (barcodeData)
-      {
-        setBarcodeResult(JSON.stringify(barcodeData));
-      }
-      else
-      {
-        RestApiService.setBarcode(barcode, "");
-      }
-
-      Quagga.stop();
-    });
-  }
-  
+  const onDetected = async (data) => {
+    const barcode = data.codeResult.code;
+    const barcodeData = await RestApiService.getBarcodeData(barcode);
+    setScanned(true);
+    if (barcodeData) {
+      setBarcodeResult(JSON.stringify(barcodeData));
+      setIsBarcodeFound(true);
+    } else {
+      setBarcodeResult(barcode);
+      setIsBarcodeFound(false);
+    }
+    stopScannerService();
+  };
 
   useEffect(() => {
-    initQuagga();
-  
-    return () => {
-      Quagga.offDetected();
-      Quagga.stop();
-    };
-  }, []);
-  
+    if (scannerRef.current) {
+      initScannerService(scannerRef.current, onDetected);
+    }
+    return () => stopScannerService();
+  }, [scannerRef.current]);
+
+  const handleSaveProduct = async (barcode, productName) => {
+    await RestApiService.setBarcode(barcode, productName);
+    setIsBarcodeFound(true);
+    setBarcodeResult(JSON.stringify({ barcode, productName }));
+  };
 
   return (
-    <View id="scanner-container" style={styles.container}>
-      {scanned && (
+    <View ref={scannerRef} style={styles.container}>
+      {scanned && isBarcodeFound && (
         <Text style={styles.text}>Result: {barcodeResult}</Text>
+      )}
+      {scanned && !isBarcodeFound && (
+        <ProductForm barcode={barcodeResult} onSave={handleSaveProduct} />
       )}
       <Button title={'Scan Again'} onPress={() => {
         setScanned(false);
-        Quagga.stop();
-        Quagga.offDetected();
-        initQuagga();
+        stopScannerService();
+        if (scannerRef.current) {
+          initScannerService(scannerRef.current, onDetected);
+        }
       }} />
     </View>
   );
