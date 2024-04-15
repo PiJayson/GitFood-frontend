@@ -11,13 +11,12 @@ import { theme } from "../core/theme";
 import { usernameValidator } from "../utils/UsernameValidator";
 import { passwordValidator } from "../utils/PasswordValidator";
 
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import RestApiService from "../services/RestApiService";
+import { AuthContext } from "../utils/contexts/AuthContext";
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
+  const { signIn } = React.useContext(AuthContext);
 
   const handleLogin = async () => {
     // Implement your login logic here
@@ -34,16 +33,7 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    try {
-      console.log("before");
-
-      await RestApiService.login(username, password);
-      console.log("been there");
-      navigation.navigate("Home");
-    } catch (error) {
-      console.log(error);
-      alert("Invalid credentials!");
-    }
+    signIn(username.value, password.value);
   };
 
   return (
