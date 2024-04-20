@@ -1,5 +1,5 @@
-import Background from "../components/Background";
-import Logo from "../components/Logo";
+import Background from "../../components/universal/Background";
+import Logo from "../../components/universal/Logo";
 
 const splashScreen = () => {
   return (

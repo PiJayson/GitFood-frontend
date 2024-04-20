@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { TouchableOpacity, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
-import Background from "../components/Background";
-import Logo from "../components/Logo";
-import Header from "../components/Header";
-import Button from "../components/Button";
-import TextInput from "../components/TextInput";
-import BackButton from "../components/BackButton";
-import { theme } from "../core/theme";
-import { usernameValidator } from "../utils/UsernameValidator";
-import { passwordValidator } from "../utils/PasswordValidator";
+import Background from "../../components/universal/Background";
+import Logo from "../../components/universal/Logo";
+import Header from "../../components/universal/Header";
+import Button from "../../components/universal/Button";
+import TextInput from "../../components/universal/TextInput";
+import BackButton from "../../components/universal/BackButton";
+import { theme } from "../../core/theme";
+import { usernameValidator } from "../../utils/UsernameValidator";
+import { passwordValidator } from "../../utils/PasswordValidator";
 
-import { AuthContext } from "../utils/contexts/AuthContext";
+import { AuthContext } from "../../utils/contexts/AuthContext";
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState({ value: "", error: "" });

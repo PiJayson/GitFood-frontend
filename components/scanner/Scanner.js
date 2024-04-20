@@ -1,10 +1,10 @@
 // ScannerScreen.js
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
-import { initScannerService, stopScannerService } from '../services/ScannerService';
-import RestApiService from '../services/RestApiService';
+import { initScannerService, stopScannerService } from '../../services/ScannerService';
+import RestApiService from '../../services/RestApiService';
 import ProductForm from './ProductForm';
-import { AuthContext } from "../utils/contexts/AuthContext";
+import { AuthContext } from "../../utils/contexts/AuthContext";
 
 const ScannerScreen = () => {
   const [scanned, setScanned] = useState(false);
