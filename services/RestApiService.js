@@ -1,6 +1,6 @@
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
+let AWTtoken = null;
 const API_BASE_URL = "https://gitfood.fun:5255";
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -10,7 +10,7 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem("jwtToken");
+  const token = AWTtoken;
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
@@ -21,12 +21,16 @@ apiClient.interceptors.request.use(async (config) => {
 const register = async (email, password) => {
   twoFactorCode = "string";
   twoFactorRecoveryCode = "string";
-  return apiClient.post("/login/register", {
+  const response = await apiClient.post("/login/register", {
     email,
     password,
     twoFactorCode,
     twoFactorRecoveryCode,
   });
+
+  AWTtoken = response.data;
+
+  return response;
 };
 
 // Login user
@@ -39,9 +43,10 @@ const login = async (email, password) => {
     twoFactorCode,
     twoFactorRecoveryCode,
   });
-  const { token } = response.data;
-  await AsyncStorage.setItem("jwtToken", token);
-  return token;
+
+  AWTtoken = response.data;
+
+  return response;
 };
 
 // Get barcode name
@@ -57,21 +62,12 @@ const setBarcode = async (barcode, name) => {
   return apiClient.post("/barcode/add", { barcodeNumber, productId });
 };
 
-// check if token is valid
-const bootstrap = async () => {
-  let userToken;
+const setToken = (token) => {
+  AWTtoken = token;
+};
 
-  try {
-    userToken = await AsyncStorage.getItem("jwtToken");
-  } catch (e) {
-    return false;
-  }
-
-  // After restoring token, we may need to validate it in production apps
-
-  // This will switch to the App screen or Auth screen and this loading
-  // screen will be unmounted and thrown away.
-  return userToken !== null;
+const resetToken = () => {
+  AWTtoken = null;
 };
 
 export default {
@@ -80,5 +76,6 @@ export default {
   getBarcodeName,
   setBarcode,
 
-  bootstrap, // not a big fan of this
+  setToken,
+  resetToken,
 };

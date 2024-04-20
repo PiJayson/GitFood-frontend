@@ -11,12 +11,13 @@ import { theme } from "../core/theme";
 import { usernameValidator } from "../utils/UsernameValidator";
 import { passwordValidator } from "../utils/PasswordValidator";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import RestApiService from "../services/RestApiService";
+import { AuthContext } from "../utils/contexts/AuthContext";
 
 const SignUpScreen = ({ navigation }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
+  const [isWaiting, setIsWaiting] = useState(false);
+  const { signUp } = React.useContext(AuthContext);
 
   const handleSignUp = async () => {
     console.log("Username:", username);
@@ -32,11 +33,10 @@ const SignUpScreen = ({ navigation }) => {
     }
 
     try {
-      await RestApiService.register(username, password);
-      await AsyncStorage.setItem("jwtToken", response.data.token);
-      navigation.navigate("Login");
-    } catch (error) {
-      alert("Signup failed!");
+      setIsWaiting(true);
+      await signUp(username.value, password.value);
+    } finally {
+      setIsWaiting(false);
     }
   };
 
@@ -49,33 +49,28 @@ const SignUpScreen = ({ navigation }) => {
         label="Username"
         returnKeyType="next"
         value={username.value}
+        disable={isWaiting}
         onChangeText={(text) => setUsername({ value: text, error: "" })}
         error={!!username.error}
         errorText={username.error}
         autoCapitalize="none"
       />
-      {/* <TextInput
-        label="Email"
-        returnKeyType="next"
-        value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: "" })}
-        error={!!email.error}
-        errorText={email.error}
-        autoCapitalize="none"
-        autoCompleteType="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-      /> */}
       <TextInput
         label="Password"
         returnKeyType="done"
         value={password.value}
+        disable={isWaiting}
         onChangeText={(text) => setPassword({ value: text, error: "" })}
         error={!!password.error}
         errorText={password.error}
         secureTextEntry
       />
-      <Button mode="contained" onPress={handleSignUp} style={{ marginTop: 24 }}>
+      <Button
+        mode="contained"
+        disable={isWaiting}
+        onPress={handleSignUp}
+        style={{ marginTop: 24 }}
+      >
         Sign Up
       </Button>
       <View style={styles.row}>
