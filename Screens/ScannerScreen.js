@@ -4,12 +4,14 @@ import { View, Text, StyleSheet, Button } from 'react-native';
 import { initScannerService, stopScannerService } from '../services/ScannerService';
 import RestApiService from '../services/RestApiService';
 import ProductForm from './ProductForm';
+import { AuthContext } from "../utils/contexts/AuthContext";
 
 const ScannerScreen = () => {
   const [scanned, setScanned] = useState(false);
   const [barcodeResult, setBarcodeResult] = useState('');
   const [isBarcodeFound, setIsBarcodeFound] = useState(true);
   const scannerRef = useRef(null);
+  const { call } = React.useContext(AuthContext);
 
   const onDetected = async (data) => {
     const barcode = data.codeResult.code;

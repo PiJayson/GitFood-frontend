@@ -1,92 +1,96 @@
 import React, { useState } from "react";
-import {
-  TouchableOpacity,
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-} from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { Text } from "react-native-paper";
+import Background from "../components/Background";
+import Logo from "../components/Logo";
+import Header from "../components/Header";
+import Button from "../components/Button";
+import TextInput from "../components/TextInput";
+import BackButton from "../components/BackButton";
+import { theme } from "../core/theme";
+import { usernameValidator } from "../utils/UsernameValidator";
+import { passwordValidator } from "../utils/PasswordValidator";
 
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import RestApiService from "../services/RestApiService";
+import { AuthContext } from "../utils/contexts/AuthContext";
 
 const SignUpScreen = ({ navigation }) => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState({ value: "", error: "" });
+  const [password, setPassword] = useState({ value: "", error: "" });
+  const [isWaiting, setIsWaiting] = useState(false);
+  const { signUp } = React.useContext(AuthContext);
 
-  const handleLogin = async () => {
-    // Implement your login logic here
+  const handleSignUp = async () => {
     console.log("Username:", username);
-    console.log("Email:", email);
     console.log("Password:", password);
-    // For a real application, you would send the credentials to your server for authentication
+
+    const usernameError = usernameValidator(username.value);
+    const passwordError = passwordValidator(password.value);
+
+    if (usernameError || passwordError) {
+      setUsername({ ...username, error: usernameError });
+      setPassword({ ...password, error: passwordError });
+      return;
+    }
+
     try {
-      await RestApiService.register(username, password);
-      await AsyncStorage.setItem("jwtToken", response.data.token);
-      navigation.navigate("Login");
-    } catch (error) {
-      alert("Signup failed!");
+      setIsWaiting(true);
+      await signUp(username.value, password.value);
+    } finally {
+      setIsWaiting(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign up</Text>
+    <Background>
+      <BackButton goBack={navigation.goBack} />
+      <Logo />
+      <Header>Create Account</Header>
       <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
+        label="Username"
+        returnKeyType="next"
+        value={username.value}
+        disable={isWaiting}
+        onChangeText={(text) => setUsername({ value: text, error: "" })}
+        error={!!username.error}
+        errorText={username.error}
+        autoCapitalize="none"
       />
       <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry={true}
-        value={password}
-        onChangeText={(text) => setPassword(text)}
+        label="Password"
+        returnKeyType="done"
+        value={password.value}
+        disable={isWaiting}
+        onChangeText={(text) => setPassword({ value: text, error: "" })}
+        error={!!password.error}
+        errorText={password.error}
+        secureTextEntry
       />
-      <Button title="Signup" onPress={handleLogin} />
+      <Button
+        mode="contained"
+        disable={isWaiting}
+        onPress={handleSignUp}
+        style={{ marginTop: 24 }}
+      >
+        Sign Up
+      </Button>
       <View style={styles.row}>
         <Text>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation.replace("Login")}>
           <Text style={styles.link}>Login</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </Background>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  input: {
-    width: "100%",
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
   row: {
     flexDirection: "row",
     marginTop: 4,
   },
   link: {
     fontWeight: "bold",
-    color: "blue",
+    color: theme.colors.primary,
   },
 });
 
