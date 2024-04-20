@@ -1,137 +1,78 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Button } from "react-native";
-import { Camera } from "expo-camera";
-import RestApiService from "../services/RestApiService";
+// ScannerScreen.js
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { initScannerService, stopScannerService } from '../services/ScannerService';
+import RestApiService from '../services/RestApiService';
+import ProductForm from './ProductForm';
 import { AuthContext } from "../utils/contexts/AuthContext";
 
-export default function App() {
-  const [hasPermission, setHasPermission] = useState(null);
+const ScannerScreen = () => {
   const [scanned, setScanned] = useState(false);
-  const [getBarcodeVar, setBarcode] = useState(false);
-  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [barcodeResult, setBarcodeResult] = useState('');
+  const [isBarcodeFound, setIsBarcodeFound] = useState(true);
+  const scannerRef = useRef(null);
   const { call } = React.useContext(AuthContext);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
-  }, []);
-
-  const handleBarCodeScanned = ({ type, data }) => {
+  const onDetected = async (data) => {
+    const barcode = data.codeResult.code;
+    const barcodeData = await RestApiService.getBarcodeData(barcode);
     setScanned(true);
-
-    if (getBarcodeVar) {
-      call(RestApiService.getBarcodeName, data);
+    if (barcodeData) {
+      setBarcodeResult(JSON.stringify(barcodeData));
+      setIsBarcodeFound(true);
     } else {
-      alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-
-      call(RestApiService.setBarcode, data, "");
-      sendBarcodeToBackend(data);
+      setBarcodeResult(barcode);
+      setIsBarcodeFound(false);
     }
+    stopScannerService();
   };
 
-  const getBarcode = async () => {
-    setBarcode(true);
-    setScanned(false);
-  };
-
-  const getBarcodeFromDatabase = async (barcodeData) => {
-    try {
-      let response = await fetch(
-        `https://gitfood.fun:/barcode/get?barcodeNumber=${barcodeData}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      let responseJson = await response.json();
-
-      alert("data: " + JSON.stringify(responseJson));
-    } catch (error) {
-      alert("server is not working");
+  useEffect(() => {
+    if (scannerRef.current) {
+      initScannerService(scannerRef.current, onDetected);
     }
-  };
+    return () => stopScannerService();
+  }, [scannerRef.current]);
 
-  // Function to send barcode data to the backend
-  const sendBarcodeToBackend = async (barcodeData) => {
-    try {
-      let response = await fetch("https://gitfood.fun/barcode/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          barcodeNumber: barcodeData,
-          productId: 1,
-        }),
-      });
-      // let responseJson = await response.json();
-    } catch (error) {
-      console.error(error);
-    }
+  const handleSaveProduct = async (barcode, productName) => {
+    await RestApiService.setBarcode(barcode, productName);
+    setIsBarcodeFound(true);
+    setBarcodeResult(JSON.stringify({ barcode, productName }));
   };
-
-  if (hasPermission === null) {
-    return (
-      <View style={styles.container}>
-        <Text>Requesting for camera permission</Text>
-      </View>
-    );
-  }
-  if (hasPermission === false) {
-    return (
-      <View style={styles.container}>
-        <Text>No access to camera</Text>
-      </View>
-    );
-  }
 
   return (
-    <View style={styles.container}>
-      <Camera
-        style={styles.camera}
-        type={type}
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-      ></Camera>
-      {scanned == false && (
-        <Button
-          title={"Tap to Scan Again"}
-          onPress={() => {
-            setScanned(false);
-            setBarcode(false);
-          }}
-        />
+    <View ref={scannerRef} style={styles.container}>
+      {scanned && isBarcodeFound && (
+        <Text style={styles.text}>Result: {barcodeResult}</Text>
       )}
-      {scanned && (
-        <Button
-          title={"Tap to Get Barcode Info"}
-          onPress={() => getBarcode()}
-        />
+      {scanned && !isBarcodeFound && (
+        <ProductForm barcode={barcodeResult} onSave={handleSaveProduct} />
       )}
-      <Button
-        title={"Flip Camera"}
-        onPress={() => {
-          setType(
-            type === Camera.Constants.Type.back
-              ? Camera.Constants.Type.front
-              : Camera.Constants.Type.back,
-          );
-        }}
-      />
+      <Button title={'Scan Again'} onPress={() => {
+        setScanned(false);
+        stopScannerService();
+        if (scannerRef.current) {
+          initScannerService(scannerRef.current, onDetected);
+        }
+      }} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
-    justifyContent: "flex-end",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  camera: {
-    flex: 1,
+  scanner: {
+    width: '100%',
+    height: '50%',
+    backgroundColor: 'gray',
+  },
+  text: {
+    margin: 20,
   },
 });
+
+export default ScannerScreen;

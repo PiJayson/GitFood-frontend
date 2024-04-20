@@ -49,10 +49,10 @@ const login = async (email, password) => {
   return response;
 };
 
-// Get barcode name
-const getBarcodeName = async (barcodeNumber) => {
-  const response = await apiClient.get(`/barcode/get/${barcodeNumber}`);
-  return response.data.name;
+// Get barcode data
+const getBarcodeData = async (barcodeNumber) => {
+  const response = await apiClient.get(`/barcode/get?barcodeNumber=${barcodeNumber}`);
+  return response.data;
 };
 
 // Set barcode name
@@ -73,7 +73,7 @@ const resetToken = () => {
 export default {
   register,
   login,
-  getBarcodeName,
+  getBarcodeData,
   setBarcode,
 
   setToken,
