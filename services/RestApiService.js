@@ -18,14 +18,10 @@ apiClient.interceptors.request.use(async (config) => {
 });
 
 // Register user
-const register = async (email, password) => {
-  twoFactorCode = "string";
-  twoFactorRecoveryCode = "string";
+const register = async (login, password) => {
   const response = await apiClient.post("/login/register", {
-    email,
+    login,
     password,
-    twoFactorCode,
-    twoFactorRecoveryCode,
   });
 
   AWTtoken = response.data;
@@ -34,14 +30,12 @@ const register = async (email, password) => {
 };
 
 // Login user
-const login = async (email, password) => {
+const login = async (login, password) => {
   twoFactorCode = "string";
   twoFactorRecoveryCode = "string";
   const response = await apiClient.post("/login", {
-    email,
+    login,
     password,
-    twoFactorCode,
-    twoFactorRecoveryCode,
   });
 
   AWTtoken = response.data;
@@ -51,7 +45,9 @@ const login = async (email, password) => {
 
 // Get barcode data
 const getBarcodeData = async (barcodeNumber) => {
-  const response = await apiClient.get(`/barcode/get?barcodeNumber=${barcodeNumber}`);
+  const response = await apiClient.get(
+    `/barcode/get?barcodeNumber=${barcodeNumber}`,
+  );
   return response.data;
 };
 
