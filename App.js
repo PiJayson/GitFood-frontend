@@ -18,6 +18,7 @@ import { initialState } from "./utils/reducers/TokenStateReducer";
 import RestApiService from "./services/RestApiService";
 import { AuthContext } from "./utils/contexts/AuthContext";
 import ErrorHandler from "./utils/decorators/RestApiErrorHandler";
+import { config } from "process";
 
 const Stack = createStackNavigator();
 
@@ -110,9 +111,21 @@ function App() {
     return <SplashScreen />;
   }
 
+  const linking = {
+    config: {
+      screens: {
+        Start: "",
+        Login: "login",
+        SignUp: "signUp",
+        Home: "home",
+        Scanner: "scanner",
+      },
+    },
+  }
+
   return (
     <Provider theme={theme}>
-      <NavigationContainer>
+      <NavigationContainer linking={linking}>
         <AuthContext.Provider value={authContext}>
           <Stack.Navigator
             initialRouteName={state.userToken ? "Home" : "Start"}
