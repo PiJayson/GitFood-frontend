@@ -29,15 +29,15 @@ const login = async (email, password) => {
   twoFactorCode = "string";
   twoFactorRecoveryCode = "string";
   const response = await apiClient.post('/login', { email, password, twoFactorCode, twoFactorRecoveryCode });
-  const { token } = response.data;
+  const token = response.data;
   await AsyncStorage.setItem('jwtToken', token);
   return token;
 };
 
-// Get barcode name
-const getBarcodeName = async (barcodeNumber) => {
-  const response = await apiClient.get(`/barcode/get/${barcodeNumber}`);
-  return response.data.name;
+// Get barcode data
+const getBarcodeData = async (barcodeNumber) => {
+  const response = await apiClient.get(`/barcode/get?barcodeNumber=${barcodeNumber}`);
+  return response.data;
 };
 
 // Set barcode name
@@ -50,6 +50,6 @@ const setBarcode = async (barcode, name) => {
 export default {
   register,
   login,
-  getBarcodeName,
+  getBarcodeData,
   setBarcode,
 };
