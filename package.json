@@ -26,6 +26,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.73.6",
+    "react-native-outside-press": "^1.2.2",
     "react-native-paper": "^5.12.3",
     "react-native-screens": "~3.29.0",
     "react-native-status-bar-height": "^2.6.0",

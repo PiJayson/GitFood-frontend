@@ -12,13 +12,13 @@ import {
   SignUpScreen,
   StartScreen,
   SplashScreen,
+  FridgeScreen,
 } from "./screens";
 import tokenStateReducer from "./utils/reducers/TokenStateReducer";
 import { initialState } from "./utils/reducers/TokenStateReducer";
 import RestApiService from "./services/RestApiService";
 import { AuthContext } from "./utils/contexts/AuthContext";
 import ErrorHandler from "./utils/decorators/RestApiErrorHandler";
-import { config } from "process";
 
 const Stack = createStackNavigator();
 
@@ -119,16 +119,17 @@ function App() {
         SignUp: "signUp",
         Home: "home",
         Scanner: "scanner",
+        Fridge: "fridge",
       },
     },
-  }
+  };
 
   return (
     <Provider theme={theme}>
       <NavigationContainer linking={linking}>
         <AuthContext.Provider value={authContext}>
           <Stack.Navigator
-            initialRouteName={state.userToken ? "Home" : "Start"}
+            initialRouteName={state.userToken ? "Fridge" : "Start"}
             screenOptions={{ headerShown: false }}
           >
             {state.userToken == false ? (
@@ -154,6 +155,7 @@ function App() {
               </>
             ) : (
               <>
+                <Stack.Screen name="Fridge" component={FridgeScreen} />
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="Scanner" component={ScannerScreen} />
               </>
