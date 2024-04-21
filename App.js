@@ -8,7 +8,8 @@ import { theme } from "./core/theme";
 import {
   LoginScreen,
   HomeScreen,
-  ScannerScreen,
+  ShoppingScreen,
+  ShoppingScannerScreen,
   SignUpScreen,
   StartScreen,
   SplashScreen,
@@ -118,7 +119,8 @@ function App() {
         Login: "login",
         SignUp: "signUp",
         Home: "home",
-        Scanner: "scanner",
+        Shopping: "shopping",
+        Scanner: "shopping/scanner",
       },
     },
   }
@@ -155,7 +157,9 @@ function App() {
             ) : (
               <>
                 <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen name="Scanner" component={ScannerScreen} />
+                
+                <Stack.Screen name="Shopping" component={ShoppingScreen} />
+                <Stack.Screen name="Scanner" component={ShoppingScannerScreen} />
               </>
             )}
           </Stack.Navigator>
