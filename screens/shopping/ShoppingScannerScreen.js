@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import ScannerComponent from '../../components/scanner/ScannerComponent';
 import BackButton from "../../components/universal/BackButton";
+import ProductForm from '../../components/scanner/ProductForm';
 
 export default function ShoppingScannerScreen({ navigation }) {
+  const [formVisible, setFormVisible] = useState(false);
   const [lastScannedItem, setLastScannedItem] = useState(null);
   const [itemCount, setItemCount] = useState(0);
 
@@ -11,6 +13,11 @@ export default function ShoppingScannerScreen({ navigation }) {
     console.log("scanned")
     setLastScannedItem(scannedData);
     setItemCount(1);
+  };
+
+  const handleAddProduct = (productData) => {
+    console.log('Product Added:', productData);
+    setFormVisible(false);
   };
 
   return (
@@ -25,6 +32,14 @@ export default function ShoppingScannerScreen({ navigation }) {
               <Button title="+" onPress={() => setItemCount(itemCount + 1)} />
               <Text>{itemCount}</Text>
               <Button title="-" onPress={() => setItemCount(Math.max(0, itemCount - 1))} />
+            </View>
+            <View>
+              <Button title="Add Product" onPress={() => setFormVisible(true)} />
+              <ProductForm
+                visible={formVisible}
+                onSubmit={handleAddProduct}
+                onClose={() => setFormVisible(false)}
+              />
             </View>
           </View>
         ) : (
