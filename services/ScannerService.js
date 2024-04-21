@@ -29,9 +29,12 @@ const initScannerService = (element, onDetected) => {
   Quagga.onDetected(onDetected);
 };
 
+const startScannerService = () => {
+  Quagga.onDetected();
+}
+
 const stopScannerService = () => {
   Quagga.offDetected();
-  Quagga.stop();
 };
 
-export { initScannerService, stopScannerService };
+export { initScannerService, stopScannerService, startScannerService };

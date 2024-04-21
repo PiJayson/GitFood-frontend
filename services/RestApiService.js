@@ -1,42 +1,53 @@
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from "axios";
 
-const API_BASE_URL = 'https://gitfood.fun:5255';
+let AWTtoken = null;
+const API_BASE_URL = "https://gitfood.fun:5255";
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 apiClient.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('jwtToken');
+  const token = AWTtoken;
   if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+    config.headers["Authorization"] = `Bearer ${token}`;
   }
   return config;
 });
 
 // Register user
-const register = async (email, password) => {
-  twoFactorCode = "string";
-  twoFactorRecoveryCode = "string";
-  return apiClient.post('/login/register', { email, password, twoFactorCode, twoFactorRecoveryCode });
+const register = async (login, password) => {
+  const response = await apiClient.post("/login/register", {
+    login,
+    password,
+  });
+
+  AWTtoken = response.data;
+
+  return response;
 };
 
 // Login user
-const login = async (email, password) => {
+const login = async (login, password) => {
   twoFactorCode = "string";
   twoFactorRecoveryCode = "string";
-  const response = await apiClient.post('/login', { email, password, twoFactorCode, twoFactorRecoveryCode });
-  const token = response.data;
-  await AsyncStorage.setItem('jwtToken', token);
-  return token;
+  const response = await apiClient.post("/login", {
+    login,
+    password,
+  });
+
+  AWTtoken = response.data;
+
+  return response;
 };
 
 // Get barcode data
 const getBarcodeData = async (barcodeNumber) => {
-  const response = await apiClient.get(`/barcode/get?barcodeNumber=${barcodeNumber}`);
+  const response = await apiClient.get(
+    `/barcode/get?barcodeNumber=${barcodeNumber}`,
+  );
   return response.data;
 };
 
@@ -44,7 +55,15 @@ const getBarcodeData = async (barcodeNumber) => {
 const setBarcode = async (barcode, name) => {
   barcodeNumber = barcode;
   productId = 1;
-  return apiClient.post('/barcode/add', { barcodeNumber, productId });
+  return apiClient.post("/barcode/add", { barcodeNumber, productId });
+};
+
+const setToken = (token) => {
+  AWTtoken = token;
+};
+
+const resetToken = () => {
+  AWTtoken = null;
 };
 
 export default {
@@ -52,4 +71,7 @@ export default {
   login,
   getBarcodeData,
   setBarcode,
+
+  setToken,
+  resetToken,
 };
