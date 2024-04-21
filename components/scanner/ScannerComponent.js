@@ -1,66 +1,70 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Platform, StyleSheet } from 'react-native';
-import Quagga from 'quagga';
-import { Camera } from 'expo-camera';
+import { View, StyleSheet, Platform, Text } from 'react-native';
+import { BrowserMultiFormatReader, NotFoundException, ChecksumException, FormatException } from '@zxing/library';
 
 export default function ScannerComponent({ onBarcodeScanned, style }) {
-  const scannerRef = useRef(null);
+  const videoRef = useRef(null);
+  const codeReader = new BrowserMultiFormatReader();
 
   useEffect(() => {
-    Quagga.init({
-      inputStream: {
-        type: "LiveStream",
-        constraints: {
-          facingMode: "environment"
-        },
-        target: scannerRef.current,
-      },
-      decoder: {
-        readers: [
-          "code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader",
-          "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader"
-        ],
-      }
-    }, function(err) {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      Quagga.start();
-    });
+    if (Platform.OS === 'web') {
+      const startScanning = async () => {
+        try {
+          const videoInputDevices = await codeReader.listVideoInputDevices();
+          if (videoInputDevices.length > 0) {
+            const selectedDeviceId = videoInputDevices[0].deviceId;
+            await codeReader.decodeFromVideoDevice(selectedDeviceId, videoRef.current, (result, error) => {
+              if (result) {
+                onBarcodeScanned(result.text);
+              }
+              if (error) {
+                if (error instanceof NotFoundException ||
+                    error instanceof ChecksumException ||
+                    error instanceof FormatException) {
+                  
+                    console.log('No barcode detected.');
+                } else {
+                  console.error(error);
+                }
+              }
+            });
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      };
 
-    Quagga.onDetected((data) => {
-      onBarcodeScanned(data.codeResult.code);
-    });
+      startScanning();
 
-    return () => Quagga.stop();
+      return () => {
+        codeReader.reset();
+      };
+    }
   }, []);
 
   if (Platform.OS !== 'web') {
     return (
       <View style={styles.container}>
-        <Camera
-          style={styles.preview}
-          onBarCodeRead={(e) => onBarcodeScanned(e.data)}
-          captureAudio={false}
-        />
+        <Text>Barcode scanning is not available on native platforms.</Text>
       </View>
     );
   } else {
     return (
-      <View ref={scannerRef} style={[styles.container, style]}></View>
+      <View style={[styles.container, style]}>
+        <video ref={videoRef} style={styles.video} />
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    height: "75%",
     flex: 1,
-  },
-  preview: {
-    flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  video: {
+    width: '100%',
+    height: '100%',
   },
 });
