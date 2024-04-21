@@ -8,37 +8,34 @@ import OutsidePressHandler from "react-native-outside-press";
 import { theme } from "../../core/theme";
 import ProductName from "./ProductName";
 
-// import { useContext } from "react";
-
 export default function SingleProduct({ product, dispatch }) {
   const [count, setCount] = useState(product.count);
 
   const outsidePressHandler = () => {
     if (count == 0) {
-      // dispatch({ type: "REMOVE_PRODUCT", productName: product.name });
+      dispatch({ type: "REMOVE_PRODUCT", productName: product.name });
     }
   }; // well this one will be a little bit of a perfomance killer
 
   const updateCount = (value) => {
     product.count = product.count + value > 0 ? product.count + value : 0;
     setCount(product.count);
-    // dispatch({
-    //   type: "UPDATE_PRODUCT",
-    //   productName: product.name,
-    //   count: product.count,
-    // });
+    dispatch({
+      type: "UPDATE_PRODUCT",
+      product: product,
+    });
   };
 
   return (
-    // <OutsidePressHandler onOutsidePress={outsidePressHandler}>
-    <View style={styles.container}>
-      <Text variant="displayMedium" style={styles.count}>
-        {count}x
-      </Text>
-      <ProductName> {product.name} </ProductName>
-      <IncrementDecrement update={updateCount} />
-    </View>
-    // </OutsidePressHandler>
+    <OutsidePressHandler onOutsidePress={() => outsidePressHandler()}>
+      <View style={styles.container}>
+        <Text variant="displayMedium" style={styles.count}>
+          {count}x
+        </Text>
+        <ProductName> {product.name} </ProductName>
+        <IncrementDecrement update={updateCount} />
+      </View>
+    </OutsidePressHandler>
   );
 }
 

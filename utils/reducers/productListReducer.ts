@@ -9,7 +9,7 @@ export type ProductListState = {
 };
 
 type ProductListAction =
-  | { type: "REMOVE_PRODUCT"; name: string }
+  | { type: "REMOVE_PRODUCT"; productName: string }
   | { type: "ADD_PRODUCT"; product: Product }
   | { type: "UPDATE_PRODUCT"; product: Product };
 
@@ -22,7 +22,7 @@ export default function productListReducer(
       return {
         ...state,
         products: state.products.filter(
-          (product) => product.name !== action.name,
+          (product) => product.name !== action.productName,
         ),
       };
     case "ADD_PRODUCT":

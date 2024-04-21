@@ -8,7 +8,10 @@ import { useReducer } from "react";
 import productListReducer from "../../utils/reducers/productListReducer";
 
 export default function ProductList({ products = [], ListName = "" }) {
-  const [productList, dispatch] = useReducer(productListReducer, products);
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [productList, dispatch] = useReducer(productListReducer, {
+    products: products,
+  });
 
   return (
     <View style={styles.container}>
@@ -20,15 +23,18 @@ export default function ProductList({ products = [], ListName = "" }) {
       />
       <FlatList
         style={styles.list}
-        data={productList}
+        data={productList.products}
         renderItem={({ item }) => (
           <SingleProduct product={item} dispatch={dispatch} />
         )}
         scrollEnabled={true}
         keyExtractor={(item) => item.name}
-        // refreshControl={
-        //   <RefreshControl refreshing={refreshing} onRefresh={loadUserData} />
-        // }
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => console.log("refresh")}
+          />
+        }
       />
       <Button mode="outlined" title="begin Scanning"></Button>
     </View>
