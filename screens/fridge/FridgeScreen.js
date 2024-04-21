@@ -6,6 +6,7 @@ import { AuthContext } from "../../utils/contexts/AuthContext";
 // import ProductList from "../../components/product_list/ProductList";
 import ProductList from "../../components/product_list/ProductList";
 import { Dimensions } from "react-native";
+import BackButton from "../../components/universal/BackButton";
 import { useState, useEffect } from "react";
 import { theme } from "../../core/theme";
 
@@ -89,6 +90,7 @@ const FridgeScreen = ({ navigation }) => {
   const { signOut } = React.useContext(AuthContext);
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
+      <BackButton goBack={() => navigation.navigate("Home")} />
       <ProductList products={products} ListName={"kldsaj"} />
       <Button
         mode="outlined"

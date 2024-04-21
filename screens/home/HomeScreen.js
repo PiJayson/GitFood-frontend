@@ -10,6 +10,9 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
       <Paragraph>Home screen stuff</Paragraph>
+      <Button mode="outlined" onPress={() => navigation.navigate("Fridge")}>
+        Fridge
+      </Button>
       <Button mode="outlined" onPress={() => navigation.navigate("Scanner")}>
         Scan
       </Button>

@@ -131,7 +131,7 @@ function App() {
         <NavigationContainer linking={linking}>
           <AuthContext.Provider value={authContext}>
             <Stack.Navigator
-              initialRouteName={state.userToken ? "Fridge" : "Start"}
+              initialRouteName={state.userToken ? "Home" : "Start"}
               screenOptions={{ headerShown: false }}
             >
               {state.userToken == false ? (
@@ -157,8 +157,8 @@ function App() {
                 </>
               ) : (
                 <>
-                  <Stack.Screen name="Fridge" component={FridgeScreen} />
                   <Stack.Screen name="Home" component={HomeScreen} />
+                  <Stack.Screen name="Fridge" component={FridgeScreen} />
                   <Stack.Screen name="Scanner" component={ScannerScreen} />
                 </>
               )}
