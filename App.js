@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack"; // change back to native-stack
 import * as SecureStore from "expo-secure-store";
 import { theme } from "./core/theme";
+import { EventProvider } from "react-native-outside-press";
 import {
   LoginScreen,
   HomeScreen,
@@ -13,13 +14,13 @@ import {
   SignUpScreen,
   StartScreen,
   SplashScreen,
+  FridgeScreen,
 } from "./screens";
 import tokenStateReducer from "./utils/reducers/TokenStateReducer";
 import { initialState } from "./utils/reducers/TokenStateReducer";
 import RestApiService from "./services/RestApiService";
 import { AuthContext } from "./utils/contexts/AuthContext";
 import ErrorHandler from "./utils/decorators/RestApiErrorHandler";
-import { config } from "process";
 
 const Stack = createStackNavigator();
 
@@ -121,50 +122,53 @@ function App() {
         Home: "home",
         Shopping: "shopping",
         Scanner: "shopping/scanner",
+        Fridge: "fridge",
       },
     },
-  }
+  };
 
   return (
     <Provider theme={theme}>
-      <NavigationContainer linking={linking}>
-        <AuthContext.Provider value={authContext}>
-          <Stack.Navigator
-            initialRouteName={state.userToken ? "Home" : "Start"}
-            screenOptions={{ headerShown: false }}
-          >
-            {state.userToken == false ? (
-              <>
-                <Stack.Screen
-                  name="Start"
-                  URL="start"
-                  component={StartScreen}
-                  options={{
-                    animationTypeForReplace: state.isSignout ? "pop" : "push",
-                  }} //to test if looks better
-                />
-                <Stack.Screen
-                  name="Login"
-                  URL="login"
-                  component={LoginScreen}
-                />
-                <Stack.Screen
-                  name="SignUp"
-                  URL="signup"
-                  component={SignUpScreen}
-                />
-              </>
-            ) : (
-              <>
-                <Stack.Screen name="Home" component={HomeScreen} />
-                
-                <Stack.Screen name="Shopping" component={ShoppingScreen} />
-                <Stack.Screen name="Scanner" component={ShoppingScannerScreen} />
-              </>
-            )}
-          </Stack.Navigator>
-        </AuthContext.Provider>
-      </NavigationContainer>
+      <EventProvider style={{ flex: 1 }}>
+        <NavigationContainer linking={linking}>
+          <AuthContext.Provider value={authContext}>
+            <Stack.Navigator
+              initialRouteName={state.userToken ? "Home" : "Start"}
+              screenOptions={{ headerShown: false }}
+            >
+              {state.userToken == false ? (
+                <>
+                  <Stack.Screen
+                    name="Start"
+                    URL="start"
+                    component={StartScreen}
+                    options={{
+                      animationTypeForReplace: state.isSignout ? "pop" : "push",
+                    }} //to test if looks better
+                  />
+                  <Stack.Screen
+                    name="Login"
+                    URL="login"
+                    component={LoginScreen}
+                  />
+                  <Stack.Screen
+                    name="SignUp"
+                    URL="signup"
+                    component={SignUpScreen}
+                  />
+                </>
+              ) : (
+                <>
+                  <Stack.Screen name="Home" component={HomeScreen} />
+                  <Stack.Screen name="Fridge" component={FridgeScreen} />
+                  <Stack.Screen name="Shopping" component={ShoppingScreen} />
+                  <Stack.Screen name="Scanner" component={ShoppingScannerScreen} />
+                </>
+              )}
+            </Stack.Navigator>
+          </AuthContext.Provider>
+        </NavigationContainer>
+      </EventProvider>
     </Provider>
   );
 }

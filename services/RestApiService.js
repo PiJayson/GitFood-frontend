@@ -31,8 +31,6 @@ const register = async (login, password) => {
 
 // Login user
 const login = async (login, password) => {
-  twoFactorCode = "string";
-  twoFactorRecoveryCode = "string";
   const response = await apiClient.post("/login", {
     login,
     password,
