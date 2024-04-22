@@ -1,10 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Platform, Text } from 'react-native';
-import { BrowserMultiFormatReader, NotFoundException, ChecksumException, FormatException } from '@zxing/library';
+import { BrowserMultiFormatReader, BarcodeFormat, NotFoundException, ChecksumException, FormatException } from '@zxing/library';
 
 export default function ScannerComponent({ onBarcodeScanned, style }) {
   const videoRef = useRef(null);
-  const codeReader = new BrowserMultiFormatReader();
+  const formats = [
+    BarcodeFormat.QR_CODE,
+    BarcodeFormat.DATA_MATRIX,
+    BarcodeFormat.AZTEC,
+    BarcodeFormat.PDF_417,
+    BarcodeFormat.CODE_128,
+    BarcodeFormat.EAN_13,
+    BarcodeFormat.EAN_8,
+    BarcodeFormat.UPC_A,
+    BarcodeFormat.UPC_E,
+    BarcodeFormat.CODE_39,
+    BarcodeFormat.CODE_93,
+    BarcodeFormat.ITF,
+    BarcodeFormat.CODABAR,
+  ];
+  const codeReader = new BrowserMultiFormatReader(new Map(), formats);
 
   useEffect(() => {
     if (Platform.OS === 'web') {

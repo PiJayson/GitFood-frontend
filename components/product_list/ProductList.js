@@ -4,14 +4,9 @@ import { View, FlatList } from "react-native";
 import Header from "../universal/Header";
 import Button from "../universal/Button";
 import SingleProduct from "./SingleProduct";
-import { useReducer } from "react";
-import productListReducer from "../../utils/reducers/productListReducer";
 
-export default function ProductList({ products = [], ListName = "" }) {
+export default function ProductList({ dispatch, products = [], ListName = "" }) {
   const [refreshing, setRefreshing] = React.useState(false);
-  const [productList, dispatch] = useReducer(productListReducer, {
-    products: products,
-  });
 
   return (
     <View style={styles.container}>
@@ -23,7 +18,7 @@ export default function ProductList({ products = [], ListName = "" }) {
       />
       <FlatList
         style={styles.list}
-        data={productList.products}
+        data={products}
         renderItem={({ item }) => (
           <SingleProduct product={item} dispatch={dispatch} />
         )}

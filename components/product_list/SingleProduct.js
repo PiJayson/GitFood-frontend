@@ -30,7 +30,7 @@ export default function SingleProduct({ product, dispatch }) {
     <OutsidePressHandler onOutsidePress={() => outsidePressHandler()}>
       <View style={styles.container}>
         <Text variant="displayMedium" style={styles.count}>
-          {count}x
+          {product.count}x
         </Text>
         <ProductName> {product.name} </ProductName>
         <IncrementDecrement update={updateCount} />

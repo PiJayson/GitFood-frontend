@@ -21,6 +21,8 @@ import { initialState } from "./utils/reducers/TokenStateReducer";
 import RestApiService from "./services/RestApiService";
 import { AuthContext } from "./utils/contexts/AuthContext";
 import ErrorHandler from "./utils/decorators/RestApiErrorHandler";
+import FridgeScannerScreen from "./screens/fridge/FridgeScannerScreen";
+import { ProductsProvider } from "./services/ProductProvider";
 
 const Stack = createStackNavigator();
 
@@ -121,8 +123,9 @@ function App() {
         SignUp: "signUp",
         Home: "home",
         Shopping: "shopping",
-        Scanner: "shopping/scanner",
+        ShoppingScanner: "shopping/scanner",
         Fridge: "fridge",
+        FridgeScanner: "fridge/scanner",
       },
     },
   };
@@ -131,6 +134,7 @@ function App() {
     <Provider theme={theme}>
       <EventProvider style={{ flex: 1 }}>
         <NavigationContainer linking={linking}>
+        <ProductsProvider>
           <AuthContext.Provider value={authContext}>
             <Stack.Navigator
               initialRouteName={state.userToken ? "Home" : "Start"}
@@ -160,13 +164,17 @@ function App() {
               ) : (
                 <>
                   <Stack.Screen name="Home" component={HomeScreen} />
+                  
                   <Stack.Screen name="Fridge" component={FridgeScreen} />
+                  <Stack.Screen name="FridgeScanner" component={FridgeScannerScreen} />
+                  
                   <Stack.Screen name="Shopping" component={ShoppingScreen} />
-                  <Stack.Screen name="Scanner" component={ShoppingScannerScreen} />
+                  <Stack.Screen name="ShoppingScanner" component={ShoppingScannerScreen} />
                 </>
               )}
             </Stack.Navigator>
           </AuthContext.Provider>
+          </ProductsProvider>
         </NavigationContainer>
       </EventProvider>
     </Provider>

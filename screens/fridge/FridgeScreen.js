@@ -9,6 +9,9 @@ import { Dimensions } from "react-native";
 import BackButton from "../../components/universal/BackButton";
 import { useState, useEffect } from "react";
 import { theme } from "../../core/theme";
+import { useReducer } from "react";
+import productListReducer from "../../utils/reducers/productListReducer";
+import RestApiService from "../../services/RestApiService";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
@@ -17,6 +20,92 @@ const windowDimensions = Dimensions.get("window");
 const FridgeScreen = ({ navigation }) => {
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
+  });
+
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const productList = await RestApiService.getProductList();
+
+      productList.forEach(product => {
+        const { name, barcodes } = product.product;
+        const barcode = barcodes[0] || ''; // Assuming you want the first barcode if available
+        const count = product.fridgeUnits.reduce((total, item) => total + item.quantity, 0); // Sum quantities from all fridgeUnits
+
+        dispatch({
+          type: "ADD_PRODUCT",
+          product: {
+              name,
+              count,
+              barcode,
+         }});
+      });
+    };
+
+    fetchData();
+  }, []);
+
+  const products = [
+    // {
+    //   name: "Milk",
+    //   count: 1,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Eggs",
+    //   count: 12,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Bread",
+    //   count: 1,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Butter",
+    //   count: 1,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Cheese",
+    //   count: 1,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Yogurt",
+    //   count: 1,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Apples",
+    //   count: 3,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Oranges",
+    //   count: 2,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Bananas",
+    //   count: 4,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Grapes",
+    //   count: 1,
+    //   barcode: null,
+    // },
+    // {
+    //   name: "Strawberrie sssssssssssssssssssssssssssss ssssssssssssss",
+    //   count: 1,
+    //   barcode: null,
+    // },
+  ];
+
+  const [productList, dispatch] = useReducer(productListReducer, {
+    products: products,
   });
 
   useEffect(() => {
@@ -29,77 +118,27 @@ const FridgeScreen = ({ navigation }) => {
     return () => subscription?.remove();
   });
 
-  const products = [
-    {
-      name: "Milk",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Eggs",
-      count: 12,
-      barcode: null,
-    },
-    {
-      name: "Bread",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Butter",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Cheese",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Yogurt",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Apples",
-      count: 3,
-      barcode: null,
-    },
-    {
-      name: "Oranges",
-      count: 2,
-      barcode: null,
-    },
-    {
-      name: "Bananas",
-      count: 4,
-      barcode: null,
-    },
-    {
-      name: "Grapes",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Strawberrie sssssssssssssssssssssssssssss ssssssssssssss",
-      count: 1,
-      barcode: null,
-    },
-  ];
+  const getProduct = (barcode) => {
+    const res = productList.products.filter((product) => {
+      if (product.barcode == barcode) return true;
+    });
+
+    if (res.length > 0) return res[0];
+    return null;
+  }
 
   const { signOut } = React.useContext(AuthContext);
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
       <BackButton goBack={() => navigation.navigate("Home")} />
-      <ProductList products={products} ListName={"kldsaj"} />
+      <ProductList dispatch={dispatch} products={productList.products} ListName={"kldsaj"} />
       <Button
-        mode="outlined"
-        onPress={async () => {
-          await signOut(); // disabling when clicked?
-        }}
-      >
-        log out
-      </Button>
+        title="Open Scanner"
+        onPress={() => navigation.navigate('FridgeScanner', {
+          dispatch: dispatch,
+          getProduct: getProduct
+        })}
+      >Open Scanner</Button>
     </View>
   );
 };
