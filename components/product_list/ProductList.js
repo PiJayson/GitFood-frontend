@@ -4,18 +4,16 @@ import { View, FlatList } from "react-native";
 import Header from "../universal/Header";
 import Button from "../universal/Button";
 import SingleProduct from "./SingleProduct";
-import { useReducer } from "react";
-import productListReducer from "../../utils/reducers/productListReducer";
+// import { useProductStore } from "../../screens/fridge/ProductStore";
 
-export default function ProductList({ products = [], ListName = "" }) {
+export default function ProductList({ store }) {
   const [refreshing, setRefreshing] = React.useState(false);
-  const [productList, dispatch] = useReducer(productListReducer, {
-    products: products,
-  });
+
+  const { productStoreName, products } = store();
 
   return (
     <View style={styles.container}>
-      <Header> {ListName} </Header>
+      <Header> {productStoreName} </Header>
       <Button
         title="Add Product"
         mode="contained"
@@ -23,9 +21,9 @@ export default function ProductList({ products = [], ListName = "" }) {
       />
       <FlatList
         style={styles.list}
-        data={productList.products}
+        data={products}
         renderItem={({ item }) => (
-          <SingleProduct product={item} dispatch={dispatch} />
+          <SingleProduct productName={item.name} store={store} />
         )}
         scrollEnabled={true}
         keyExtractor={(item) => item.name}

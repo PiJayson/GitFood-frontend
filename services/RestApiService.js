@@ -56,6 +56,36 @@ const setBarcode = async (barcode, name) => {
   return apiClient.post("/barcode/add", { barcodeNumber, productId });
 };
 
+// Add product
+const addProductWithBarcode = async (barcode, name, description) => {
+  return apiClient.post("/products/addWithBarcode", {
+    description,
+    name,
+    barcode,
+  });
+};
+
+const getProductByBarcode = async (barcode) => {
+  try {
+    const response = await apiClient.get(
+      `/products/getByBarcode?barcode=${barcode}`,
+    );
+    console.log("ta:", response);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
+    throw error;
+  }
+};
+
+// Get list of products
+const getProductList = async () => {
+  const result = await apiClient.get(`/fridge/get?login=${username}`);
+  return result.data;
+};
+
 const setToken = (token) => {
   AWTtoken = token;
 };
@@ -69,6 +99,9 @@ export default {
   login,
   getBarcodeData,
   setBarcode,
+  addProductWithBarcode,
+  getProductByBarcode,
+  getProductList,
 
   setToken,
   resetToken,

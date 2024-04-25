@@ -14,7 +14,7 @@ import {
   SignUpScreen,
   StartScreen,
   SplashScreen,
-  FridgeScreen,
+  FridgeGroup,
 } from "./screens";
 import tokenStateReducer from "./utils/reducers/TokenStateReducer";
 import { initialState } from "./utils/reducers/TokenStateReducer";
@@ -129,46 +129,47 @@ function App() {
 
   return (
     <Provider theme={theme}>
-      <EventProvider style={{ flex: 1 }}>
-        <NavigationContainer linking={linking}>
-          <AuthContext.Provider value={authContext}>
-            <Stack.Navigator
-              initialRouteName={state.userToken ? "Home" : "Start"}
-              screenOptions={{ headerShown: false }}
-            >
-              {state.userToken == false ? (
-                <>
-                  <Stack.Screen
-                    name="Start"
-                    URL="start"
-                    component={StartScreen}
-                    options={{
-                      animationTypeForReplace: state.isSignout ? "pop" : "push",
-                    }} //to test if looks better
-                  />
-                  <Stack.Screen
-                    name="Login"
-                    URL="login"
-                    component={LoginScreen}
-                  />
-                  <Stack.Screen
-                    name="SignUp"
-                    URL="signup"
-                    component={SignUpScreen}
-                  />
-                </>
-              ) : (
-                <>
-                  <Stack.Screen name="Home" component={HomeScreen} />
-                  <Stack.Screen name="Fridge" component={FridgeScreen} />
-                  <Stack.Screen name="Shopping" component={ShoppingScreen} />
-                  <Stack.Screen name="Scanner" component={ShoppingScannerScreen} />
-                </>
-              )}
-            </Stack.Navigator>
-          </AuthContext.Provider>
-        </NavigationContainer>
-      </EventProvider>
+      <NavigationContainer linking={linking}>
+        <AuthContext.Provider value={authContext}>
+          <Stack.Navigator
+            initialRouteName={state.userToken ? "Home" : "Start"}
+            screenOptions={{ headerShown: false }}
+          >
+            {state.userToken == false ? (
+              <>
+                <Stack.Screen
+                  name="Start"
+                  URL="start"
+                  component={StartScreen}
+                  options={{
+                    animationTypeForReplace: state.isSignout ? "pop" : "push",
+                  }} //to test if looks better
+                />
+                <Stack.Screen
+                  name="Login"
+                  URL="login"
+                  component={LoginScreen}
+                />
+                <Stack.Screen
+                  name="SignUp"
+                  URL="signup"
+                  component={SignUpScreen}
+                />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="FridgeGroup" component={FridgeGroup} />
+                <Stack.Screen name="Shopping" component={ShoppingScreen} />
+                <Stack.Screen
+                  name="Scanner"
+                  component={ShoppingScannerScreen}
+                />
+              </>
+            )}
+          </Stack.Navigator>
+        </AuthContext.Provider>
+      </NavigationContainer>
     </Provider>
   );
 }

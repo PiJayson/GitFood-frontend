@@ -13,7 +13,10 @@ const HomeScreen = ({ navigation }) => {
       <Button mode="outlined" onPress={() => navigation.navigate("Shopping")}>
         Shopping
       </Button>
-      <Button mode="outlined" onPress={() => navigation.navigate("Fridge")}>
+      <Button
+        mode="outlined"
+        onPress={() => navigation.navigate("FridgeGroup")}
+      >
         Fridge
       </Button>
       <Button

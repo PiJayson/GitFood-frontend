@@ -7,30 +7,31 @@ import IncrementDecrement from "../universal/IncrementDecrement";
 import OutsidePressHandler from "react-native-outside-press";
 import { theme } from "../../core/theme";
 import ProductName from "./ProductName";
+import { useProductStore } from "../../screens/fridge/ProductStore";
 
-export default function SingleProduct({ product, dispatch }) {
-  const [count, setCount] = useState(product.count);
+export default function SingleProduct({ productName, store }) {
+  // const [count, setCount] = useState(product.count);
+  const { removeProduct, updateProduct } = store();
+  const product = useProductStore().products.find(
+    (p) => p.name === productName,
+  );
 
   const outsidePressHandler = () => {
-    if (count == 0) {
-      dispatch({ type: "REMOVE_PRODUCT", productName: product.name });
+    if (product.count == 0) {
+      removeProduct(product);
     }
   }; // well this one will be a little bit of a perfomance killer
 
-  const updateCount = (value) => {
-    product.count = product.count + value > 0 ? product.count + value : 0;
-    setCount(product.count);
-    dispatch({
-      type: "UPDATE_PRODUCT",
-      product: product,
-    });
+  const updateCount = (change) => {
+    const newProduct = { ...product, count: product.count + change };
+    updateProduct(newProduct);
   };
 
   return (
     <OutsidePressHandler onOutsidePress={() => outsidePressHandler()}>
       <View style={styles.container}>
         <Text variant="displayMedium" style={styles.count}>
-          {count}x
+          {product.count}x
         </Text>
         <ProductName> {product.name} </ProductName>
         <IncrementDecrement update={updateCount} />
