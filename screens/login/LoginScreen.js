@@ -7,17 +7,16 @@ import Header from "../../components/universal/Header";
 import Button from "../../components/universal/Button";
 import TextInput from "../../components/universal/TextInput";
 import BackButton from "../../components/universal/BackButton";
-import { theme } from "../../core/theme";
+import { theme } from "../../assets/theme";
 import { usernameValidator } from "../../utils/UsernameValidator";
 import { passwordValidator } from "../../utils/PasswordValidator";
-
-import { AuthContext } from "../../utils/contexts/AuthContext";
+import { useRestApi } from "../../providers/RestApiProvider";
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [isWaiting, setIsWaiting] = useState(false);
-  const { signIn } = React.useContext(AuthContext);
+  const { login } = useRestApi();
 
   const handleLogin = async () => {
     console.log("Username:", username);
@@ -34,7 +33,7 @@ const LoginScreen = ({ navigation }) => {
 
     try {
       setIsWaiting(true);
-      await signIn(username.value, password.value);
+      await login(username.value, password.value);
     } finally {
       setIsWaiting(false);
     }

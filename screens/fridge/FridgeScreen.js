@@ -7,8 +7,9 @@ import ProductList from "../../components/product_list/ProductList";
 import { Dimensions } from "react-native";
 import BackButton from "../../components/universal/BackButton";
 import { useState, useEffect } from "react";
-import { theme } from "../../core/theme";
 import { useProductStore } from "./ProductStore";
+import { theme } from "../../assets/theme";
+import { useRestApi } from "../../providers/RestApiProvider";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
@@ -17,6 +18,8 @@ const FridgeScreen = ({ navigation }) => {
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
   });
+
+  const { signOut } = useRestApi();
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener(
@@ -27,6 +30,7 @@ const FridgeScreen = ({ navigation }) => {
     );
     return () => subscription?.remove();
   });
+
 
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>

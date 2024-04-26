@@ -7,17 +7,16 @@ import Header from "../../components/universal/Header";
 import Button from "../../components/universal/Button";
 import TextInput from "../../components/universal/TextInput";
 import BackButton from "../../components/universal/BackButton";
-import { theme } from "../../core/theme";
+import { theme } from "../../assets/theme";
 import { usernameValidator } from "../../utils/UsernameValidator";
 import { passwordValidator } from "../../utils/PasswordValidator";
-
-import { AuthContext } from "../../utils/contexts/AuthContext";
+import { useRestApi } from "../../providers/RestApiProvider";
 
 const SignUpScreen = ({ navigation }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [isWaiting, setIsWaiting] = useState(false);
-  const { signUp } = React.useContext(AuthContext);
+  const { register } = useRestApi();
 
   const handleSignUp = async () => {
     console.log("Username:", username);
@@ -34,7 +33,7 @@ const SignUpScreen = ({ navigation }) => {
 
     try {
       setIsWaiting(true);
-      await signUp(username.value, password.value);
+      await register(username.value, password.value);
     } finally {
       setIsWaiting(false);
     }
