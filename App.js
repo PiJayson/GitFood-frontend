@@ -1,57 +1,176 @@
 import * as React from "react";
-import { Button, View, Text } from "react-native";
+import { useReducer } from "react";
+import { Provider } from "react-native-paper";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack"; // change back to native-stack
-import LoginScreen from "./Screens/LoginScreen";
-import ScannerScreen from "./Screens/ScannerScreen";
-import SignUpScreen from "./Screens/SignUpScreen";
-
-//for now here
-const HomeScreen = ({ navigation }) => {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Home Screen</Text>
-      <Button title="Scanner" onPress={() => navigation.navigate("Scanner")} />
-    </View>
-  );
-};
+import * as SecureStore from "expo-secure-store";
+import { theme } from "./core/theme";
+import { EventProvider } from "react-native-outside-press";
+import {
+  LoginScreen,
+  HomeScreen,
+  ShoppingScreen,
+  ShoppingScannerScreen,
+  SignUpScreen,
+  StartScreen,
+  SplashScreen,
+  FridgeScreen,
+} from "./screens";
+import tokenStateReducer from "./utils/reducers/TokenStateReducer";
+import { initialState } from "./utils/reducers/TokenStateReducer";
+import RestApiService from "./services/RestApiService";
+import { AuthContext } from "./utils/contexts/AuthContext";
+import ErrorHandler from "./utils/decorators/RestApiErrorHandler";
 
 const Stack = createStackNavigator();
 
 function App() {
+  const [state, dispatch] = useReducer(tokenStateReducer, initialState);
+
+  React.useEffect(() => {
+    // TODO: solution for web tokenw
+    async function getToken() {
+      let token;
+      try {
+        token = await SecureStore.getItemAsync("jwtToken");
+        console.log("Token: " + token);
+      } catch (e) {
+        console.log("Error getting token");
+        console.log(e);
+        dispatch({ type: "RESTORE_TOKEN", token: false });
+        return;
+      }
+      RestApiService.setToken(token);
+      dispatch({ type: "RESTORE_TOKEN", token: token !== null });
+    }
+    getToken();
+  }, []);
+
+  const authContext = React.useMemo(
+    () => ({
+      signIn: async (username, password) => {
+        let response;
+        try {
+          response = await RestApiService.login(username, password);
+          dispatch({ type: "SIGN_IN", token: true });
+        } catch (error) {
+          console.log(error);
+          if (error.response.status == 401) {
+            alert("Invalid credentials!");
+          } else if (error.response.status == 500) {
+            alert("Server error!");
+          }
+          throw error;
+        }
+
+        try {
+          await SecureStore.setItemAsync("jwtToken", response.data);
+        } catch (e) {
+          console.log("Error setting token: " + response.data);
+          console.log(e);
+        } // I assume fail during setting token is not critical
+      },
+      signOut: async () => {
+        try {
+          await SecureStore.deleteItemAsync("jwtToken");
+        } catch (e) {
+          console.log("Error removing token");
+          console.log(e);
+        } // I assume fail during removing token is not critical
+        RestApiService.resetToken();
+        dispatch({ type: "SIGN_OUT" });
+      },
+      signUp: async (username, password) => {
+        let response;
+        try {
+          response = await RestApiService.register(username, password);
+          dispatch({ type: "SIGN_IN", token: true });
+        } catch (error) {
+          console.log(error);
+          if (error.response.status == 409) {
+            alert("User already exists!");
+          } else if (error.response.status == 500) {
+            alert("Server error!");
+          }
+          throw error;
+        }
+
+        try {
+          await SecureStore.setItemAsync("jwtToken", response.data);
+        } catch (e) {
+          console.log("Error setting token");
+          console.log(e);
+        } // I assume fail during setting token is not critical
+      },
+      call: async (func, args) => {
+        return await ErrorHandler(func, args);
+      },
+    }),
+    [],
+  );
+
+  if (state.isLoading) {
+    return <SplashScreen />;
+  }
+
+  const linking = {
+    config: {
+      screens: {
+        Start: "",
+        Login: "login",
+        SignUp: "signUp",
+        Home: "home",
+        Shopping: "shopping",
+        Scanner: "shopping/scanner",
+        Fridge: "fridge",
+      },
+    },
+  };
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ gestureEnabled: false, headerShown: false }}
-        />
-        <Stack.Screen name="Scanner" component={ScannerScreen} />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ gestureEnabled: false, headerShown: false }}
-        />
-        <Stack.Screen
-          name="SignUp"
-          component={SignUpScreen}
-          options={{ gestureEnabled: false, headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider theme={theme}>
+      <EventProvider style={{ flex: 1 }}>
+        <NavigationContainer linking={linking}>
+          <AuthContext.Provider value={authContext}>
+            <Stack.Navigator
+              initialRouteName={state.userToken ? "Home" : "Start"}
+              screenOptions={{ headerShown: false }}
+            >
+              {state.userToken == false ? (
+                <>
+                  <Stack.Screen
+                    name="Start"
+                    URL="start"
+                    component={StartScreen}
+                    options={{
+                      animationTypeForReplace: state.isSignout ? "pop" : "push",
+                    }} //to test if looks better
+                  />
+                  <Stack.Screen
+                    name="Login"
+                    URL="login"
+                    component={LoginScreen}
+                  />
+                  <Stack.Screen
+                    name="SignUp"
+                    URL="signup"
+                    component={SignUpScreen}
+                  />
+                </>
+              ) : (
+                <>
+                  <Stack.Screen name="Home" component={HomeScreen} />
+                  <Stack.Screen name="Fridge" component={FridgeScreen} />
+                  <Stack.Screen name="Shopping" component={ShoppingScreen} />
+                  <Stack.Screen name="Scanner" component={ShoppingScannerScreen} />
+                </>
+              )}
+            </Stack.Navigator>
+          </AuthContext.Provider>
+        </NavigationContainer>
+      </EventProvider>
+    </Provider>
   );
 }
-
-// const Tab = createBottomTabNavigator();
-
-// function MyTabs() {
-//   return (
-//     <Tab.Navigator>
-//       <Tab.Screen name="Home" component={HomeScreen} />
-//       <Tab.Screen name="Settings" component={SettingsScreen} />
-//     </Tab.Navigator>
-//   );
-// }
 
 export default App;
