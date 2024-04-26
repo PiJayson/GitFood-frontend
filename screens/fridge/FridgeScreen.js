@@ -8,7 +8,7 @@ import ProductList from "../../components/product_list/ProductList";
 import { Dimensions } from "react-native";
 import BackButton from "../../components/universal/BackButton";
 import { useState, useEffect } from "react";
-import { theme } from "../../core/theme";
+import { theme } from "../../assets/theme";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");

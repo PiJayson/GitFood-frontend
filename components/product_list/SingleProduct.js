@@ -5,7 +5,7 @@ import Button from "../universal/Button";
 import IncrementDecrement from "../universal/IncrementDecrement";
 // import Swipeable from "react-native-gesture-handler/Swipeable";
 import OutsidePressHandler from "react-native-outside-press";
-import { theme } from "../../core/theme";
+import { theme } from "../../assets/theme";
 import ProductName from "./ProductName";
 
 export default function SingleProduct({ product, dispatch }) {
