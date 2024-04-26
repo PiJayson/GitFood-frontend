@@ -9,6 +9,7 @@ import { Dimensions } from "react-native";
 import BackButton from "../../components/universal/BackButton";
 import { useState, useEffect } from "react";
 import { theme } from "../../assets/theme";
+import { useRestApi } from "../../providers/RestApiProvider";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
@@ -18,6 +19,8 @@ const FridgeScreen = ({ navigation }) => {
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
   });
+
+  const { signOut } = useRestApi();
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener(
@@ -87,7 +90,6 @@ const FridgeScreen = ({ navigation }) => {
     },
   ];
 
-  const { signOut } = React.useContext(AuthContext);
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
       <BackButton goBack={() => navigation.navigate("Home")} />

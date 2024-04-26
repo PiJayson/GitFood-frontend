@@ -18,8 +18,10 @@ import {
   StartScreen,
   FridgeScreen,
 } from "./screens";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 function AppNavigation() {
   const { isSignedIn } = useRestApi(); // Hook into the RestApiProvider
@@ -40,25 +42,19 @@ function AppNavigation() {
 
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator
-        initialRouteName={isSignedIn ? "Home" : "Start"}
-        screenOptions={{ headerShown: false }}
-      >
-        {!isSignedIn ? (
-          <>
-            <Stack.Screen name="Start" component={StartScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="SignUp" component={SignUpScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Fridge" component={FridgeScreen} />
-            <Stack.Screen name="Shopping" component={ShoppingScreen} />
-            <Stack.Screen name="Scanner" component={ShoppingScannerScreen} />
-          </>
-        )}
-      </Stack.Navigator>
+      {isSignedIn ? (
+        <Tab.Navigator initialRouteName="Shopping" screenOptions={{ headerShown: false }} >
+          <Tab.Screen name="Shopping" component={ShoppingScreen} />
+          <Tab.Screen name="Fridge" component={FridgeScreen} />
+          <Tab.Screen name="Scanner" component={ShoppingScannerScreen} />
+        </Tab.Navigator>
+      ) : (
+        <Stack.Navigator initialRouteName="Start" screenOptions={{ headerShown: false }} >
+          <Stack.Screen name="Start" component={StartScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="SignUp" component={SignUpScreen} />
+        </Stack.Navigator>
+      )}
     </NavigationContainer>
   );
 }
