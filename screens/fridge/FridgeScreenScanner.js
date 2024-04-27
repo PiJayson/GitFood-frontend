@@ -3,15 +3,16 @@ import { View, Text, StyleSheet, Button } from "react-native";
 import ScannerComponent from "../../components/scanner/ScannerComponent";
 import BackButton from "../../components/universal/BackButton";
 import ProductForm from "../../components/scanner/ProductForm";
-import RestApiService from "../../services/RestApiService";
-import { useProductStore } from "../../screens/fridge/ProductStore";
+import { useRestApi } from "../../providers/RestApiProvider";
+import { syncProductStore } from "../../screens/fridge/ProductStore";
 
 export default function FridgeScannerScreen({ navigation }) {
   const [formVisible, setFormVisible] = useState(false);
   const lastScannedItem = useRef(null);
   const [, forceUpdate] = useState();
   const update = () => forceUpdate({});
-  const { addProduct, updateProduct, products } = useProductStore();
+  const products = syncProductStore.products();
+  const { getProductByBarcode } = useRestApi();
 
   const handleBarcodeDetected = async (scannedData) => {
     console.log(lastScannedItem.current); // Access via .current
@@ -22,41 +23,29 @@ export default function FridgeScannerScreen({ navigation }) {
       console.log("SCANNED");
       return;
     }
-    const productInDatabase =
-      await RestApiService.getProductByBarcode(scannedData);
-
+    console.log("new scan");
+    const productInDatabase = await getProductByBarcode(scannedData);
+    console.log(productInDatabase);
     const productFromFridge = products.find(
       (product) => product.barcode == scannedData,
     );
-
-    console.log(scannedData);
-    console.log(productInDatabase);
-    console.log(productFromFridge);
 
     if (productInDatabase) {
       if (productFromFridge) {
         lastScannedItem.current = productFromFridge; // Set with .current
       } else {
         lastScannedItem.current = {
-          name: productInDatabase.product.innerInformation.name,
-          count: 1,
+          name: productInDatabase.product.name,
+          quantity: 1,
           barcode: scannedData,
         };
 
-        // dispatch({
-        //   type: "ADD_PRODUCT",
-        //   product: {
-        //     name: productInDatabase.product.innerInformation.name,
-        //     count: 1,
-        //     barcode: scannedData,
-        //   },
-        // });
-        addProduct(lastScannedItem.current);
+        syncProductStore.addProduct(lastScannedItem.current);
       }
     } else {
       lastScannedItem.current = {
         name: "",
-        count: 1,
+        quantity: 1,
         barcode: scannedData,
       };
       setFormVisible(true);
@@ -67,56 +56,42 @@ export default function FridgeScannerScreen({ navigation }) {
   const handleAddProduct = async (productData) => {
     console.log("Product Added:", productData);
 
-    // dispatch({
-    //   type: "ADD_PRODUCT",
-    //   product: {
-    //     name: productData.name,
-    //     count: lastScannedItem.current.count, // Access via .current
-    //     barcode: lastScannedItem.current.barcode, // Access via .current
-    //   },
-    addProduct({
+    lastScannedItem.current = {
+      ...lastScannedItem.current,
       name: productData.name,
-      count: lastScannedItem.current.count,
+    };
+    syncProductStore.addProduct({
+      name: productData.name,
+      quantity: lastScannedItem.current.quantity,
       barcode: lastScannedItem.current.barcode,
     });
 
-    const response = await RestApiService.addProductWithBarcode(
-      lastScannedItem.current.barcode,
-      productData.name,
-      productData.description,
-    );
-    console.log(response);
     setFormVisible(false);
     update();
   };
 
   const incrementCount = () => {
+    const prevItem = lastScannedItem.current;
+    console.log(lastScannedItem.current);
+
     lastScannedItem.current = {
       ...lastScannedItem.current,
-      count: lastScannedItem.current.count + 1, // Update with .current
+      quantity: lastScannedItem.current.quantity + 1, // Update with .current
     };
-
-    // dispatch({
-    //   type: "UPDATE_PRODUCT",
-    //   product: lastScannedItem.current, // Send the updated ref
-    // });
-
-    updateProduct(lastScannedItem.current);
+    console.log(lastScannedItem.current);
+    syncProductStore.updateProduct(prevItem, lastScannedItem.current);
 
     update();
   };
 
   const decrementCount = () => {
+    prevItem = lastScannedItem.current;
     lastScannedItem.current = {
       ...lastScannedItem.current,
-      count: Math.max(0, lastScannedItem.current.count - 1), // Update with .current
+      quantity: Math.max(0, lastScannedItem.current.quantity - 1), // Update with .current
     };
 
-    // dispatch({
-    //   type: "UPDATE_PRODUCT",
-    //   product: lastScannedItem.current, // Send the updated ref
-    // });
-    updateProduct(lastScannedItem.current);
+    syncProductStore.updateProduct(prevItem, lastScannedItem.current);
 
     update();
   };
@@ -130,8 +105,8 @@ export default function FridgeScannerScreen({ navigation }) {
           <View>
             <Text>{lastScannedItem.current.name}</Text>
             <View style={styles.buttonContainer}>
-              <Button title="-" />
-              <Text>{lastScannedItem.current.count}</Text>
+              <Button title="-" onPress={decrementCount} />
+              <Text>{lastScannedItem.current.quantity}</Text>
               <Button title="+" onPress={incrementCount} />
             </View>
             <View>

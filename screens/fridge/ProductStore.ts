@@ -1,8 +1,10 @@
 import { create } from "zustand";
+import { useRestApi } from "../../providers/RestApiProvider";
 
 export interface Product {
   name: string;
-  count: number;
+  productId: number;
+  quantity: number;
   barcode: string | null;
 }
 
@@ -11,33 +13,51 @@ type State = {
   products: Product[];
 };
 
-type Actions = {
-  setProducts: (products: Product[]) => void;
-  addProduct: (product: Product) => void;
-  removeProduct: (productName: string) => void;
-  updateProduct: (product: Product) => void;
-};
-
-export const useProductStore = create<State & Actions>((set, get) => ({
+const useProductStore = create<State>(() => ({
   productStoreName: "",
   products: [],
-  setProducts: (products: Product[]) => set({ products }),
-  addProduct: (product) =>
-    set((state) => ({ products: [...state.products, product] })),
-  removeProduct: (productName) =>
-    set((state) => ({
+}));
+
+export const syncProductStore = {
+  products: () => useProductStore().products,
+  productStoreName: () => useProductStore().productStoreName,
+  loadProducts: async (productStoreName: string) => {
+    // const loadedProducts = await useRestApi().getFridgeProducts();
+
+    const loadedProducts = [];
+
+    useProductStore.setState({
+      productStoreName,
+      products: loadedProducts,
+    });
+  },
+  addProduct: async (product: Product) => {
+    // await useRestApi().addProductToFridge(product);
+
+    useProductStore.setState((state) => ({
+      products: [...state.products, product],
+    }));
+  },
+  updateProduct: async (prevProduct: Product, product: Product) => {
+    // await useRestApi().updateProductInFridge(product);
+
+    useProductStore.setState((state) => ({
+      products: state.products.map((p) =>
+        p.name === prevProduct.name ? product : p,
+      ),
+    }));
+  },
+  removeProduct: async (productName: string) => {
+    // await useRestApi().removeProductFromFridge(productName);
+
+    useProductStore.setState((state) => ({
       products: state.products.filter(
         (product) => product.name !== productName,
       ),
-    })),
-  updateProduct: (product) =>
-    set((state) => ({
-      products: state.products.map((p) =>
-        p.name === product.name ? product : p,
-      ),
-    })),
-  getProduct: (productName: string) =>
-    get().products.find((product) => product.name === productName),
-
-  // getFridgeName: () => get().storeName,
-}));
+    }));
+  },
+  getProductCopy: (productName: string) =>
+    useProductStore
+      .getState()
+      .products.find((product) => product.name === productName),
+};

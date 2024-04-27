@@ -4,13 +4,12 @@ import { View, FlatList } from "react-native";
 import Header from "../universal/Header";
 import Button from "../universal/Button";
 import SingleProduct from "./SingleProduct";
-// import { useProductStore } from "../../screens/fridge/ProductStore";
 
-export default function ProductList({ store }) {
+export default function ProductList({ syncStore }) {
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const { productStoreName, products } = store();
-
+  const products = syncStore.products();
+  const productStoreName = syncStore.productStoreName();
   return (
     <View style={styles.container}>
       <Header> {productStoreName} </Header>
@@ -23,7 +22,7 @@ export default function ProductList({ store }) {
         style={styles.list}
         data={products}
         renderItem={({ item }) => (
-          <SingleProduct productName={item.name} store={store} />
+          <SingleProduct productName={item.name} syncStore={syncStore} />
         )}
         scrollEnabled={true}
         keyExtractor={(item) => item.name}

@@ -2,14 +2,13 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import Button from "../../components/universal/Button";
 
-// import ProductList from "../../components/product_list/ProductList";
 import ProductList from "../../components/product_list/ProductList";
 import { Dimensions } from "react-native";
 import BackButton from "../../components/universal/BackButton";
 import { useState, useEffect } from "react";
-import { useProductStore } from "./ProductStore";
 import { theme } from "../../assets/theme";
 import { useRestApi } from "../../providers/RestApiProvider";
+import { syncProductStore } from "./ProductStore";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
@@ -19,6 +18,7 @@ const FridgeScreen = ({ navigation }) => {
     window: windowDimensions,
   });
 
+  console.log(syncProductStore);
   const { signOut } = useRestApi();
 
   useEffect(() => {
@@ -31,11 +31,10 @@ const FridgeScreen = ({ navigation }) => {
     return () => subscription?.remove();
   });
 
-
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
       <BackButton goBack={() => navigation.navigate("Home")} />
-      <ProductList store={useProductStore} />
+      <ProductList syncStore={syncProductStore} />
       <Button
         title="Open Scanner"
         onPress={() => navigation.navigate("FridgeScanner")}
