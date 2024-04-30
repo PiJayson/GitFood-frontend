@@ -5,31 +5,41 @@ import Header from "../universal/Header";
 import Button from "../universal/Button";
 import SingleProduct from "./SingleProduct";
 
-export default function ProductList({ syncStore }) {
+export default function ProductList({
+  syncStore,
+  normalProductView,
+  editProductView,
+}) {
   const [refreshing, setRefreshing] = React.useState(false);
 
   const products = syncStore.products();
+
   const productStoreName = syncStore.productStoreName();
   return (
     <View style={styles.container}>
       <Header> {productStoreName} </Header>
-      <Button
-        title="Add Product"
-        mode="contained"
-        onPress={() => console.log("")}
-      />
       <FlatList
         style={styles.list}
         data={products}
-        renderItem={({ item }) => (
-          <SingleProduct productName={item.name} syncStore={syncStore} />
+        renderItem={({ item, index }) => (
+          <SingleProduct
+            index={index}
+            productName={item.name}
+            syncStore={syncStore}
+            editView={editProductView}
+            normalView={normalProductView}
+          />
         )}
+        // extraData={syncStore
+        //   .products()
+        //   .map((product) => product.quantity)
+        //   .join("")}
         scrollEnabled={true}
         keyExtractor={(item) => item.name}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => console.log("refresh")}
+            onRefresh={async () => await syncStore.loadProducts()}
           />
         }
       />

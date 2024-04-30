@@ -9,6 +9,11 @@ import { useState, useEffect } from "react";
 import { theme } from "../../assets/theme";
 import { useRestApi } from "../../providers/RestApiProvider";
 import { syncProductStore } from "./ProductStore";
+import {
+  fridgeProductView,
+  editedFridgeProductView,
+} from "../../components/product_list/fridgeProductView";
+import ExpandableList from "../../components/universal/ExpandableList";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
@@ -18,7 +23,6 @@ const FridgeScreen = ({ navigation }) => {
     window: windowDimensions,
   });
 
-  console.log(syncProductStore);
   const { signOut } = useRestApi();
 
   useEffect(() => {
@@ -33,8 +37,17 @@ const FridgeScreen = ({ navigation }) => {
 
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
-      <BackButton goBack={() => navigation.navigate("Home")} />
-      <ProductList syncStore={syncProductStore} />
+      <ExpandableList
+        title={"current list"}
+        items={["base", "new-List"]}
+        choosenIndex={0}
+        chooseItem={(item) => console.log(item + "was choosen")}
+      />
+      <ProductList
+        syncStore={syncProductStore}
+        normalProductView={fridgeProductView}
+        editProductView={editedFridgeProductView}
+      />
       <Button
         title="Open Scanner"
         onPress={() => navigation.navigate("FridgeScanner")}

@@ -10,10 +10,10 @@ export default function ProductName(props) {
 const styles = StyleSheet.create({
   productname: {
     flex: 6,
-    textAlign: "center",
-    fontSize: 36,
+    textAlign: "left",
+    fontSize: 30,
     // color: theme.colors.primary,
     fontWeight: "bold",
-    paddingLeft: 16,
+    paddingLeft: 2,
   },
 });

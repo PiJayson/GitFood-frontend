@@ -13,6 +13,10 @@ const FridgeStack = createStackNavigator();
 export default function FridgeGroup({ navigation }) {
   // load the products from the server
 
+  useEffect(() => {
+    syncProductStore.loadProducts();
+  }, []);
+
   return (
     <EventProvider style={{ flex: 1 }}>
       <FridgeStack.Navigator>

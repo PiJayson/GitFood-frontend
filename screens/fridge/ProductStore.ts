@@ -21,13 +21,38 @@ const useProductStore = create<State>(() => ({
 export const syncProductStore = {
   products: () => useProductStore().products,
   productStoreName: () => useProductStore().productStoreName,
-  loadProducts: async (productStoreName: string) => {
+  loadProducts: async () => {
     // const loadedProducts = await useRestApi().getFridgeProducts();
 
-    const loadedProducts = [];
+    const loadedProducts = [
+      {
+        name: "Milk",
+        productId: 1,
+        quantity: 1,
+        barcode: "123456789",
+      },
+      {
+        name: "Eggs",
+        productId: 2,
+        quantity: 12,
+        barcode: "987654321",
+      },
+      {
+        name: "Bread",
+        productId: 3,
+        quantity: 1,
+        barcode: "123456789",
+      },
+      {
+        name: "Butter",
+        productId: 4,
+        quantity: 1,
+        barcode: "987654321",
+      },
+    ];
+    console.log("Loaded products", loadedProducts);
 
     useProductStore.setState({
-      productStoreName,
       products: loadedProducts,
     });
   },
@@ -41,19 +66,19 @@ export const syncProductStore = {
   updateProduct: async (prevProduct: Product, product: Product) => {
     // await useRestApi().updateProductInFridge(product);
 
+    console.log("Updating product in store", prevProduct, "to", product);
     useProductStore.setState((state) => ({
       products: state.products.map((p) =>
         p.name === prevProduct.name ? product : p,
       ),
     }));
   },
-  removeProduct: async (productName: string) => {
+  removeProduct: async (product: Product) => {
     // await useRestApi().removeProductFromFridge(productName);
 
+    console.log("Removing product from store", product);
     useProductStore.setState((state) => ({
-      products: state.products.filter(
-        (product) => product.name !== productName,
-      ),
+      products: state.products.filter((p) => p.name !== product.name),
     }));
   },
   getProductCopy: (productName: string) =>
