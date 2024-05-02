@@ -7,6 +7,12 @@ gitfood.fun.key
 # dependencies
 node_modules/
 
+# Android build
+android/
+
+# iOS build
+ios/
+
 # Expo
 .expo/
 dist/

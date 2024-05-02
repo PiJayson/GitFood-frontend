@@ -17,11 +17,14 @@ import {
   SignUpScreen,
   StartScreen,
   FridgeScreen,
+  RecipesScreens,
 } from "./screens";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const queryClient = new QueryClient();
 
 function AppNavigation() {
   const { isSignedIn } = useRestApi(); // Hook into the RestApiProvider
@@ -43,13 +46,20 @@ function AppNavigation() {
   return (
     <NavigationContainer linking={linking}>
       {isSignedIn ? (
-        <Tab.Navigator initialRouteName="Shopping" screenOptions={{ headerShown: false }} >
+        <Tab.Navigator
+          initialRouteName="Shopping"
+          screenOptions={{ headerShown: false }}
+        >
           <Tab.Screen name="Shopping" component={ShoppingScreen} />
           <Tab.Screen name="Fridge" component={FridgeScreen} />
           <Tab.Screen name="Scanner" component={ShoppingScannerScreen} />
+          <Tab.Screen name="Recipes" component={RecipesScreens} />
         </Tab.Navigator>
       ) : (
-        <Stack.Navigator initialRouteName="Start" screenOptions={{ headerShown: false }} >
+        <Stack.Navigator
+          initialRouteName="Start"
+          screenOptions={{ headerShown: false }}
+        >
           <Stack.Screen name="Start" component={StartScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />
@@ -64,11 +74,13 @@ function App() {
     <SafeAreaProvider>
       <NotificationProvider>
         <RestApiProvider>
-          <Provider theme={theme}>
-            <EventProvider style={{ flex: 1 }}>
-              <AppNavigation />
-            </EventProvider>
-          </Provider>
+          <QueryClientProvider client={queryClient}>
+            <Provider theme={theme}>
+              <EventProvider style={{ flex: 1 }}>
+                <AppNavigation />
+              </EventProvider>
+            </Provider>
+          </QueryClientProvider>
         </RestApiProvider>
       </NotificationProvider>
     </SafeAreaProvider>
