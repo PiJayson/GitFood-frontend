@@ -1,13 +1,16 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNotification } from './NotificationProvider';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useNotification } from "./NotificationProvider";
 
 const RestApiContext = createContext();
 
 export const useRestApi = () => useContext(RestApiContext);
 
 export const RestApiProvider = ({ children }) => {
-  const [isSignedIn, setIsSignedIn] = useState(localStorage.getItem('AWTtoken') != null);
+  const [isSignedIn, setIsSignedIn] = useState(
+    async () => await AsyncStorage.getItem("AWTtoken"),
+  );
   const triggerNotification = useNotification();
 
   const apiClient = axios.create({
@@ -17,8 +20,8 @@ export const RestApiProvider = ({ children }) => {
     },
   });
 
-  apiClient.interceptors.request.use(config => {
-    const token = localStorage.getItem('AWTtoken');
+  apiClient.interceptors.request.use(async (config) => {
+    const token = await AsyncStorage.getItem("AWTtoken");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -26,8 +29,8 @@ export const RestApiProvider = ({ children }) => {
   });
 
   apiClient.interceptors.response.use(
-    response => response,
-    error => {
+    (response) => response,
+    (error) => {
       if (error.response) {
         switch (error.response.status) {
           case 401:
@@ -40,36 +43,89 @@ export const RestApiProvider = ({ children }) => {
             triggerNotification("Resource not found!");
             break;
           default:
-            console.log("here!");
             triggerNotification(error.response.data);
             break;
         }
       }
       return Promise.reject(error);
-    }
+    },
   );
 
   const login = async (login, password) => {
     const response = await apiClient.post("/login", { login, password });
-    localStorage.setItem('AWTtoken', response.data.token);
+    console.log(response.data);
+    await AsyncStorage.setItem("AWTtoken", response.data);
     setIsSignedIn(true);
     return response;
   };
 
-  const signOut = () => {
-    localStorage.removeItem('AWTtoken');
+  const signOut = async () => {
+    await AsyncStorage.removeItem("AWTtoken");
     setIsSignedIn(false);
+  };
+
+  const getProductByBarcode = async (barcode) => {
+    try {
+      const response = await apiClient.get(`/product/get/${barcode}`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      if (error.response.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  };
+
+  const getFridgeProducts = async (fridgeId) => {
+    const response = await apiClient.get("/fridge/get", {
+      params: { fridgeId },
+    });
+    return response.data;
+  };
+
+  const updateProductQuantity = async (fridgeId, productId, quantity) => {
+    return await apiClient.post("/fridge/add", {
+      fridgeId,
+      productId,
+      quantity,
+    });
+  };
+
+  const createFridge = async (name) => {
+    console.log("Creating fridge");
+    const response = await apiClient.post(`/fridge/create?name=${name}`);
+    console.log(response);
+
+    return response.data;
+  };
+
+  const getFridges = async () => {
+    const response = await apiClient.get("/fridge/getMap");
+
+    // realy backend can do better
+
+    return Object.keys(response.data).map((key) => ({
+      id: key,
+      name: response.data[key],
+    }));
   };
 
   const value = {
     isSignedIn,
     login,
-    signOut
+    signOut,
+
+    getProductByBarcode,
+
+    getFridgeProducts,
+    updateProductQuantity,
+
+    createFridge,
+    getFridges,
   };
 
   return (
-    <RestApiContext.Provider value={value}>
-      {children}
-    </RestApiContext.Provider>
+    <RestApiContext.Provider value={value}>{children}</RestApiContext.Provider>
   );
 };

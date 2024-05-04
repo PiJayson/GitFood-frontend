@@ -1,68 +1,74 @@
-import React, { useContext, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
-import Button from "../universal/Button";
-import IncrementDecrement from "../universal/IncrementDecrement";
-// import Swipeable from "react-native-gesture-handler/Swipeable";
+import React, { useState } from "react";
 import OutsidePressHandler from "react-native-outside-press";
-import { theme } from "../../assets/theme";
-import ProductName from "./ProductName";
+import Animated, {
+  SlideInLeft,
+  SlideOutRight,
+  Layout,
+  Transition,
+  LinearTransition,
+  combineTransition,
+  ExitingAnimation,
+  EnteringAnimation,
+  FadeIn,
+  FadeOut,
+  StretchOutY,
+  StretchInY,
+  ZoomIn,
+  ZoomOut,
+} from "react-native-reanimated";
 
-export default function SingleProduct({ product, dispatch }) {
-  const [count, setCount] = useState(product.count);
+export default function SingleProduct({
+  index,
+  productName,
+  syncStore,
+  normalView,
+  editView,
+}) {
+  const baseProduct = syncStore.getProductCopy(productName); // gets the copy, reference may be needed
+  const [product, setProduct] = useState(baseProduct);
+  const [isEdited, setIsEdited] = useState(false);
 
-  const outsidePressHandler = () => {
-    if (count == 0) {
-      dispatch({ type: "REMOVE_PRODUCT", productName: product.name });
+  const updateProduct = () => {
+    if (product.quantity <= 0) {
+      syncStore.removeProduct(product);
+      return;
     }
+    if (product !== baseProduct) {
+      syncStore.updateProduct(baseProduct, product);
+    }
+  };
+  const outsidePressHandler = () => {
+    if (!isEdited) {
+      return;
+    }
+    updateProduct();
+    setIsEdited(false);
   }; // well this one will be a little bit of a perfomance killer
 
-  const updateCount = (value) => {
-    product.count = product.count + value > 0 ? product.count + value : 0;
-    setCount(product.count);
-    dispatch({
-      type: "UPDATE_PRODUCT",
-      product: product,
-    });
+  handleExpand = () => {
+    if (isEdited) {
+      updateProduct();
+      setIsEdited(false);
+    } else {
+      setIsEdited(true);
+    }
   };
+
+  const updateCount = (change) => {
+    if (product.quantity + change < 0 || product.quantity + change >= 100) {
+      return;
+    }
+    setProduct({ ...product, quantity: product.quantity + change });
+    // syncStore.updateProduct(product, newProduct);
+  };
+
+  let body = isEdited
+    ? editView(product, updateCount, handleExpand)
+    : normalView(product, handleExpand);
 
   return (
     <OutsidePressHandler onOutsidePress={() => outsidePressHandler()}>
-      <View style={styles.container}>
-        <Text variant="displayMedium" style={styles.count}>
-          {count}x
-        </Text>
-        <ProductName> {product.name} </ProductName>
-        <IncrementDecrement update={updateCount} />
-      </View>
+      {body}
     </OutsidePressHandler>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 5,
-    flex: 1,
-    flexDirection: "row",
-    // padding: 20,
-    width: "98%",
-    maxWidth: 600,
-    alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "space-between",
-
-    borderRadius: 10,
-    margin: 5,
-    borderStyle: "solid",
-    borderColor: theme.colors.primary,
-    borderWidth: 3,
-
-    backgroundColor: theme.colors.surface,
-  },
-  count: {
-    paddingLeft: 8,
-    color: theme.colors.primary,
-    fontWeight: "800",
-    textAlign: "center",
-  },
-});

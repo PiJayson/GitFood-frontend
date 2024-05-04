@@ -4,35 +4,42 @@ import { View, FlatList } from "react-native";
 import Header from "../universal/Header";
 import Button from "../universal/Button";
 import SingleProduct from "./SingleProduct";
-import { useReducer } from "react";
-import productListReducer from "../../utils/reducers/productListReducer";
 
-export default function ProductList({ products = [], ListName = "" }) {
+export default function ProductList({
+  syncStore,
+  normalProductView,
+  editProductView,
+}) {
   const [refreshing, setRefreshing] = React.useState(false);
-  const [productList, dispatch] = useReducer(productListReducer, {
-    products: products,
-  });
 
+  const products = syncStore.products();
+
+  const productStoreName = syncStore.currentFridge()?.name;
   return (
     <View style={styles.container}>
-      <Header> {ListName} </Header>
-      <Button
-        title="Add Product"
-        mode="contained"
-        onPress={() => console.log("")}
-      />
+      <Header> {productStoreName} </Header>
       <FlatList
         style={styles.list}
-        data={productList.products}
-        renderItem={({ item }) => (
-          <SingleProduct product={item} dispatch={dispatch} />
+        data={products}
+        renderItem={({ item, index }) => (
+          <SingleProduct
+            index={index}
+            productName={item.name}
+            syncStore={syncStore}
+            editView={editProductView}
+            normalView={normalProductView}
+          />
         )}
+        // extraData={syncStore
+        //   .products()
+        //   .map((product) => product.quantity)
+        //   .join("")}
         scrollEnabled={true}
         keyExtractor={(item) => item.name}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => console.log("refresh")}
+            onRefresh={async () => await syncStore.loadProducts()}
           />
         }
       />
