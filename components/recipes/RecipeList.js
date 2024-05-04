@@ -12,11 +12,16 @@ export default function RecipeList({ dataSource, onLikeRecipe, onViewRecipe }) {
     }
   };
 
+  if (!isLoading) {
+    console.log(data);
+    console.log(data.pages.flat());
+  }
+
   return isLoading ? (
     <RenderSpinner />
   ) : (
     <FlatList
-      data={data.pages.flatMap((page) => page.results)}
+      data={data.pages.flat()}
       renderItem={({ item }) => (
         <RecipeCard
           recipe={item}

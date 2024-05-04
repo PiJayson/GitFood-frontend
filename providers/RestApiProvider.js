@@ -64,15 +64,20 @@ export const RestApiProvider = ({ children }) => {
     setIsSignedIn(false);
   };
 
-  const getRecipesPage = async (pageParam, pageSize, search, ingredients) => {
+  const getRecipesPage = async (
+    pageParam,
+    pageSize,
+    searchName,
+    ingredients,
+  ) => {
     return apiClient
-      .get("/recipes", {
+      .post("/recipe/getPaged", {
         params: {
           page: pageParam,
           size: pageSize,
-          search,
-          ingredients,
         },
+        searchName,
+        ingredients,
       })
       .then((response) => {
         return response.data;
