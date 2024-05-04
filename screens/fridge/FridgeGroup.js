@@ -5,17 +5,18 @@ import { EventProvider } from "react-native-outside-press";
 import FridgeScannerScreen from "./FridgeScreenScanner";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { syncProductStore } from "./ProductStore";
+import { syncFridgeStore } from "./FridgeStore";
 import { useRestApi } from "../../providers/RestApiProvider";
 
 const FridgeStack = createStackNavigator();
 
 export default function FridgeGroup({ navigation }) {
   // load the products from the server
+  const { getFridges } = useRestApi();
 
   useEffect(() => {
-    syncProductStore.loadProducts();
-  }, []);
+    syncFridgeStore.loadFridges(getFridges);
+  }, [getFridges]);
 
   return (
     <EventProvider style={{ flex: 1 }}>

@@ -14,7 +14,7 @@ export default function ProductList({
 
   const products = syncStore.products();
 
-  const productStoreName = syncStore.productStoreName();
+  const productStoreName = syncStore.currentFridge()?.name;
   return (
     <View style={styles.container}>
       <Header> {productStoreName} </Header>

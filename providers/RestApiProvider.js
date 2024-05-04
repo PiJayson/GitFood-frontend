@@ -77,33 +77,38 @@ export const RestApiProvider = ({ children }) => {
     }
   };
 
-  const getFridgeProducts = async () => {
-    const response = await apiClient.get("/fridge/get", { login });
+  const getFridgeProducts = async (fridgeId) => {
+    const response = await apiClient.get("/fridge/get", {
+      params: { fridgeId },
+    });
     return response.data;
   };
 
-  const addProductToFridge = async (product) => {
+  const updateProductQuantity = async (fridgeId, productId, quantity) => {
     return await apiClient.post("/fridge/add", {
-      productId: product.id,
-      login: login,
-      quantity: product.quantity,
-      unit: null,
+      fridgeId,
+      productId,
+      quantity,
     });
   };
 
-  const updateProductInFridge = async (product) => {
-    return await apiClient.patch("/fridge/update", {
-      productId: product.id,
-      login: login,
-      quantity: product.quantity,
-      unit: product.unit,
-    });
+  const createFridge = async (name) => {
+    console.log("Creating fridge");
+    const response = await apiClient.post(`/fridge/create?name=${name}`);
+    console.log(response);
+
+    return response.data;
   };
 
-  const removeProductFromFridge = async (product) => {
-    return await apiClient.delete("/fridge/delete", {
-      productId: product.id,
-    });
+  const getFridges = async () => {
+    const response = await apiClient.get("/fridge/getMap");
+
+    // realy backend can do better
+
+    return Object.keys(response.data).map((key) => ({
+      id: key,
+      name: response.data[key],
+    }));
   };
 
   const value = {
@@ -112,10 +117,12 @@ export const RestApiProvider = ({ children }) => {
     signOut,
 
     getProductByBarcode,
+
     getFridgeProducts,
-    addProductToFridge,
-    updateProductInFridge,
-    removeProductFromFridge,
+    updateProductQuantity,
+
+    createFridge,
+    getFridges,
   };
 
   return (

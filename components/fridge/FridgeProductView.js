@@ -4,7 +4,7 @@ import { Text, IconButton } from "react-native-paper";
 import IncrementDecrement from "../universal/IncrementDecrement";
 // import Swipeable from "react-native-gesture-handler/Swipeable";
 import { theme } from "../../assets/theme";
-import ProductName from "./ProductName";
+import ProductName from "../product_list/ProductName";
 import Animated, {
   ZoomIn,
   ZoomOut,
@@ -12,7 +12,7 @@ import Animated, {
   StretchOutX,
 } from "react-native-reanimated";
 
-export function editedFridgeProductView(product, updateCount, handleExpand) {
+export function EditedFridgeProductView(product, updateCount, handleExpand) {
   return (
     <Animated.View entering={StretchInX} exiting={StretchOutX}>
       <View style={styles.container}>
@@ -34,7 +34,7 @@ export function editedFridgeProductView(product, updateCount, handleExpand) {
   );
 }
 
-export function fridgeProductView(product, handleExpand) {
+export function FridgeProductView(product, handleExpand) {
   return (
     <Animated.View entering={ZoomIn} exiting={ZoomOut}>
       <View style={styles.container}>

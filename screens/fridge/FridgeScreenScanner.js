@@ -4,15 +4,16 @@ import ScannerComponent from "../../components/scanner/ScannerComponent";
 import BackButton from "../../components/universal/BackButton";
 import ProductForm from "../../components/scanner/ProductForm";
 import { useRestApi } from "../../providers/RestApiProvider";
-import { syncProductStore } from "../../screens/fridge/ProductStore";
+import { syncFridgeStore } from "../../screens/fridge/FridgeStore";
 
 export default function FridgeScannerScreen({ navigation }) {
   const [formVisible, setFormVisible] = useState(false);
   const lastScannedItem = useRef(null);
   const [, forceUpdate] = useState();
   const update = () => forceUpdate({});
-  const products = syncProductStore.products();
-  const { getProductByBarcode } = useRestApi();
+  const { getProductByBarcode, updateProductQuantity } = useRestApi();
+
+  const products = syncFridgeStore.products();
 
   const handleBarcodeDetected = async (scannedData) => {
     console.log(lastScannedItem.current); // Access via .current
@@ -40,7 +41,10 @@ export default function FridgeScannerScreen({ navigation }) {
           barcode: scannedData,
         };
 
-        syncProductStore.addProduct(lastScannedItem.current);
+        syncFridgeStore.addProduct(
+          lastScannedItem.current,
+          updateProductQuantity,
+        );
       }
     } else {
       lastScannedItem.current = {
@@ -60,11 +64,14 @@ export default function FridgeScannerScreen({ navigation }) {
       ...lastScannedItem.current,
       name: productData.name,
     };
-    syncProductStore.addProduct({
-      name: productData.name,
-      quantity: lastScannedItem.current.quantity,
-      barcode: lastScannedItem.current.barcode,
-    });
+    syncFridgeStore.addProduct(
+      {
+        name: productData.name,
+        quantity: lastScannedItem.current.quantity,
+        barcode: lastScannedItem.current.barcode,
+      },
+      updateProductQuantity,
+    );
 
     setFormVisible(false);
     update();
@@ -79,7 +86,11 @@ export default function FridgeScannerScreen({ navigation }) {
       quantity: lastScannedItem.current.quantity + 1, // Update with .current
     };
     console.log(lastScannedItem.current);
-    syncProductStore.updateProduct(prevItem, lastScannedItem.current);
+    syncFridgeStore.updateProduct(
+      prevItem,
+      lastScannedItem.current,
+      updateProductQuantity,
+    );
 
     update();
   };
@@ -91,7 +102,11 @@ export default function FridgeScannerScreen({ navigation }) {
       quantity: Math.max(0, lastScannedItem.current.quantity - 1), // Update with .current
     };
 
-    syncProductStore.updateProduct(prevItem, lastScannedItem.current);
+    syncFridgeStore.updateProduct(
+      prevItem,
+      lastScannedItem.current,
+      updateProductQuantity,
+    );
 
     update();
   };

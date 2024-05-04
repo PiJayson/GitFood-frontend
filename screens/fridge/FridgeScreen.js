@@ -4,26 +4,24 @@ import Button from "../../components/universal/Button";
 
 import ProductList from "../../components/product_list/ProductList";
 import { Dimensions } from "react-native";
-import BackButton from "../../components/universal/BackButton";
 import { useState, useEffect } from "react";
 import { theme } from "../../assets/theme";
-import { useRestApi } from "../../providers/RestApiProvider";
-import { syncProductStore } from "./ProductStore";
+import { syncFridgeStore } from "./FridgeStore";
 import {
-  fridgeProductView,
-  editedFridgeProductView,
-} from "../../components/product_list/fridgeProductView";
-import ExpandableList from "../../components/universal/ExpandableList";
+  FridgeProductView,
+  EditedFridgeProductView,
+} from "../../components/fridge/FridgeProductView";
+import ExpandableFridgeList from "../../components/fridge/ExpandableFridgeList";
+import NewListForm from "../../components/fridge/NewListForm";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
 
 const FridgeScreen = ({ navigation }) => {
+  const [formVisible, setFormVisible] = useState(false);
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
   });
-
-  const { signOut } = useRestApi();
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener(
@@ -37,16 +35,14 @@ const FridgeScreen = ({ navigation }) => {
 
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
-      <ExpandableList
-        title={"current list"}
-        items={["base", "new-List"]}
-        choosenIndex={0}
-        chooseItem={(item) => console.log(item + "was choosen")}
+      <ExpandableFridgeList
+        syncStore={syncFridgeStore}
+        addNewItemForm={() => setFormVisible(true)}
       />
       <ProductList
-        syncStore={syncProductStore}
-        normalProductView={fridgeProductView}
-        editProductView={editedFridgeProductView}
+        syncStore={syncFridgeStore}
+        normalProductView={FridgeProductView}
+        editProductView={EditedFridgeProductView}
       />
       <Button
         title="Open Scanner"
@@ -54,6 +50,11 @@ const FridgeScreen = ({ navigation }) => {
       >
         Open Scanner
       </Button>
+      <NewListForm
+        visible={formVisible}
+        onSubmit={syncFridgeStore.createFridge}
+        onClose={() => setFormVisible(false)}
+      />
     </View>
   );
 };

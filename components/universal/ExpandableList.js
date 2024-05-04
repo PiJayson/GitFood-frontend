@@ -4,32 +4,40 @@ import { List } from "react-native-paper";
 export default function ExpandableList({
   title,
   items,
+  itemName,
   chooseItem,
-  choosenIndex,
+  isChosen,
+  addNewItemForm,
+  onExpand,
 }) {
   const [expanded, setExpanded] = React.useState(false);
 
-  console.log(items);
   return (
     <List.Accordion
       title={title}
       left={(props) => <List.Icon {...props} icon="folder" />}
       expanded={expanded}
-      onPress={() => setExpanded(!expanded)}
+      onPress={() => {
+        setExpanded(!expanded);
+        onExpand();
+      }}
     >
-      {items.map((item, index) =>
-        index === choosenIndex ? (
+      {items.map((item) =>
+        isChosen(item) ? (
           <List.Item
-            key={index}
-            title={item}
-            onPress={() => chooseItem(item)}
+            title={itemName(item) + " (chosen)"}
+            key={item.id}
+            onPress={() => {
+              chooseItem(item);
+              setExpanded(false);
+            }}
             icon="check"
             style={{ backgroundColor: "lightblue" }}
           />
         ) : (
           <List.Item
-            key={index}
-            title={item}
+            title={itemName(item)}
+            key={item.id}
             onPress={() => {
               chooseItem(item);
               setExpanded(false);
@@ -37,6 +45,11 @@ export default function ExpandableList({
           />
         ),
       )}
+      <List.Item
+        title="Add new"
+        onPress={addNewItemForm}
+        left={(props) => <List.Icon {...props} icon="plus" />}
+      />
     </List.Accordion>
   );
 }
