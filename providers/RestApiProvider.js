@@ -105,9 +105,9 @@ export const RestApiProvider = ({ children }) => {
 
     // realy backend can do better
 
-    return Object.keys(response.data).map((key) => ({
-      id: key,
-      name: response.data[key],
+    return response.data.map((fridge) => ({
+      id: fridge.item1,
+      name: fridge.item2,
     }));
   };
 
