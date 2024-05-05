@@ -4,15 +4,19 @@ import { View, FlatList } from "react-native";
 import Header from "../universal/Header";
 import Button from "../universal/Button";
 import SingleProduct from "./SingleProduct";
+import { useFridgesStore } from "../../screens/fridge/FridgeStore";
 
 export default function ProductList({
   syncStore,
   normalProductView,
   editProductView,
+  updateProductQuantity,
 }) {
   const [refreshing, setRefreshing] = React.useState(false);
 
   const products = syncStore.products();
+
+  console.log("pr:", products);
 
   const productStoreName = syncStore.currentFridge()?.name;
   return (
@@ -20,7 +24,7 @@ export default function ProductList({
       <Header> {productStoreName} </Header>
       <FlatList
         style={styles.list}
-        data={products}
+        data={useFridgesStore().products}
         renderItem={({ item, index }) => (
           <SingleProduct
             index={index}
@@ -28,6 +32,7 @@ export default function ProductList({
             syncStore={syncStore}
             editView={editProductView}
             normalView={normalProductView}
+            updateProductQuantity={updateProductQuantity}
           />
         )}
         // extraData={syncStore
@@ -35,7 +40,7 @@ export default function ProductList({
         //   .map((product) => product.quantity)
         //   .join("")}
         scrollEnabled={true}
-        keyExtractor={(item) => item.name}
+        keyExtractor={(item) => item.productId}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -43,7 +48,6 @@ export default function ProductList({
           />
         }
       />
-      <Button mode="outlined" title="begin Scanning"></Button>
     </View>
   );
 }

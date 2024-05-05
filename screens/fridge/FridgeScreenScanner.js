@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, Button } from "react-native";
 import ScannerComponent from "../../components/scanner/ScannerComponent";
 import BackButton from "../../components/universal/BackButton";
@@ -7,16 +7,32 @@ import { useRestApi } from "../../providers/RestApiProvider";
 import { syncFridgeStore } from "../../screens/fridge/FridgeStore";
 
 export default function FridgeScannerScreen({ navigation }) {
+  const { getProductByBarcode, updateProductQuantity, categoryGetAll, productAdd } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
+  const [categories, setCategories] = useState([]);
   const lastScannedItem = useRef(null);
   const [, forceUpdate] = useState();
   const update = () => forceUpdate({});
-  const { getProductByBarcode, updateProductQuantity } = useRestApi();
-
+  
   const products = syncFridgeStore.products();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await categoryGetAll();
+        setCategories(result);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, [categoryGetAll]);
+
 
   const handleBarcodeDetected = async (scannedData) => {
     console.log(lastScannedItem.current); // Access via .current
+    console.log("scanned: ", categories);
     if (
       lastScannedItem.current &&
       lastScannedItem.current.barcode === scannedData
@@ -26,6 +42,7 @@ export default function FridgeScannerScreen({ navigation }) {
     }
     console.log("new scan");
     const productInDatabase = await getProductByBarcode(scannedData);
+    console.log("productInDatabase");
     console.log(productInDatabase);
     const productFromFridge = products.find(
       (product) => product.barcode == scannedData,
@@ -49,8 +66,12 @@ export default function FridgeScannerScreen({ navigation }) {
     } else {
       lastScannedItem.current = {
         name: "",
-        quantity: 1,
+        description: "",
         barcode: scannedData,
+        productId: -1,
+        categoryid: -1,
+        unit: "amount",
+        quantity: 1,
       };
       setFormVisible(true);
     }
@@ -60,16 +81,16 @@ export default function FridgeScannerScreen({ navigation }) {
   const handleAddProduct = async (productData) => {
     console.log("Product Added:", productData);
 
+    const productId = await productAdd(productData.name, productData.description, productData.barcode, 1, productData.quantity);
+    
     lastScannedItem.current = {
       ...lastScannedItem.current,
       name: productData.name,
+      productId: productId
     };
+    
     syncFridgeStore.addProduct(
-      {
-        name: productData.name,
-        quantity: lastScannedItem.current.quantity,
-        barcode: lastScannedItem.current.barcode,
-      },
+      lastScannedItem.current,
       updateProductQuantity,
     );
 
@@ -132,6 +153,8 @@ export default function FridgeScannerScreen({ navigation }) {
               <ProductForm
                 visible={formVisible}
                 initialData={lastScannedItem.current}
+                categories={categories.map(category => category.name)}
+                units={["ml", "l", "dl", "mg", "g", "kg", "amount"]}
                 onSubmit={handleAddProduct}
                 onClose={() => setFormVisible(false)}
               />

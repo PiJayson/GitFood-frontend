@@ -50,7 +50,6 @@ function AppNavigation() {
         >
           <Tab.Screen name="Shopping" component={ShoppingScreen} />
           <Tab.Screen name="FridgeGroup" component={FridgeGroup} />
-          <Tab.Screen name="Scanner" component={ShoppingScannerScreen} />
         </Tab.Navigator>
       ) : (
         <Stack.Navigator
@@ -72,9 +71,7 @@ function App() {
       <NotificationProvider>
         <RestApiProvider>
           <Provider theme={theme}>
-            {/* <EventProvider style={{ flex: 1 }}> */}
             <AppNavigation />
-            {/* </EventProvider> */}
           </Provider>
         </RestApiProvider>
       </NotificationProvider>

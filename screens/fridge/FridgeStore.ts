@@ -31,7 +31,7 @@ type ProductsState = {
   products: Product[];
 }; // using arrays here is causing a lot of reloads
 
-const useFridgesStore = create<ProductsState & FridgesState>(() => ({
+export const useFridgesStore = create<ProductsState & FridgesState>(() => ({
   products: [],
   fridges: [],
   currentFridgeId: -1,
@@ -70,16 +70,28 @@ export const syncFridgeStore = {
 
     useFridgesStore.setState({
       currentFridgeId: id,
+      products: fridgeProducts.map((product) => ({
+        description: product.product.description,
+        name: product.product.name,
+        barcode: product.product.barcode,
+        productId: product.product.id,
+        categoryId: product.product.category,
+        quantity: product.ammount,
+        unit: product.product.categoryNavigation.unit
+      }))
     });
   },
 
   addProduct: async (product: Product, updateProductQuantity) => {
     console.log("Adding product to store", product);
+
     await updateProductQuantity(
-      useFridgesStore().currentFridgeId,
+      useFridgesStore.getState().currentFridgeId,
       product.productId,
       product.quantity,
     );
+
+    console.log("sent");
 
     useFridgesStore.setState((state) => ({
       products: [...state.products, product],
@@ -93,7 +105,7 @@ export const syncFridgeStore = {
   ) => {
     // change, no prevProduct needed !!!
     await updateProductQuantity(
-      useFridgesStore().currentFridgeId,
+      useFridgesStore.getState().currentFridgeId,
       prevProduct.productId,
       product.quantity,
     );
@@ -101,7 +113,7 @@ export const syncFridgeStore = {
     console.log("Updating product in store", prevProduct, "to", product);
     useFridgesStore.setState((state) => ({
       products: state.products.map((p: Product) =>
-        p.productId === prevProduct.productId ? product : p,
+        p.productId == product.productId ? product : p,
       ),
     }));
   },
@@ -118,9 +130,8 @@ export const syncFridgeStore = {
     }));
   },
   getProductCopy: (productName: string) =>
-    useFridgesStore
-      .getState()
-      .products.find((product) => product.name === productName),
+    useFridgesStore()
+      .products.find((product) => product.name == productName),
 
   createFridge: async (fridgeName: string, createFridge) => {
     const id = await createFridge(fridgeName);

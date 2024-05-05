@@ -51,8 +51,23 @@ export const RestApiProvider = ({ children }) => {
     },
   );
 
+
+  /**
+   * ENDPOINTS
+   */
+
+  // Login
+
   const login = async (login, password) => {
     const response = await apiClient.post("/login", { login, password });
+    console.log(response.data);
+    await AsyncStorage.setItem("AWTtoken", response.data);
+    setIsSignedIn(true);
+    return response;
+  };
+
+  const register = async (login, password) => {
+    const response = await apiClient.post("/login/register", { login, password });
     console.log(response.data);
     await AsyncStorage.setItem("AWTtoken", response.data);
     setIsSignedIn(true);
@@ -64,12 +79,31 @@ export const RestApiProvider = ({ children }) => {
     setIsSignedIn(false);
   };
 
+  // Category
+
+  const categoryGetAll = async () => {
+    const response = await apiClient.get(`/category/getAll`);
+    return response.data;
+  };
+
+  // Product
+
+  const productAdd = async (name, description, barcode, categoryId, quantity) => {
+    const response = await apiClient.post("/product/add", {
+      description,
+      name,
+      barcode,
+      categoryId,
+      quantity
+    });
+    return response.data;
+  }
+
   const getProductByBarcode = async (barcode) => {
     try {
-      const response = await apiClient.get(`/product/get/${barcode}`);
-      return response.data;
+    const response = await apiClient.get(`/product/getByBarcode?barcode=${barcode}`);
+    return response.data;
     } catch (error) {
-      console.log(error);
       if (error.response.status === 404) {
         return null;
       }
@@ -85,11 +119,7 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const updateProductQuantity = async (fridgeId, productId, quantity) => {
-    return await apiClient.post("/fridge/add", {
-      fridgeId,
-      productId,
-      quantity,
-    });
+    return await apiClient.patch(`/fridge/updateProductQuantity?fridgeId=${fridgeId}&productId=${productId}&quantity=${quantity}`);
   };
 
   const createFridge = async (name) => {
@@ -113,14 +143,22 @@ export const RestApiProvider = ({ children }) => {
 
   const value = {
     isSignedIn,
+    
+    // Login
     login,
+    register,
     signOut,
 
+    // Category
+    categoryGetAll,
+
+    // Product
+    productAdd,
     getProductByBarcode,
 
+    // Fridge
     getFridgeProducts,
     updateProductQuantity,
-
     createFridge,
     getFridges,
   };

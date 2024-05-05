@@ -23,6 +23,7 @@ export default function SingleProduct({
   syncStore,
   normalView,
   editView,
+  updateProductQuantity,
 }) {
   const baseProduct = syncStore.getProductCopy(productName); // gets the copy, reference may be needed
   const [product, setProduct] = useState(baseProduct);
@@ -34,7 +35,7 @@ export default function SingleProduct({
       return;
     }
     if (product !== baseProduct) {
-      syncStore.updateProduct(baseProduct, product);
+      syncStore.updateProduct(baseProduct, product, updateProductQuantity);
     }
   };
   const outsidePressHandler = () => {
