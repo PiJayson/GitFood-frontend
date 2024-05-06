@@ -78,7 +78,7 @@ export default function FridgeScannerScreen({ navigation }) {
         description: "",
         barcode: scannedData,
         productId: -1,
-        categoryid: -1,
+        categoryId: 1,
         unit: "amount",
         quantity: 1,
       };
@@ -95,14 +95,34 @@ export default function FridgeScannerScreen({ navigation }) {
     
     lastScannedItem.current = {
       ...lastScannedItem.current,
-      name: productData.name,
+      name: productData.category,
       productId: productId
     };
+
+    const productFromFridge = products.find(
+      (product) => product.categoryId == 1,
+    );
     
-    syncShoppingStore.addProduct(
+    if (productFromFridge) {
+      const prevItem = lastScannedItem.current;
+
+      lastScannedItem.current = {
+      ...lastScannedItem.current,
+      quantity: lastScannedItem.current.quantity + productData.quantity, // Update with .current
+    };
+
+    syncShoppingStore.updateProduct(
+      prevItem,
       lastScannedItem.current,
       updateShoppingListQuantity,
     );
+    }
+    else {
+      syncShoppingStore.addProduct(
+        lastScannedItem.current,
+        updateShoppingListQuantity,
+      );
+    }
 
     setFormVisible(false);
     update();
