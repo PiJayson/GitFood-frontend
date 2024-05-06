@@ -4,39 +4,47 @@ import { View, FlatList } from "react-native";
 import Header from "../universal/Header";
 import Button from "../universal/Button";
 import SingleProduct from "./SingleProduct";
-import { useReducer } from "react";
-import productListReducer from "../../utils/reducers/productListReducer";
+import { useFridgesStore } from "../../screens/fridge/FridgeStore";
 
-export default function ProductList({ products = [], ListName = "" }) {
+export default function ProductList({
+  syncStore,
+  normalProductView,
+  editProductView,
+  updateProductQuantity,
+  onRefresh,
+}) {
   const [refreshing, setRefreshing] = React.useState(false);
-  const [productList, dispatch] = useReducer(productListReducer, {
-    products: products,
-  });
 
+  const products = syncStore.products();
+
+  const productStoreName = syncStore.currentFridge()?.name;
+  console.log("fridge list rendered", productStoreName);
   return (
     <View style={styles.container}>
-      <Header> {ListName} </Header>
-      <Button
-        title="Add Product"
-        mode="contained"
-        onPress={() => console.log("")}
-      />
+      <Header> {productStoreName} </Header>
       <FlatList
         style={styles.list}
-        data={productList.products}
-        renderItem={({ item }) => (
-          <SingleProduct product={item} dispatch={dispatch} />
-        )}
-        scrollEnabled={true}
-        keyExtractor={(item) => item.name}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => console.log("refresh")}
+        data={useFridgesStore().products}
+        renderItem={({ item, index }) => (
+          <SingleProduct
+            index={index}
+            productId={item.productId}
+            syncStore={syncStore}
+            editView={editProductView}
+            normalView={normalProductView}
+            updateProductQuantity={updateProductQuantity}
           />
+        )}
+        // extraData={syncStore
+        //   .products()
+        //   .map((product) => product.quantity)
+        //   .join("")}
+        scrollEnabled={true}
+        keyExtractor={(item) => item.productId + item.quantity}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
-      <Button mode="outlined" title="begin Scanning"></Button>
     </View>
   );
 }

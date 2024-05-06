@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { theme } from "./assets/theme";
-import { EventProvider } from "react-native-outside-press";
+// import { EventProvider } from "react-native-outside-press";
 import { NotificationProvider } from "./providers/NotificationProvider";
 import { RestApiProvider, useRestApi } from "./providers/RestApiProvider";
 
@@ -16,8 +16,9 @@ import {
   ShoppingScannerScreen,
   SignUpScreen,
   StartScreen,
-  FridgeScreen,
   RecipesScreens,
+  SplashScreen,
+  FridgeGroup,
 } from "./screens";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -51,8 +52,8 @@ function AppNavigation() {
           screenOptions={{ headerShown: false }}
         >
           <Tab.Screen name="Shopping" component={ShoppingScreen} />
-          <Tab.Screen name="Fridge" component={FridgeScreen} />
           <Tab.Screen name="Scanner" component={ShoppingScannerScreen} />
+          <Tab.Screen name="FridgeGroup" component={FridgeGroup} />
           <Tab.Screen name="Recipes" component={RecipesScreens} />
         </Tab.Navigator>
       ) : (
@@ -76,9 +77,9 @@ function App() {
         <RestApiProvider>
           <QueryClientProvider client={queryClient}>
             <Provider theme={theme}>
-              <EventProvider style={{ flex: 1 }}>
-                <AppNavigation />
-              </EventProvider>
+              {/* <EventProvider style={{ flex: 1 }}> */}
+              <AppNavigation />
+              {/* </EventProvider> */}
             </Provider>
           </QueryClientProvider>
         </RestApiProvider>

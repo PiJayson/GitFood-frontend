@@ -1,26 +1,29 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import Button from "../../components/universal/Button";
-import Paragraph from "../../components/universal/Paragraph";
-import { AuthContext } from "../../utils/contexts/AuthContext";
-// import ProductList from "../../components/product_list/ProductList";
+
 import ProductList from "../../components/product_list/ProductList";
 import { Dimensions } from "react-native";
-import BackButton from "../../components/universal/BackButton";
 import { useState, useEffect } from "react";
 import { theme } from "../../assets/theme";
 import { useRestApi } from "../../providers/RestApiProvider";
+import { syncFridgeStore, useFridgesStore } from "./FridgeStore";
+import {
+  FridgeProductView,
+  EditedFridgeProductView,
+} from "../../components/fridge/FridgeProductView";
+import ExpandableFridgeList from "../../components/fridge/ExpandableFridgeList";
+import NewListForm from "../../components/fridge/NewListForm";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
 
-// TODO: plan what is supposed to be on the home screen
 const FridgeScreen = ({ navigation }) => {
+  const { updateProductQuantity, getFridgeProducts } = useRestApi();
+  const [formVisible, setFormVisible] = useState(false);
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
   });
-
-  const { signOut } = useRestApi();
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener(
@@ -32,76 +35,36 @@ const FridgeScreen = ({ navigation }) => {
     return () => subscription?.remove();
   });
 
-  const products = [
-    {
-      name: "Milk",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Eggs",
-      count: 12,
-      barcode: null,
-    },
-    {
-      name: "Bread",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Butter",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Cheese",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Yogurt",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Apples",
-      count: 3,
-      barcode: null,
-    },
-    {
-      name: "Oranges",
-      count: 2,
-      barcode: null,
-    },
-    {
-      name: "Bananas",
-      count: 4,
-      barcode: null,
-    },
-    {
-      name: "Grapes",
-      count: 1,
-      barcode: null,
-    },
-    {
-      name: "Strawberrie sssssssssssssssssssssssssssss ssssssssssssss",
-      count: 1,
-      barcode: null,
-    },
-  ];
-
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
-      <BackButton goBack={() => navigation.navigate("Home")} />
-      <ProductList products={products} ListName={"kldsaj"} />
-      <Button
-        mode="outlined"
-        onPress={async () => {
-          await signOut(); // disabling when clicked?
+      <ExpandableFridgeList
+        syncStore={syncFridgeStore}
+        addNewItemForm={() => setFormVisible(true)}
+      />
+      <ProductList
+        syncStore={syncFridgeStore}
+        normalProductView={FridgeProductView}
+        editProductView={EditedFridgeProductView}
+        updateProductQuantity={updateProductQuantity}
+        onRefresh={async () => {
+          console.log("refresh");
+          const id = syncFridgeStore.currentFridgeIdCopy();
+          console.log("id", id);
+          await syncFridgeStore.setFridge(id, getFridgeProducts);
         }}
+      />
+      <Button
+        title="Open Scanner"
+        mode="outlined"
+        onPress={() => navigation.navigate("FridgeScanner")}
       >
-        log out
+        Open Scanner
       </Button>
+      <NewListForm
+        visible={formVisible}
+        onSubmit={syncFridgeStore.createFridge}
+        onClose={() => setFormVisible(false)}
+      />
     </View>
   );
 };
