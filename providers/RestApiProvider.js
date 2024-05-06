@@ -64,30 +64,75 @@ export const RestApiProvider = ({ children }) => {
     setIsSignedIn(false);
   };
 
-  const getRecipesPage = async (
-    pageParam,
-    pageSize,
-    searchName,
-    ingredients,
-  ) => {
-    return apiClient
-      .post("/recipe/getPaged", {
-        params: {
-          page: pageParam,
-          size: pageSize,
-        },
-        searchName,
-        ingredients,
-      })
-      .then((response) => {
-        return response.data;
-      });
+  const getProductByBarcode = async (barcode) => {
+    try {
+      const response = await apiClient.get(`/product/get/${barcode}`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      if (error.response.status === 404) {
+        return null;
+      }
+      throw error;
+    }
   };
+
+  const getFridgeProducts = async (fridgeId) => {
+    const response = await apiClient.get("/fridge/get", {
+      params: { fridgeId },
+    });
+    return response.data;
+  };
+
+  const updateProductQuantity = async (fridgeId, productId, quantity) => {
+    return await apiClient.post("/fridge/add", {
+      fridgeId,
+      productId,
+      quantity,
+    });
+  };
+
+  const createFridge = async (name) => {
+    console.log("Creating fridge");
+    const response = await apiClient.post(`/fridge/create?name=${name}`);
+    console.log(response);
+
+    return response.data;
+  };
+
+  const getFridges = async () => {
+    const response = await apiClient.get("/fridge/getMap");
+
+    // realy backend can do better
+
+    return response.data.map((fridge) => ({
+      id: fridge.item1,
+      name: fridge.item2,
+    }));
+  };
+
+  const getRecipesPage = async (page, pageSize, search, ingredients) => {
+    const response = await apiClient.post(
+      `/recipe/getPaged?page=${page}&pageSize=${pageSize}`,
+      { search, ingredients },
+    );
+
+    console.log(response.data);
+    return response.data;
+  }; // this
 
   const value = {
     isSignedIn,
     login,
     signOut,
+
+    getProductByBarcode,
+
+    getFridgeProducts,
+    updateProductQuantity,
+
+    createFridge,
+    getFridges,
 
     getRecipesPage,
   };

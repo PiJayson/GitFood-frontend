@@ -1,10 +1,22 @@
+import React from "react";
 import RenderSpinner from "../universal/RenderSpinner";
 import RecipeCard from "./RecipeCard";
 import { FlatList } from "react-native";
+import { Text } from "react-native-paper";
 
 export default function RecipeList({ dataSource, onLikeRecipe, onViewRecipe }) {
-  const { isLoading, data, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    dataSource;
+  const {
+    isLoading,
+    isError,
+    data,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = dataSource;
+
+  if (isError) {
+    return <Text>Error</Text>;
+  }
 
   const loadMore = () => {
     if (hasNextPage) {

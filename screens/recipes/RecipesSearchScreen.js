@@ -41,7 +41,9 @@ export default function RecipesSearchScreen({ navigation }) {
         <RecipeList
           dataSource={dataSource}
           onLikeRecipe={(recipe) => console.log("like", recipe)}
-          onViewRecipe={(recipe) => navigation.navigate("Recipe", { recipe })}
+          onViewRecipe={(recipe) =>
+            navigation.navigate("Recipe", { recipe: recipe })
+          }
         />
       </View>
     </View>
