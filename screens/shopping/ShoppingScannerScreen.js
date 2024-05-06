@@ -7,7 +7,7 @@ import { useRestApi } from "../../providers/RestApiProvider";
 import { syncShoppingStore } from "../../screens/shopping/ShoppingStore";
 
 export default function FridgeScannerScreen({ navigation }) {
-  const { getProductByBarcode, updateProductQuantity, categoryGetAll, productAdd } = useRestApi();
+  const { getProductByBarcode, updateShoppingListQuantity, categoryGetAll, productAdd } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
   const [categories, setCategories] = useState([]);
   const lastScannedItem = useRef(null);
@@ -57,9 +57,10 @@ export default function FridgeScannerScreen({ navigation }) {
         lastScannedItem.current = productFromFridge; // Set with .current
       } else {
         lastScannedItem.current = {
-          name: productInDatabase.product.innerInformation.name,
+          name: productInDatabase.category.innerInformation.name,
           description: "",
           productId: productInDatabase.product.id,
+          categoryId: productInDatabase.category.id,
           quantity: 1,
           barcode: scannedData,
           unit: "amount",
@@ -68,7 +69,7 @@ export default function FridgeScannerScreen({ navigation }) {
 
         syncShoppingStore.addProduct(
           lastScannedItem.current,
-          updateProductQuantity,
+          updateShoppingListQuantity,
         );
       }
     } else {
@@ -100,7 +101,7 @@ export default function FridgeScannerScreen({ navigation }) {
     
     syncShoppingStore.addProduct(
       lastScannedItem.current,
-      updateProductQuantity,
+      updateShoppingListQuantity,
     );
 
     setFormVisible(false);
@@ -119,7 +120,7 @@ export default function FridgeScannerScreen({ navigation }) {
     syncShoppingStore.updateProduct(
       prevItem,
       lastScannedItem.current,
-      updateProductQuantity,
+      updateShoppingListQuantity,
     );
 
     update();
@@ -135,7 +136,7 @@ export default function FridgeScannerScreen({ navigation }) {
     syncShoppingStore.updateProduct(
       prevItem,
       lastScannedItem.current,
-      updateProductQuantity,
+      updateShoppingListQuantity,
     );
 
     update();

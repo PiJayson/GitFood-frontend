@@ -5,7 +5,7 @@ export interface Product {
   name: string;
   barcode: string | null;
   productId: number;
-  categoryid: number; // category Name or id?
+  categoryId: number; // category Name or id?
   quantity: number;
   unit: string;
   // size: number;
@@ -87,7 +87,7 @@ export const syncShoppingStore = {
 
     await updateProductQuantity(
       useShoppingStore.getState().currentFridgeId,
-      product.productId,
+      product.categoryId,
       product.quantity,
     );
 
@@ -106,14 +106,14 @@ export const syncShoppingStore = {
     // change, no prevProduct needed !!!
     await updateProductQuantity(
       useShoppingStore.getState().currentFridgeId,
-      prevProduct.categoryid,
+      prevProduct.categoryId,
       product.quantity,
     );
 
     console.log("Updating category in store", prevProduct, "to", product);
     useShoppingStore.setState((state) => ({
       products: state.products.map((p: Product) =>
-        p.categoryid == product.categoryid ? product : p,
+        p.categoryId == product.categoryId ? product : p,
       ),
     }));
   },

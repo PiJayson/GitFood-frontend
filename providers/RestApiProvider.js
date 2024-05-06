@@ -160,7 +160,7 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const updateShoppingListQuantity = async (shoppingId, categoryId, quantity) => {
-    return await apiClient.patch(`/fridge/updateProductQuantity?shoppingListId=${shoppingId}&categoryId=${categoryId}&quantity=${quantity}`);
+    return await apiClient.patch(`/shoppingList/update?shoppingListId=${shoppingId}&categoryId=${categoryId}&quantity=${quantity}`);
   };
 
   const createShoppingList = async (name) => {
