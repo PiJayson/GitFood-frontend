@@ -15,7 +15,7 @@ export default function ExpandableFridgeList({ syncStore, addNewItemForm }) {
       title="Fridges"
       items={fridges}
       itemName={(item) => item.name}
-      chooseItem={(item) => syncStore.setFridge(item, getFridgeProducts)}
+      chooseItem={(item) => syncStore.setFridge(item.id, getFridgeProducts)}
       isChosen={(item) => item.id == id}
       addNewItemForm={addNewItemForm}
       onExpand={() => syncStore.loadFridges(getFridges)}

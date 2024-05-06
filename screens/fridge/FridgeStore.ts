@@ -22,11 +22,6 @@ type FridgesState = {
   currentFridgeId: number;
 };
 
-// interface productStore {
-//   id: number;
-//   name: string;
-// }
-
 type ProductsState = {
   products: Product[];
 }; // using arrays here is causing a lot of reloads
@@ -44,11 +39,16 @@ export const syncFridgeStore = {
   fridges: () => useFridgesStore().fridges, // no need for useShallow here, at least i think so, well i was wrong
 
   currentFridgeId: () => useFridgesStore().currentFridgeId,
+  currentFridgeIdCopy: () => useFridgesStore.getState().currentFridgeId,
   currentFridge: () => {
-    const storeId = useFridgesStore().currentFridgeId;
-    if (!storeId) return undefined;
+    //also copies, doesn't update
+    const storeId = useFridgesStore.getState().currentFridgeId;
 
-    useFridgesStore().fridges.find((store) => store.id === storeId);
+    if (storeId == -1) return undefined;
+
+    return useFridgesStore
+      .getState()
+      .fridges.find((store) => store.id === storeId);
   },
 
   loadFridges: async (getFridges) => {
@@ -60,10 +60,8 @@ export const syncFridgeStore = {
     });
   },
 
-  setFridge: async (fridge: Fridge, getFridgeProducts) => {
-    const fridgeId = fridge.id;
-
-    console.log("Setting fridge", fridge, fridgeId);
+  setFridge: async (fridgeId: Number, getFridgeProducts) => {
+    console.log("Setting fridge", fridgeId);
     const { id, name, fridgeProducts } = await getFridgeProducts(fridgeId);
 
     console.log(id, name, fridgeProducts);
@@ -77,8 +75,8 @@ export const syncFridgeStore = {
         productId: product.product.id,
         categoryId: product.product.category,
         quantity: product.ammount,
-        unit: product.product.categoryNavigation.unit
-      }))
+        unit: product.product.categoryNavigation.unit,
+      })),
     });
   },
 
@@ -106,7 +104,7 @@ export const syncFridgeStore = {
     // change, no prevProduct needed !!!
     await updateProductQuantity(
       useFridgesStore.getState().currentFridgeId,
-      prevProduct.productId,
+      product.productId,
       product.quantity,
     );
 
@@ -119,19 +117,20 @@ export const syncFridgeStore = {
   },
   removeProduct: async (product: Product, updateProductQuantity) => {
     await updateProductQuantity(
-      useFridgesStore().currentFridgeId,
+      useFridgesStore.getState().currentFridgeId,
       product.productId,
       0,
     );
 
     console.log("Removing product from store", product);
     useFridgesStore.setState((state) => ({
-      products: state.products.filter((p) => p.name !== product.name),
+      products: state.products.filter((p) => p.productId !== product.productId),
     }));
   },
-  getProductCopy: (productName: string) =>
-    useFridgesStore()
-      .products.find((product) => product.name == productName),
+  getProductCopy: (productId: number) =>
+    useFridgesStore
+      .getState()
+      .products.find((product) => product.productId == productId),
 
   createFridge: async (fridgeName: string, createFridge) => {
     const id = await createFridge(fridgeName);

@@ -11,14 +11,14 @@ export default function ProductList({
   normalProductView,
   editProductView,
   updateProductQuantity,
+  onRefresh,
 }) {
   const [refreshing, setRefreshing] = React.useState(false);
 
   const products = syncStore.products();
 
-  console.log("pr:", products);
-
   const productStoreName = syncStore.currentFridge()?.name;
+  console.log("fridge list rendered", productStoreName);
   return (
     <View style={styles.container}>
       <Header> {productStoreName} </Header>
@@ -28,7 +28,7 @@ export default function ProductList({
         renderItem={({ item, index }) => (
           <SingleProduct
             index={index}
-            productName={item.name}
+            productId={item.productId}
             syncStore={syncStore}
             editView={editProductView}
             normalView={normalProductView}
@@ -40,12 +40,9 @@ export default function ProductList({
         //   .map((product) => product.quantity)
         //   .join("")}
         scrollEnabled={true}
-        keyExtractor={(item) => item.productId}
+        keyExtractor={(item) => item.productId + item.quantity}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={async () => await syncStore.loadProducts()}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
     </View>

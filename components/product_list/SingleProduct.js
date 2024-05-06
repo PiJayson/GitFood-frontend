@@ -1,37 +1,23 @@
 import React, { useState } from "react";
 import OutsidePressHandler from "react-native-outside-press";
-import Animated, {
-  SlideInLeft,
-  SlideOutRight,
-  Layout,
-  Transition,
-  LinearTransition,
-  combineTransition,
-  ExitingAnimation,
-  EnteringAnimation,
-  FadeIn,
-  FadeOut,
-  StretchOutY,
-  StretchInY,
-  ZoomIn,
-  ZoomOut,
-} from "react-native-reanimated";
 
 export default function SingleProduct({
   index,
-  productName,
+  productId,
   syncStore,
   normalView,
   editView,
   updateProductQuantity,
 }) {
-  const baseProduct = syncStore.getProductCopy(productName); // gets the copy, reference may be needed
+  const baseProduct = syncStore.getProductCopy(productId); // gets the copy, reference may be needed
   const [product, setProduct] = useState(baseProduct);
   const [isEdited, setIsEdited] = useState(false);
 
+  console.log("single product rendered", productId);
+
   const updateProduct = () => {
     if (product.quantity <= 0) {
-      syncStore.removeProduct(product);
+      syncStore.removeProduct(product, updateProductQuantity);
       return;
     }
     if (product !== baseProduct) {

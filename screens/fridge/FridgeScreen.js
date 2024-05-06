@@ -19,7 +19,7 @@ const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
 
 const FridgeScreen = ({ navigation }) => {
-  const { updateProductQuantity } = useRestApi();
+  const { updateProductQuantity, getFridgeProducts } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
@@ -35,8 +35,6 @@ const FridgeScreen = ({ navigation }) => {
     return () => subscription?.remove();
   });
 
-  console.log("fasdfdas", useFridgesStore().products);
-
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
       <ExpandableFridgeList
@@ -48,6 +46,12 @@ const FridgeScreen = ({ navigation }) => {
         normalProductView={FridgeProductView}
         editProductView={EditedFridgeProductView}
         updateProductQuantity={updateProductQuantity}
+        onRefresh={async () => {
+          console.log("refresh");
+          const id = syncFridgeStore.currentFridgeIdCopy();
+          console.log("id", id);
+          await syncFridgeStore.setFridge(id, getFridgeProducts);
+        }}
       />
       <Button
         title="Open Scanner"

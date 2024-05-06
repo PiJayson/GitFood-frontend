@@ -5,53 +5,43 @@ import IncrementDecrement from "../universal/IncrementDecrement";
 // import Swipeable from "react-native-gesture-handler/Swipeable";
 import { theme } from "../../assets/theme";
 import ProductName from "../product_list/ProductName";
-import Animated, {
-  ZoomIn,
-  ZoomOut,
-  StretchInX,
-  StretchOutX,
-} from "react-native-reanimated";
 
 export function EditedFridgeProductView(product, updateCount, handleExpand) {
   return (
-    <Animated.View entering={StretchInX} exiting={StretchOutX}>
-      <View style={styles.container}>
-        <View style={styles.info}>
-          <Text variant="displayMedium" style={styles.count}>
-            {product.quantity}x
-          </Text>
-          <ProductName> {product.name} </ProductName>
-        </View>
-        <IncrementDecrement update={updateCount} />
-        <IconButton
-          // mode="outlined"
-          icon="chevron-up"
-          style={styles.expandButton}
-          onPress={() => handleExpand()}
-        />
+    <View style={styles.container}>
+      <View style={styles.info}>
+        <Text variant="displayMedium" style={styles.count}>
+          {product.quantity}x
+        </Text>
+        <ProductName> {product.name} </ProductName>
       </View>
-    </Animated.View>
+      <IncrementDecrement update={updateCount} />
+      <IconButton
+        // mode="outlined"
+        icon="chevron-up"
+        style={styles.expandButton}
+        onPress={() => handleExpand()}
+      />
+    </View>
   );
 }
 
 export function FridgeProductView(product, handleExpand) {
   return (
-    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-      <View style={styles.container}>
-        <View style={styles.info}>
-          <Text variant="displayMedium" style={styles.count}>
-            {product.quantity}x
-          </Text>
-          <ProductName> {product.name} </ProductName>
-        </View>
-        <IconButton
-          // mode="outlined"
-          icon="chevron-down"
-          style={styles.expandButton}
-          onPress={() => handleExpand()}
-        />
+    <View style={styles.container}>
+      <View style={styles.info}>
+        <Text variant="displayMedium" style={styles.count}>
+          {product.quantity}x
+        </Text>
+        <ProductName> {product.name} </ProductName>
       </View>
-    </Animated.View>
+      <IconButton
+        // mode="outlined"
+        icon="chevron-down"
+        style={styles.expandButton}
+        onPress={() => handleExpand()}
+      />
+    </View>
   );
 }
 

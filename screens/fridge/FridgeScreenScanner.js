@@ -5,15 +5,21 @@ import BackButton from "../../components/universal/BackButton";
 import ProductForm from "../../components/scanner/ProductForm";
 import { useRestApi } from "../../providers/RestApiProvider";
 import { syncFridgeStore } from "../../screens/fridge/FridgeStore";
+import FridgeScreen from "./FridgeScreen";
 
 export default function FridgeScannerScreen({ navigation }) {
-  const { getProductByBarcode, updateProductQuantity, categoryGetAll, productAdd } = useRestApi();
+  const {
+    getProductByBarcode,
+    updateProductQuantity,
+    categoryGetAll,
+    productAdd,
+  } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
   const [categories, setCategories] = useState([]);
   const lastScannedItem = useRef(null);
   const [, forceUpdate] = useState();
   const update = () => forceUpdate({});
-  
+
   const products = syncFridgeStore.products();
 
   useEffect(() => {
@@ -28,7 +34,6 @@ export default function FridgeScannerScreen({ navigation }) {
 
     fetchCategories();
   }, [categoryGetAll]);
-
 
   const handleBarcodeDetected = async (scannedData) => {
     console.log(lastScannedItem.current); // Access via .current
@@ -81,18 +86,21 @@ export default function FridgeScannerScreen({ navigation }) {
   const handleAddProduct = async (productData) => {
     console.log("Product Added:", productData);
 
-    const productId = await productAdd(productData.name, productData.description, productData.barcode, 1, productData.quantity);
-    
+    const productId = await productAdd(
+      productData.name,
+      productData.description,
+      productData.barcode,
+      1,
+      productData.quantity,
+    );
+
     lastScannedItem.current = {
       ...lastScannedItem.current,
       name: productData.name,
-      productId: productId
+      productId: productId,
     };
-    
-    syncFridgeStore.addProduct(
-      lastScannedItem.current,
-      updateProductQuantity,
-    );
+
+    syncFridgeStore.addProduct(lastScannedItem.current, updateProductQuantity);
 
     setFormVisible(false);
     update();
@@ -153,7 +161,7 @@ export default function FridgeScannerScreen({ navigation }) {
               <ProductForm
                 visible={formVisible}
                 initialData={lastScannedItem.current}
-                categories={categories.map(category => category.name)}
+                categories={categories.map((category) => category.name)}
                 units={["ml", "l", "dl", "mg", "g", "kg", "amount"]}
                 onSubmit={handleAddProduct}
                 onClose={() => setFormVisible(false)}
