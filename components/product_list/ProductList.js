@@ -4,7 +4,6 @@ import { View, FlatList } from "react-native";
 import Header from "../universal/Header";
 import Button from "../universal/Button";
 import SingleProduct from "./SingleProduct";
-import { useFridgesStore } from "../../screens/fridge/FridgeStore";
 
 export default function ProductList({
   syncStore,
@@ -16,15 +15,13 @@ export default function ProductList({
 
   const products = syncStore.products();
 
-  console.log("pr:", products);
-
   const productStoreName = syncStore.currentFridge()?.name;
   return (
     <View style={styles.container}>
       <Header> {productStoreName} </Header>
       <FlatList
         style={styles.list}
-        data={useFridgesStore().products}
+        data={products}
         renderItem={({ item, index }) => (
           <SingleProduct
             index={index}

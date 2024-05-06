@@ -52,11 +52,11 @@ export const syncShoppingStore = {
   },
 
   loadShoppingLists: async (getShoppingLists) => {
-    const loadedFridges = await getShoppingLists();
+    const loadedShoppingLists = await getShoppingLists();
 
-    console.log("Loaded fridges", loadedFridges);
+    console.log("Loaded fridges", loadedShoppingLists);
     useShoppingStore.setState({
-      fridges: loadedFridges,
+      fridges: loadedShoppingLists,
     });
   },
 

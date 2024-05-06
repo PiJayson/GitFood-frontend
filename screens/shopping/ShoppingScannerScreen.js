@@ -4,7 +4,7 @@ import ScannerComponent from "../../components/scanner/ScannerComponent";
 import BackButton from "../../components/universal/BackButton";
 import ProductForm from "../../components/scanner/ProductForm";
 import { useRestApi } from "../../providers/RestApiProvider";
-import { syncFridgeStore } from "../../screens/fridge/FridgeStore";
+import { syncShoppingStore } from "../../screens/shopping/ShoppingStore";
 
 export default function FridgeScannerScreen({ navigation }) {
   const { getProductByBarcode, updateProductQuantity, categoryGetAll, productAdd } = useRestApi();
@@ -15,7 +15,7 @@ export default function FridgeScannerScreen({ navigation }) {
   const [, forceUpdate] = useState();
   const update = () => forceUpdate({});
   
-  const products = syncFridgeStore.products();
+  const products = syncShoppingStore.products();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -45,11 +45,14 @@ export default function FridgeScannerScreen({ navigation }) {
     const productInDatabase = await getProductByBarcode(scannedData);
     console.log("productInDatabase");
     console.log(productInDatabase);
-    const productFromFridge = products.find(
-      (product) => product.barcode == scannedData,
-    );
 
     if (productInDatabase) {
+      const productFromFridge = products.find(
+        (product) => product.categoryId == productInDatabase.category.id,
+      );
+
+      console.log("productFromFridge", products, productFromFridge);
+
       if (productFromFridge) {
         lastScannedItem.current = productFromFridge; // Set with .current
       } else {
@@ -63,7 +66,7 @@ export default function FridgeScannerScreen({ navigation }) {
           quantity: 1,
         };
 
-        syncFridgeStore.addProduct(
+        syncShoppingStore.addProduct(
           lastScannedItem.current,
           updateProductQuantity,
         );
@@ -95,7 +98,7 @@ export default function FridgeScannerScreen({ navigation }) {
       productId: productId
     };
     
-    syncFridgeStore.addProduct(
+    syncShoppingStore.addProduct(
       lastScannedItem.current,
       updateProductQuantity,
     );
@@ -113,7 +116,7 @@ export default function FridgeScannerScreen({ navigation }) {
       quantity: lastScannedItem.current.quantity + 1, // Update with .current
     };
     console.log(lastScannedItem.current);
-    syncFridgeStore.updateProduct(
+    syncShoppingStore.updateProduct(
       prevItem,
       lastScannedItem.current,
       updateProductQuantity,
@@ -129,7 +132,7 @@ export default function FridgeScannerScreen({ navigation }) {
       quantity: Math.max(0, lastScannedItem.current.quantity - 1), // Update with .current
     };
 
-    syncFridgeStore.updateProduct(
+    syncShoppingStore.updateProduct(
       prevItem,
       lastScannedItem.current,
       updateProductQuantity,
