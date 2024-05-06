@@ -12,12 +12,11 @@ import { RestApiProvider, useRestApi } from "./providers/RestApiProvider";
 import {
   LoginScreen,
   HomeScreen,
-  ShoppingScreen,
-  ShoppingScannerScreen,
   SignUpScreen,
   StartScreen,
   SplashScreen,
   FridgeGroup,
+  ShoppingGroup,
 } from "./screens";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
@@ -48,7 +47,7 @@ function AppNavigation() {
           initialRouteName="Shopping"
           screenOptions={{ headerShown: false }}
         >
-          <Tab.Screen name="Shopping" component={ShoppingScreen} />
+          <Tab.Screen name="ShoppingGroup" component={ShoppingGroup} />
           <Tab.Screen name="FridgeGroup" component={FridgeGroup} />
         </Tab.Navigator>
       ) : (

@@ -141,6 +141,36 @@ export const RestApiProvider = ({ children }) => {
     }));
   };
 
+  // Shopping
+
+  const getShoppingProducts = async (shoppingId) => {
+    const response = await apiClient.get(`/shoppingList/get?shoppingListId=${shoppingId}`);
+
+    console.log("data: ", response.data, shoppingId);
+    return response.data;
+  };
+
+  const getShoppingLists = async () => {
+    const response = await apiClient.get("/shoppingList/getMap");
+
+    return response.data.map((fridge) => ({
+      id: fridge.item1,
+      name: fridge.item2,
+    }));
+  };
+
+  const updateShoppingListQuantity = async (shoppingId, categoryId, quantity) => {
+    return await apiClient.patch(`/fridge/updateProductQuantity?shoppingListId=${shoppingId}&categoryId=${categoryId}&quantity=${quantity}`);
+  };
+
+  const createShoppingList = async (name) => {
+    console.log("Creating fridge");
+    const response = await apiClient.post(`/shoppingList/create?name=${name}`);
+    console.log(response);
+
+    return response.data;
+  };
+
   const value = {
     isSignedIn,
     
@@ -161,6 +191,12 @@ export const RestApiProvider = ({ children }) => {
     updateProductQuantity,
     createFridge,
     getFridges,
+
+    // Shopping List
+    getShoppingProducts,
+    getShoppingLists,
+    updateShoppingListQuantity,
+    createShoppingList,
   };
 
   return (

@@ -40,7 +40,7 @@ export default function ProductList({
         //   .map((product) => product.quantity)
         //   .join("")}
         scrollEnabled={true}
-        keyExtractor={(item) => item.productId}
+        keyExtractor={(item) => item.productId + item.quantity}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

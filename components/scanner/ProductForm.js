@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Modal, Text, FlatList, TouchableOpacity, Picker } from 'react-native';
 
 const ProductForm = ({ visible, onSubmit, onClose, categories = [], units = [], initialData = {} }) => {
@@ -10,6 +10,15 @@ const ProductForm = ({ visible, onSubmit, onClose, categories = [], units = [], 
   const [unit, setUnit] = useState(initialData.unit || units[0] || '');
   const [filteredOptions, setFilteredOptions] = useState(categories);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    setName(initialData.name || '');
+    setDescription(initialData.description || '');
+    setBarcode(initialData.barcode || '');
+    setQuantity(initialData.quantity || '');
+    setCategory(initialData.category || '');
+    setUnit(initialData.unit || units[0] || '');
+  }, [initialData]);
 
   const handleSubmit = () => {
     onSubmit({ name, description, barcode, quantity, category, unit });

@@ -12,13 +12,13 @@ import Animated, {
   StretchOutX,
 } from "react-native-reanimated";
 
-export function EditedFridgeProductView(product, updateCount, handleExpand) {
+export function EditedShoppingProductView(product, updateCount, handleExpand) {
   return (
     <Animated.View entering={StretchInX} exiting={StretchOutX}>
       <View style={styles.container}>
         <View style={styles.info}>
           <Text variant="displayMedium" style={styles.count}>
-            {product.quantity }x
+            {product.quantity}x
           </Text>
           <ProductName> {product.name} </ProductName>
         </View>
@@ -34,7 +34,7 @@ export function EditedFridgeProductView(product, updateCount, handleExpand) {
   );
 }
 
-export function FridgeProductView(product, handleExpand) {
+export function ShoppingProductView(product, handleExpand) {
   if (!product) return;
 
   return (

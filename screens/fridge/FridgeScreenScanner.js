@@ -11,6 +11,7 @@ export default function FridgeScannerScreen({ navigation }) {
   const [formVisible, setFormVisible] = useState(false);
   const [categories, setCategories] = useState([]);
   const lastScannedItem = useRef(null);
+  const [initialData, setInitialData] = useState({});
   const [, forceUpdate] = useState();
   const update = () => forceUpdate({});
   
@@ -53,9 +54,13 @@ export default function FridgeScannerScreen({ navigation }) {
         lastScannedItem.current = productFromFridge; // Set with .current
       } else {
         lastScannedItem.current = {
-          name: productInDatabase.product.name,
+          name: productInDatabase.product.innerInformation.name,
+          description: "",
+          productId: productInDatabase.product.id,
           quantity: 1,
           barcode: scannedData,
+          unit: "amount",
+          quantity: 1,
         };
 
         syncFridgeStore.addProduct(
@@ -73,6 +78,7 @@ export default function FridgeScannerScreen({ navigation }) {
         unit: "amount",
         quantity: 1,
       };
+      setInitialData(lastScannedItem.current);
       setFormVisible(true);
     }
     update();
@@ -146,17 +152,13 @@ export default function FridgeScannerScreen({ navigation }) {
               <Button title="+" onPress={incrementCount} />
             </View>
             <View>
-              <Button
-                title="Edit Product"
-                onPress={() => setFormVisible(true)}
-              />
               <ProductForm
                 visible={formVisible}
-                initialData={lastScannedItem.current}
+                initialData={initialData}
                 categories={categories.map(category => category.name)}
                 units={["ml", "l", "dl", "mg", "g", "kg", "amount"]}
                 onSubmit={handleAddProduct}
-                onClose={() => setFormVisible(false)}
+                onClose={() => {setFormVisible(false), lastScannedItem.current = null;}}
               />
             </View>
           </View>

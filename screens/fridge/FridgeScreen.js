@@ -7,7 +7,7 @@ import { Dimensions } from "react-native";
 import { useState, useEffect } from "react";
 import { theme } from "../../assets/theme";
 import { useRestApi } from "../../providers/RestApiProvider";
-import { syncFridgeStore, useFridgesStore } from "./FridgeStore";
+import { syncFridgeStore } from "./FridgeStore";
 import {
   FridgeProductView,
   EditedFridgeProductView,
@@ -34,8 +34,6 @@ const FridgeScreen = ({ navigation }) => {
     );
     return () => subscription?.remove();
   });
-
-  console.log("fasdfdas", useFridgesStore().products);
 
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
