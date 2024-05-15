@@ -20,6 +20,13 @@ export const RestApiProvider = ({ children }) => {
     },
   });
 
+  const apiMultipart = axios.create({
+    baseURL: "https://gitfood.fun:5255",
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   apiClient.interceptors.request.use(async (config) => {
     const token = await AsyncStorage.getItem("AWTtoken");
     if (token) {
@@ -159,9 +166,37 @@ export const RestApiProvider = ({ children }) => {
       { search, ingredients },
     );
 
-    console.log(response.data);
+    // console.log(response.data);
     return response.data;
   }; // this
+
+  const addRecipesPhotos = async (recipeId, photos) => {
+    const data = new FormData();
+
+    photos.forEach((photo) => {
+      data.append("photos", {
+        uri: photo.uri,
+        name: photo.fileName,
+        type: photo.type,
+      });
+    });
+
+    console.log(data);
+
+    const response = await apiMultipart.post(
+      `/recipe/addPhotos?recipeId=${recipeId}`,
+      data,
+    ); //
+
+    return response.data;
+  };
+
+  const getFoodCategorySuggestions = async (search) => {
+    const response = await apiClient.get(
+      `/category/getSuggestions?search=${search}`,
+    );
+    return response.data;
+  };
 
   const value = {
     isSignedIn,
@@ -186,6 +221,9 @@ export const RestApiProvider = ({ children }) => {
 
     // Recipe
     getRecipesPage,
+    addRecipesPhotos,
+
+    getFoodCategorySuggestions,
   };
 
   return (
