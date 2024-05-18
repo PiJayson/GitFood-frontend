@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRestApi } from "./RestApiProvider";
 
 const getRecipes = (query) => {
@@ -21,4 +21,12 @@ const getRecipes = (query) => {
   });
 };
 
-export { getRecipes };
+const getFoodCategoriesSuggestion = (query) => {
+  const { getFoodCategorySuggestions } = useRestApi();
+  return useQuery({
+    queryKey: ["foodCategoriesSuggestions", query],
+    queryFn: () => getFoodCategorySuggestions(query),
+  });
+};
+
+export { getRecipes, getFoodCategoriesSuggestion };
