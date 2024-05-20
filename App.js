@@ -16,13 +16,16 @@ import {
   ShoppingScannerScreen,
   SignUpScreen,
   StartScreen,
+  RecipesScreens,
   SplashScreen,
   FridgeGroup,
 } from "./screens";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const queryClient = new QueryClient();
 
 function AppNavigation() {
   const { isSignedIn } = useRestApi(); // Hook into the RestApiProvider
@@ -49,7 +52,9 @@ function AppNavigation() {
           screenOptions={{ headerShown: false }}
         >
           <Tab.Screen name="Shopping" component={ShoppingScreen} />
+          <Tab.Screen name="Scanner" component={ShoppingScannerScreen} />
           <Tab.Screen name="FridgeGroup" component={FridgeGroup} />
+          <Tab.Screen name="Recipes" component={RecipesScreens} />
         </Tab.Navigator>
       ) : (
         <Stack.Navigator
@@ -70,9 +75,13 @@ function App() {
     <SafeAreaProvider>
       <NotificationProvider>
         <RestApiProvider>
-          <Provider theme={theme}>
-            <AppNavigation />
-          </Provider>
+          <QueryClientProvider client={queryClient}>
+            <Provider theme={theme}>
+              {/* <EventProvider style={{ flex: 1 }}> */}
+              <AppNavigation />
+              {/* </EventProvider> */}
+            </Provider>
+          </QueryClientProvider>
         </RestApiProvider>
       </NotificationProvider>
     </SafeAreaProvider>
