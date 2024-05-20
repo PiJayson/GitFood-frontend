@@ -2,21 +2,18 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import Button from "../../components/universal/Button";
 
-import ProductList from "../../components/product_list/ProductList";
 import { Dimensions } from "react-native";
 import { useState, useEffect } from "react";
 import { theme } from "../../assets/theme";
 import { useRestApi } from "../../providers/RestApiProvider";
-import { syncFridgeStore } from "./FridgeStore";
-import {
-  FridgeProductView,
-  EditedFridgeProductView,
-} from "../../components/fridge/FridgeProductView";
 import ExpandableFridgeList from "../../components/fridge/ExpandableFridgeList";
+import { syncFridgeStore } from "./FridgeStore";
 import NewListForm from "../../components/fridge/NewListForm";
+import CategoryComponent from "../../components/fridge/CategoryComponent";
+import CategoryList from "../../components/category_list/CategoryList";
+import ProductComponent from "../../components/fridge/ProductComponent";
 
 const windowDimensions = Dimensions.get("window");
-// const screenDimensions = Dimensions.get("screen");
 
 const FridgeScreen = ({ navigation }) => {
   const { updateProductQuantity } = useRestApi();
@@ -35,16 +32,35 @@ const FridgeScreen = ({ navigation }) => {
     return () => subscription?.remove();
   });
 
+  const renderProduct = ({ baseProduct, syncStore, updateProductQuantity }) => (
+    <ProductComponent
+      key={baseProduct.productId}
+      baseProduct={baseProduct}
+      syncStore={syncStore}
+      updateProductQuantity={updateProductQuantity}
+    />
+  );
+  
+  const renderCategory = ({ item, index, syncStore, updateProductQuantity }) => (
+    <CategoryComponent
+      key={item.categoryId}
+      item={item}
+      index={index}
+      renderProduct={renderProduct}
+      syncStore={syncStore}
+      updateProductQuantity={updateProductQuantity}
+    />
+  );
+
   return (
     <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
       <ExpandableFridgeList
         syncStore={syncFridgeStore}
         addNewItemForm={() => setFormVisible(true)}
       />
-      <ProductList
+      <CategoryList
         syncStore={syncFridgeStore}
-        normalProductView={FridgeProductView}
-        editProductView={EditedFridgeProductView}
+        renderCategory={renderCategory}
         updateProductQuantity={updateProductQuantity}
       />
       <Button
@@ -56,7 +72,7 @@ const FridgeScreen = ({ navigation }) => {
       </Button>
       <NewListForm
         visible={formVisible}
-        onSubmit={syncFridgeStore.createFridge}
+        onSubmit={syncFridgeStore.createStore}
         onClose={() => setFormVisible(false)}
       />
     </View>

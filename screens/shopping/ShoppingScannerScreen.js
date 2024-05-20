@@ -2,187 +2,170 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, Button } from "react-native";
 import ScannerComponent from "../../components/scanner/ScannerComponent";
 import BackButton from "../../components/universal/BackButton";
-import ProductForm from "../../components/scanner/ProductForm";
+import ProductForm from "../../components/scanner/NewProductForm";
 import { useRestApi } from "../../providers/RestApiProvider";
 import { syncShoppingStore } from "../../screens/shopping/ShoppingStore";
 
-export default function FridgeScannerScreen({ navigation }) {
-  const { getProductByBarcode, updateShoppingListQuantity, categoryGetAll, productAdd } = useRestApi();
+export default function ShoppingScannerScreen({ navigation }) {
+  const { getProductByBarcode, updateShoppingListQuantity, categoryGetAll, productAdd, categoryGetUnits } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
   const [categories, setCategories] = useState([]);
-  const lastScannedItem = useRef(null);
-  const [initialData, setInitialData] = useState({});
-  const [, forceUpdate] = useState();
-  const update = () => forceUpdate({});
+  const [units, setUnits] = useState([]);
+  const [lastScannedItem, setLastScannedItem] = useState(null);
   
-  const products = syncShoppingStore.products();
+  const products = syncShoppingStore.elements();
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        const result = await categoryGetAll();
-        setCategories(result);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
+      const resCategories = await categoryGetAll();
+      const resUnits = await categoryGetUnits();
+      
+      setCategories(resCategories);
+      setUnits(resUnits);
     };
 
     fetchCategories();
-  }, [categoryGetAll]);
+  }, [categoryGetAll, categoryGetUnits]);
+
+  const findProductInFridgeStore = (barcode) => {
+    for (let category of products) {
+      const product = category.products.find(product => product.barcode === barcode);
+      if (product) {
+        return product;
+      }
+    }
+    return null;
+  };
 
 
   const handleBarcodeDetected = async (scannedData) => {
-    console.log(lastScannedItem.current); // Access via .current
-    console.log("scanned: ", categories);
-    if (
-      lastScannedItem.current &&
-      lastScannedItem.current.barcode === scannedData
-    ) {
-      console.log("SCANNED");
+    // If already scanned then do nothing.
+    if (lastScannedItem && lastScannedItem.barcode === scannedData) {
       return;
     }
-    console.log("new scan");
+
+    // Check if product exist in database.
     const productInDatabase = await getProductByBarcode(scannedData);
-    console.log("productInDatabase");
-    console.log(productInDatabase);
 
     if (productInDatabase) {
-      const productFromFridge = products.find(
-        (product) => product.categoryId == productInDatabase.category.id,
-      );
-
-      console.log("productFromFridge", products, productFromFridge);
+      const productFromFridge = findProductInFridgeStore(scannedData);
 
       if (productFromFridge) {
-        lastScannedItem.current = productFromFridge; // Set with .current
+        // Product already in firdge - edit.
+        setLastScannedItem(productFromFridge);
       } else {
-        lastScannedItem.current = {
-          name: productInDatabase.category.innerInformation.name,
-          description: "",
+        // Product not in fridge - add.
+        const newScannedItem = {
+          description: productInDatabase.product.innerInformation.description,
+          productName: productInDatabase.product.innerInformation.name,
+          categoryName: productInDatabase.category.innerInformation.name,
           productId: productInDatabase.product.id,
           categoryId: productInDatabase.category.id,
-          quantity: 1,
           barcode: scannedData,
-          unit: "amount",
           quantity: 1,
+          unit: productInDatabase.product.innerInformation.unit,
         };
 
+        setLastScannedItem(newScannedItem);
+
         syncShoppingStore.addProduct(
-          lastScannedItem.current,
+          newScannedItem,
           updateShoppingListQuantity,
         );
       }
     } else {
-      lastScannedItem.current = {
-        name: "",
+      const newScannedItem = {
         description: "",
-        barcode: scannedData,
+        productName: "",
+        categoryName: "",
         productId: -1,
-        categoryId: 1,
+        categoryId: -1,
+        barcode: scannedData,
         unit: "amount",
         quantity: 1,
       };
-      setInitialData(lastScannedItem.current);
+
+      setLastScannedItem(newScannedItem);
       setFormVisible(true);
     }
-    update();
   };
 
   const handleAddProduct = async (productData) => {
-    console.log("Product Added:", productData);
+    const categoryId = categories.find(
+      (category) => category.name == productData.categoryName,
+    ).id;
 
-    const productId = await productAdd(productData.name, productData.description, productData.barcode, 1, productData.quantity);
-    
-    lastScannedItem.current = {
-      ...lastScannedItem.current,
-      name: productData.category,
-      productId: productId
+    const productId = await productAdd(productData.productName, productData.description, productData.barcode, categoryId, productData.quantity);
+
+    const newScannedItem = {
+      ...lastScannedItem,
+      description: productData.description,
+      productName: productData.productName,
+      categoryName: productData.categoryName,
+      productId: productId,
+      categoryId: categoryId,
+      quantity: productData.quantity,
+      unit: productData.unit,
     };
 
-    const productFromFridge = products.find(
-      (product) => product.categoryId == 1,
-    );
+    setLastScannedItem(newScannedItem);
     
-    if (productFromFridge) {
-      const prevItem = lastScannedItem.current;
-
-      lastScannedItem.current = {
-      ...lastScannedItem.current,
-      quantity: lastScannedItem.current.quantity + productData.quantity, // Update with .current
-    };
-
-    syncShoppingStore.updateProduct(
-      prevItem,
-      lastScannedItem.current,
+    syncShoppingStore.addProduct(
+      newScannedItem,
       updateShoppingListQuantity,
     );
-    }
-    else {
-      syncShoppingStore.addProduct(
-        lastScannedItem.current,
-        updateShoppingListQuantity,
-      );
-    }
 
     setFormVisible(false);
-    update();
   };
 
   const incrementCount = () => {
-    const prevItem = lastScannedItem.current;
-    console.log(lastScannedItem.current);
-
-    lastScannedItem.current = {
-      ...lastScannedItem.current,
-      quantity: lastScannedItem.current.quantity + 1, // Update with .current
+    const newScannedItem = {
+      ...lastScannedItem,
+      quantity: lastScannedItem.quantity + 1,
     };
-    console.log(lastScannedItem.current);
+
+    setLastScannedItem(newScannedItem);
+    
     syncShoppingStore.updateProduct(
-      prevItem,
-      lastScannedItem.current,
+      newScannedItem,
       updateShoppingListQuantity,
     );
-
-    update();
   };
 
   const decrementCount = () => {
-    prevItem = lastScannedItem.current;
-    lastScannedItem.current = {
-      ...lastScannedItem.current,
-      quantity: Math.max(0, lastScannedItem.current.quantity - 1), // Update with .current
+    const newScannedItem = {
+      ...lastScannedItem,
+      quantity: Math.max(0, lastScannedItem.quantity - 1),
     };
 
+    setLastScannedItem(newScannedItem);
+
     syncShoppingStore.updateProduct(
-      prevItem,
-      lastScannedItem.current,
+      newScannedItem,
       updateShoppingListQuantity,
     );
-
-    update();
   };
 
   return (
     <View style={styles.container}>
-      <BackButton goBack={navigation.goBack} />
       <ScannerComponent onBarcodeScanned={handleBarcodeDetected} />
       <View style={styles.productDetails}>
-        {lastScannedItem.current ? (
+        {lastScannedItem ? (
           <View>
-            <Text>{lastScannedItem.current.name}</Text>
+            <Text>{lastScannedItem.productName}</Text>
             <View style={styles.buttonContainer}>
               <Button title="-" onPress={decrementCount} />
-              <Text>{lastScannedItem.current.quantity}</Text>
+              <Text>{lastScannedItem.quantity}</Text>
               <Button title="+" onPress={incrementCount} />
             </View>
             <View>
               <ProductForm
                 visible={formVisible}
-                initialData={initialData}
+                initialData={lastScannedItem}
                 categories={categories.map(category => category.name)}
-                units={["ml", "l", "dl", "mg", "g", "kg", "amount"]}
+                units={units}
                 onSubmit={handleAddProduct}
-                onClose={() => {setFormVisible(false), lastScannedItem.current = null;}}
+                onClose={() => {setFormVisible(false), lastScannedItem = null;}}
               />
             </View>
           </View>

@@ -2,82 +2,80 @@ import { create } from "zustand";
 
 export interface Product {
   description: string;
-  name: string;
-  barcode: string | null;
+  productName: string;
+  categoryName: string;
   productId: number;
-  categoryId: number; // category Name or id?
-  quantity: number;
+  categoryId: number;
+  barcode: string | null;
+  quantity: number,
   unit: string;
-  // size: number;
 }
 
-export interface Fridge {
-  // userLogin: string; // maybe something more intuitive
+export interface ShoppingListProduct {
+  description: string;
+  categoryName: string;
+  categoryId: number;
+  quantity: number;
+  unit: string;
+  products: Product[];
+}
+
+export interface ShoppingList {
   name: string;
   id: number;
 }
 
 type ShoppingListsState = {
-  fridges: Fridge[];
-  currentFridgeId: number;
+  shoppingLists: ShoppingList[];
+  currentStoreId: number;
 };
 
-// interface productStore {
-//   id: number;
-//   name: string;
-// }
+type ShoppingListProductState = {
+  shoppingListProducts: ShoppingListProduct[];
+};
 
-type ProductsState = {
-  products: Product[];
-}; // using arrays here is causing a lot of reloads
-
-export const useShoppingStore = create<ProductsState & ShoppingListsState>(() => ({
-  products: [],
-  fridges: [],
-  currentFridgeId: -1,
+export const useShoppingStore = create<ShoppingListsState & ShoppingListProductState>(() => ({
+  shoppingLists: [],
+  currentStoreId: -1,
+  shoppingListProducts: []
 }));
 
 export const syncShoppingStore = {
   //more getState functions here, because they don't need to be updated
 
-  products: () => useShoppingStore().products, // useShallow will be needed here, at least i think so
-  fridges: () => useShoppingStore().fridges, // no need for useShallow here, at least i think so, well i was wrong
+  elements: () => useShoppingStore().shoppingListProducts, // useShallow will be needed here, at least i think so
+  stores: () => useShoppingStore().shoppingLists, // no need for useShallow here, at least i think so, well i was wrong
 
-  currentFridgeId: () => useShoppingStore().currentFridgeId,
-  currentFridge: () => {
-    const storeId = useShoppingStore().currentFridgeId;
+  currentStoreId: () => useShoppingStore().currentStoreId,
+  currentStore: () => {
+    const storeId = useShoppingStore().currentStoreId;
     if (!storeId) return undefined;
 
-    useShoppingStore().fridges.find((store) => store.id === storeId);
+    useShoppingStore().shoppingLists.find((store) => store.id === storeId);
   },
 
-  loadShoppingLists: async (getShoppingLists) => {
+  loadStores: async (getShoppingLists) => {
     const loadedShoppingLists = await getShoppingLists();
 
-    console.log("Loaded fridges", loadedShoppingLists);
     useShoppingStore.setState({
-      fridges: loadedShoppingLists,
+      shoppingLists: loadedShoppingLists,
     });
   },
 
-  setShoppingList: async (fridge: Fridge, getShoppingProducts) => {
-    const fridgeId = fridge.id;
+  setStore: async (shoppingList: ShoppingList, getShoppingProducts) => {
+    const shoppingListId = shoppingList.id;
 
-    const { id, name, shoppingListProducts } = await getShoppingProducts(fridgeId);
-
-    console.log("fasfasd")
-    console.log(id, name, shoppingListProducts);
+    const { id, name, shoppingListProducts } = await getShoppingProducts(shoppingListId);
 
     useShoppingStore.setState({
-      currentFridgeId: id,
-      products: shoppingListProducts.map((category) => ({
-        description: "",
-        name: category.categoryNavigation.name,
-        barcode: "",
-        productId: -1,
+      currentStoreId: id,
+      shoppingListProducts: shoppingListProducts.map((category) => ({
+        description: category.categoryNavigation.description,
+        categoryName: category.categoryNavigation.name,
         categoryId: category.category,
         quantity: category.quantity,
-        unit: category.categoryNavigation.unit
+        unit: category.categoryNavigation.unit,
+        products: []
       }))
     });
   },
@@ -85,60 +83,133 @@ export const syncShoppingStore = {
   addProduct: async (product: Product, updateProductQuantity) => {
     console.log("Adding product to store", product);
 
-    await updateProductQuantity(
-      useShoppingStore.getState().currentFridgeId,
-      product.categoryId,
-      product.quantity,
-    );
+    useShoppingStore.setState((state) => {
+      const categoryIndex = state.shoppingListProducts.findIndex((cat) => cat.categoryId === product.categoryId);
+      if (categoryIndex === -1) {
+        return {
+          shoppingListProducts: [
+            ...state.shoppingListProducts,
+            {
+              description: product.description,
+              categoryName: product.categoryName,
+              categoryId: product.categoryId,
+              quantity: product.quantity,
+              unit: product.unit,
+              products: [product],
+            },
+          ],
+        };
+      } else {
+        const updatedCategory = { ...state.shoppingListProducts[categoryIndex] };
+        updatedCategory.products.push(product);
 
-    console.log("sent");
+        const updatedShoppingListProducts = [...state.shoppingListProducts];
+        updatedShoppingListProducts[categoryIndex] = updatedCategory;
 
-    useShoppingStore.setState((state) => ({
-      products: [...state.products, product],
-    }));
+        return { shoppingListProducts: updatedShoppingListProducts };
+      }
+    });
   },
 
   updateProduct: async (
-    prevProduct: Product,
     product: Product,
     updateProductQuantity,
   ) => {
-    // change, no prevProduct needed !!!
-    await updateProductQuantity(
-      useShoppingStore.getState().currentFridgeId,
-      prevProduct.categoryId,
-      product.quantity,
-    );
+    console.log("Updating category in store", product);
 
-    console.log("Updating category in store", prevProduct, "to", product);
-    useShoppingStore.setState((state) => ({
-      products: state.products.map((p: Product) =>
-        p.categoryId == product.categoryId ? product : p,
-      ),
-    }));
+    useShoppingStore.setState((state) => {
+      const categoryIndex = state.shoppingListProducts.findIndex((cat) => cat.categoryId === product.categoryId);
+      if (categoryIndex === -1) return state;
+
+      const updatedCategory = { ...state.shoppingListProducts[categoryIndex] };
+      const productIndex = updatedCategory.products.findIndex((p) => p.productId === product.productId);
+      if (productIndex === -1) return state;
+
+      updatedCategory.products[productIndex] = product;
+
+      const updatedShoppingListProducts = [...state.shoppingListProducts];
+      updatedShoppingListProducts[categoryIndex] = updatedCategory;
+
+      return { shoppingListProducts: updatedShoppingListProducts };
+    });
   },
   removeProduct: async (product: Product, updateProductQuantity) => {
-    await updateProductQuantity(
-      useShoppingStore().currentFridgeId,
-      product.productId,
+    console.log("Removing product from store", product);
+
+    useShoppingStore.setState((state) => {
+      const categoryIndex = state.shoppingListProducts.findIndex((cat) => cat.categoryId === product.categoryId);
+      if (categoryIndex === -1) return state;
+
+      const updatedCategory = { ...state.shoppingListProducts[categoryIndex] };
+      updatedCategory.products = updatedCategory.products.filter((p) => p.productId !== product.productId);
+
+      const updatedShoppingListProducts = [...state.shoppingListProducts];
+      if (updatedCategory.products.length === 0) {
+        updatedShoppingListProducts.splice(categoryIndex, 1);
+      } else {
+        updatedShoppingListProducts[categoryIndex] = updatedCategory;
+      }
+
+      return { shoppingListProducts: updatedShoppingListProducts };
+    });
+  },
+
+  addCategory: async (category: ShoppingListProduct, updateCategoryQuantity) => {
+    await updateCategoryQuantity(
+      useShoppingStore.getState().currentStoreId,
+      category.categoryId,
+      category.quantity,
+    );
+
+    useShoppingStore.setState((state) => ({
+      shoppingListProducts: [...state.shoppingListProducts, category]
+    }));
+  },
+
+  updateCategory: async (category: ShoppingListProduct, updateCategoryQuantity) => {
+    await updateCategoryQuantity(
+      useShoppingStore.getState().currentStoreId,
+      category.categoryId,
+      category.quantity,
+    );
+
+    useShoppingStore.setState((state) => {
+      const categoryIndex = state.shoppingListProducts.findIndex((cat) => cat.categoryId === category.categoryId);
+      if (categoryIndex === -1) return state;
+
+      const updatedCategory = { 
+        ...state.shoppingListProducts[categoryIndex], 
+        ...category,
+        quantity: category.quantity,
+      };
+
+      const updatedShoppingListProducts = [...state.shoppingListProducts];
+      updatedShoppingListProducts[categoryIndex] = updatedCategory;
+
+      return { shoppingListProducts: updatedShoppingListProducts };
+    });
+  },
+
+  removeCategory: async (categoryId: number, updateCategoryQuantity) => {
+    console.log("Removing category from store", categoryId);
+
+    await updateCategoryQuantity(
+      useShoppingStore.getState().currentStoreId,
+      categoryId,
       0,
     );
 
-    console.log("Removing product from store", product);
     useShoppingStore.setState((state) => ({
-      products: state.products.filter((p) => p.name !== product.name),
+      shoppingListProducts: state.shoppingListProducts.filter((cat) => cat.categoryId !== categoryId)
     }));
   },
-  getProductCopy: (productName: string) =>
-    useShoppingStore()
-      .products.find((product) => product.name == productName),
 
-  createShoppingList: async (fridgeName: string, createShoppingList) => {
-    const id = await createShoppingList(fridgeName);
-    console.log("Creating fridge", fridgeName, id);
+  createStore: async (shoppingListName: string, createStore) => {
+    const id = await createStore(shoppingListName);
+    console.log("Creating shopping list", shoppingListName, id);
 
     useShoppingStore.setState((state) => ({
-      fridges: [...state.fridges, { id, name: fridgeName }],
+      shoppingLists: [...state.shoppingLists, { id, name: shoppingListName }],
     }));
   },
 };

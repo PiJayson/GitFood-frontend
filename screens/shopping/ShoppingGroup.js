@@ -9,11 +9,11 @@ import ShoppingScannerScreen from "./ShoppingScannerScreen";
 const ShoppingStack = createStackNavigator();
 
 export default function ShoppingeGroup({ navigation }) {
-  // load the products from the server
+  // load the categories from the server
   const { getShoppingLists } = useRestApi();
 
   useEffect(() => {
-    syncShoppingStore.loadShoppingLists(getShoppingLists);
+    syncShoppingStore.loadStores(getShoppingLists);
   }, [getShoppingLists]);
 
   return (

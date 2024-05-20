@@ -3,22 +3,20 @@ import ExpandableList from "../universal/ExpandableList";
 import { useRestApi } from "../../providers/RestApiProvider";
 
 export default function ExpandableFridgeList({ syncStore, addNewItemForm }) {
-  const fridges = syncStore.fridges();
-  const id = syncStore.currentFridgeId();
+  const stores = syncStore.stores();
+  const id = syncStore.currentStoreId();
 
   const { getFridgeProducts, getFridges } = useRestApi();
-
-  // console.log("expandable", fridges, id);
 
   return (
     <ExpandableList
       title="Fridges"
-      items={fridges}
+      items={stores}
       itemName={(item) => item.name}
-      chooseItem={(item) => syncStore.setFridge(item, getFridgeProducts)}
+      chooseItem={(item) => syncStore.setStore(item, getFridgeProducts)}
       isChosen={(item) => item.id == id}
       addNewItemForm={addNewItemForm}
-      onExpand={() => syncStore.loadFridges(getFridges)}
+      onExpand={() => syncStore.loadStores(getFridges)}
     />
   );
 }

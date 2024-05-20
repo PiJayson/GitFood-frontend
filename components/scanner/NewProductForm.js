@@ -2,36 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Modal, Text, FlatList, TouchableOpacity, Picker } from 'react-native';
 
 const ProductForm = ({ visible, onSubmit, onClose, categories = [], units = [], initialData = {} }) => {
-  const [name, setName] = useState(initialData.name || '');
+  const [productName, setProductName] = useState(initialData.productName || '');
   const [description, setDescription] = useState(initialData.description || '');
   const [barcode, setBarcode] = useState(initialData.barcode || '');
   const [quantity, setQuantity] = useState(initialData.quantity || '');
-  const [category, setCategory] = useState(initialData.category || '');
+  const [categoryName, setCategoryName] = useState(initialData.categoryName || '');
   const [unit, setUnit] = useState(initialData.unit || units[0] || '');
   const [filteredOptions, setFilteredOptions] = useState(categories);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    setName(initialData.name || '');
+    setProductName(initialData.productName || '');
     setDescription(initialData.description || '');
     setBarcode(initialData.barcode || '');
     setQuantity(initialData.quantity || '');
-    setCategory(initialData.category || '');
+    setCategoryName(initialData.categoryName || '');
     setUnit(initialData.unit || units[0] || '');
   }, [initialData]);
 
   const handleSubmit = () => {
-    onSubmit({ name, description, barcode, quantity, category, unit });
-    setName('');
+    onSubmit({ productName, description, barcode, quantity, categoryName, unit });
+    setProductName('');
     setDescription('');
     setBarcode('');
     setQuantity('');
-    setCategory('');
+    setCategoryName('');
     setUnit(units[0] || '');
   };
 
   const handleCategoryInput = (text) => {
-    setCategory(text);
+    setCategoryName(text);
     setFilteredOptions(
       categories.filter(option => 
         option.toLowerCase().includes(text.toLowerCase())
@@ -41,7 +41,7 @@ const ProductForm = ({ visible, onSubmit, onClose, categories = [], units = [], 
   };
 
   const selectCategory = (option) => {
-    setCategory(option);
+    setCategoryName(option);
     setShowDropdown(false);
   };
 
@@ -49,12 +49,12 @@ const ProductForm = ({ visible, onSubmit, onClose, categories = [], units = [], 
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.backdrop}>
         <View style={styles.modalContainer}>
-          <Text style={styles.header}>{initialData.id ? 'Edit Product' : 'Add New Product'}</Text>
+          <Text style={styles.header}>{initialData.productId == -1 ? 'Add New Product' : 'Edit Product'}</Text>
           <TextInput
             style={styles.input}
             placeholder="Name"
-            value={name}
-            onChangeText={setName}
+            value={productName}
+            onChangeText={setProductName}
           />
           <TextInput
             style={styles.input}
@@ -79,7 +79,7 @@ const ProductForm = ({ visible, onSubmit, onClose, categories = [], units = [], 
           <TextInput
             style={styles.input}
             placeholder="Category"
-            value={category}
+            value={categoryName}
             onChangeText={handleCategoryInput}
           />
           {showDropdown && (

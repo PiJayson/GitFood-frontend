@@ -86,6 +86,11 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const categoryGetUnits = async () => {
+    const response = await apiClient.get(`/category/getUnits`);
+    return response.data;
+  };
+
   // Product
 
   const productAdd = async (name, description, barcode, categoryId, quantity) => {
@@ -117,6 +122,14 @@ export const RestApiProvider = ({ children }) => {
     });
     return response.data;
   };
+
+  const patchFridgeAddProducts = async (products, fridgeId) => {
+    const response = await apiClient.patch("/fridge/addProducts", {
+      products,
+      fridgeId
+    });
+    return response.data;
+  };  
 
   const updateProductQuantity = async (fridgeId, productId, quantity) => {
     return await apiClient.patch(`/fridge/updateProductQuantity?fridgeId=${fridgeId}&productId=${productId}&quantity=${quantity}`);
@@ -164,10 +177,8 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const createShoppingList = async (name) => {
-    console.log("Creating fridge");
     const response = await apiClient.post(`/shoppingList/create?name=${name}`);
-    console.log(response);
-
+    
     return response.data;
   };
 
@@ -181,6 +192,7 @@ export const RestApiProvider = ({ children }) => {
 
     // Category
     categoryGetAll,
+    categoryGetUnits,
 
     // Product
     productAdd,
@@ -188,6 +200,7 @@ export const RestApiProvider = ({ children }) => {
 
     // Fridge
     getFridgeProducts,
+    patchFridgeAddProducts,
     updateProductQuantity,
     createFridge,
     getFridges,
