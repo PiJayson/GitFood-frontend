@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { View, StyleSheet, Platform, Text } from "react-native";
-import { Camera } from "expo-camera";
+import { Camera, CameraView, useCameraPermissions } from "expo-camera";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   BrowserMultiFormatReader,
@@ -10,7 +10,7 @@ import {
 } from "@zxing/library";
 
 export default function ScannerComponent({ onBarcodeScanned, style }) {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [isFocused, setIsFocused] = useState(true);
   const cameraRef = useRef(null);
   const videoRef = useRef(null);
@@ -64,7 +64,9 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
     } else {
       (async () => {
         const { status } = await Camera.requestCameraPermissionsAsync();
-        setHasPermission(status === "granted");
+        console.log(status);
+
+        // setHasPermission(status === "granted");
       })();
     }
   }, []);
@@ -85,14 +87,14 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
     );
   }
 
-  if (hasPermission === null) {
+  if (!permission) {
     return (
       <View style={styles.container}>
         <Text>Requesting for camera permission</Text>
       </View>
     );
   }
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <View style={styles.container}>
         <Text>No access to camera</Text>
@@ -102,12 +104,12 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
 
   return (
     <View style={styles.container}>
-      {/* {isFocused && (
-        <Camera
+      {isFocused && (
+        <CameraView
           style={styles.camera}
-          type={Camera.Constants.Type.back}
-          ref={cameraRef}
-          onBarCodeScanned={(event) => onBarcodeScanned(event.data)}
+          facing="back"
+          // ref={cameraRef}
+          onBarcodeScanned={(event) => onBarcodeScanned(event.data)}
         />
       )} */}
     </View>
