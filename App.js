@@ -12,13 +12,12 @@ import { RestApiProvider, useRestApi } from "./providers/RestApiProvider";
 import {
   LoginScreen,
   HomeScreen,
-  ShoppingScreen,
-  ShoppingScannerScreen,
   SignUpScreen,
   StartScreen,
   RecipesScreens,
   SplashScreen,
   FridgeGroup,
+  ShoppingGroup,
 } from "./screens";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -51,8 +50,7 @@ function AppNavigation() {
           initialRouteName="Shopping"
           screenOptions={{ headerShown: false }}
         >
-          <Tab.Screen name="Shopping" component={ShoppingScreen} />
-          <Tab.Screen name="Scanner" component={ShoppingScannerScreen} />
+          <Tab.Screen name="ShoppingGroup" component={ShoppingGroup} />
           <Tab.Screen name="FridgeGroup" component={FridgeGroup} />
           <Tab.Screen name="Recipes" component={RecipesScreens} />
         </Tab.Navigator>
@@ -77,9 +75,7 @@ function App() {
         <RestApiProvider>
           <QueryClientProvider client={queryClient}>
             <Provider theme={theme}>
-              {/* <EventProvider style={{ flex: 1 }}> */}
               <AppNavigation />
-              {/* </EventProvider> */}
             </Provider>
           </QueryClientProvider>
         </RestApiProvider>

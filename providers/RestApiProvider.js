@@ -153,6 +153,11 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const categoryGetUnits = async () => {
+    const response = await apiClient.get(`/category/getUnits`);
+    return response.data;
+  };
+
   // Product
 
   const productAdd = async (
@@ -193,6 +198,14 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const patchFridgeAddProducts = async (products, fridgeId) => {
+    const response = await apiClient.patch("/fridge/addProducts", {
+      products,
+      fridgeId
+    });
+    return response.data;
+  };  
+
   const updateProductQuantity = async (fridgeId, productId, quantity) => {
     return await apiClient.patch(
       `/fridge/updateProductQuantity?fridgeId=${fridgeId}&productId=${productId}&quantity=${quantity}`,
@@ -216,6 +229,34 @@ export const RestApiProvider = ({ children }) => {
       id: fridge.item1,
       name: fridge.item2,
     }));
+  };
+
+  // Shopping
+
+  const getShoppingProducts = async (shoppingId) => {
+    const response = await apiClient.get(`/shoppingList/get?shoppingListId=${shoppingId}`);
+
+    console.log("data: ", response.data, shoppingId);
+    return response.data;
+  };
+
+  const getShoppingLists = async () => {
+    const response = await apiClient.get("/shoppingList/getMap");
+
+    return response.data.map((fridge) => ({
+      id: fridge.item1,
+      name: fridge.item2,
+    }));
+  };
+
+  const updateShoppingListQuantity = async (shoppingId, categoryId, quantity) => {
+    return await apiClient.patch(`/shoppingList/update?shoppingListId=${shoppingId}&categoryId=${categoryId}&quantity=${quantity}`);
+  };
+
+  const createShoppingList = async (name) => {
+    const response = await apiClient.post(`/shoppingList/create?name=${name}`);
+    
+    return response.data;
   };
 
   const getRecipesPage = async (page, pageSize, search, ingredients) => {
@@ -295,6 +336,7 @@ export const RestApiProvider = ({ children }) => {
 
     // Category
     categoryGetAll,
+    categoryGetUnits,
 
     // Product
     productAdd,
@@ -302,9 +344,16 @@ export const RestApiProvider = ({ children }) => {
 
     // Fridge
     getFridgeProducts,
+    patchFridgeAddProducts,
     updateProductQuantity,
     createFridge,
     getFridges,
+
+    // Shopping List
+    getShoppingProducts,
+    getShoppingLists,
+    updateShoppingListQuantity,
+    createShoppingList,
 
     // Recipe
     getRecipesPage,
