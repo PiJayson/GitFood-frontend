@@ -13,7 +13,22 @@ export const RestApiProvider = ({ children }) => {
   const [isSignedIn, setIsSignedIn] = useState(
     async () => await AsyncStorage.getItem("AWTtoken"),
   );
+  const [username, setUsername] = useState('');
   const triggerNotification = useNotification();
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem("username");
+        setUsername(storedUsername);
+      } catch (error) {
+        console.error("Error fetching username: ", error);
+      }
+    };
+
+    fetchUsername();
+  }, []);
+
 
   const apiClient = axios.create({
     baseURL: "https://gitfood.fun:5255",
@@ -44,9 +59,6 @@ export const RestApiProvider = ({ children }) => {
     (error) => {
       if (error.response) {
         switch (error.response.status) {
-          case 400:
-            setIsSignedIn(false);
-            break;
           case 401:
             setIsSignedIn(false);
             break;
@@ -109,6 +121,8 @@ export const RestApiProvider = ({ children }) => {
     const response = await apiClient.post("/login", { login, password });
     console.log(response.data);
     await AsyncStorage.setItem("AWTtoken", response.data);
+    await AsyncStorage.setItem("username", login);
+    setUsername(login);
     setIsSignedIn(true);
     return response;
   };
@@ -120,6 +134,8 @@ export const RestApiProvider = ({ children }) => {
     });
     console.log(response.data);
     await AsyncStorage.setItem("AWTtoken", response.data);
+    await AsyncStorage.setItem("username", login);
+    setUsername(login);
     setIsSignedIn(true);
     return response;
   };
@@ -127,6 +143,7 @@ export const RestApiProvider = ({ children }) => {
   const signOut = async () => {
     await AsyncStorage.removeItem("AWTtoken");
     setIsSignedIn(false);
+    setUsername(null);
   };
 
   // Category
@@ -239,6 +256,23 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const getMarkdown = async (path) => {
+    const response = await apiClient.get(`/${path}`);
+
+    console.log(response.data);
+    return response.data;
+  };
+
+  const updateMarkdown = async (recipeId, content) => {
+    console.log(recipeId, content);
+    const response = await apiClient.post(`/recipe/updateMarkdown?recipeId=${recipeId}`, {
+      Markdown: content
+    });
+
+    console.log(response.data);
+    return response.data;
+  };
+
   const getCategorySuggestion = async (search) => {
     // console.log(search);
 
@@ -252,6 +286,7 @@ export const RestApiProvider = ({ children }) => {
 
   const value = {
     isSignedIn,
+    username,
 
     // Login
     login,
@@ -273,6 +308,8 @@ export const RestApiProvider = ({ children }) => {
 
     // Recipe
     getRecipesPage,
+    getMarkdown,
+    updateMarkdown,
     addRecipePhotos,
 
     getCategorySuggestion,
