@@ -15,7 +15,7 @@ export default function FridgeGroup({ navigation }) {
   const { getFridges } = useRestApi();
 
   useEffect(() => {
-    syncFridgeStore.loadFridges(getFridges);
+    syncFridgeStore.loadStores(getFridges);
   }, [getFridges]);
 
   return (
