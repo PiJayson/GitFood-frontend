@@ -1,23 +1,22 @@
 import React from "react";
 import { StyleSheet } from "react-native";
-import { Card, Button, IconButton, Text } from "react-native-paper";
+import { Card, Button, IconButton, Title, Paragraph } from "react-native-paper";
 
 export default function RecipeCard({ recipe, onViewRecipe, onLikeRecipe }) {
   return (
     <Card style={styles.container}>
-      <Card.Title title={recipe.name} />
       <Card.Cover
         source={
-          // recipe.image
-          //   ? { uri: recipe.image }
-          //   :
-          require("../../assets/burger.jpeg")
+          recipe.image
+            ? { uri: recipe.image }
+            : require("../../assets/burger.jpeg")
         }
         resizeMode="cover"
         style={styles.image}
       />
       <Card.Content>
-        <Text>{recipe.description}</Text>
+        <Title>{recipe.name}</Title>
+        <Paragraph>{recipe.description}</Paragraph>
       </Card.Content>
       <Card.Actions>
         <IconButton
@@ -34,16 +33,13 @@ export default function RecipeCard({ recipe, onViewRecipe, onLikeRecipe }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 15,
-    width: "100%",
-    maxWidth: 800,
-    margin: 12,
-    maxHeight: 600,
-    alignSelf: "center",
+    marginTop: 10,
+    marginHorizontal: 10,
+    borderRadius: 10,
   },
   image: {
-    Width: "100%",
-    flex: 1,
+    // resizeMode: "contain",
+    // Width: "100%",
+    // maxHeight: 300,
   },
 });

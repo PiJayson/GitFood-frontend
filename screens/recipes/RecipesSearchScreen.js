@@ -4,24 +4,34 @@ import { Searchbar } from "react-native-paper";
 import RecipeList from "../../components/recipes/RecipeList";
 import IngredientsInSearch from "../../components/recipes/IngredientsInSearch";
 
-import { getRecipes } from "../../providers/ReactQuerryProvider";
+import { getRecipes } from "../../providers/ReactQueryProvider";
+import NewIngredientInSearchForm from "../../components/recipes/NewCategoryInSearchForm";
 
 export default function RecipesSearchScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [ingredientsQuery, dispatcher] = React.useReducer((state, action) => {
+  const [formVisible, setFormVisible] = React.useState(false);
+
+  const [categoriesQuery, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
       case "add":
-        return [...state, action.ingredient];
+        if (state.find((category) => category.id === action.category.id)) {
+          return state;
+        }
+        return [...state, action.category];
       case "remove":
-        return state.filter((ingredient) => ingredient !== action.ingredient);
+        return state.filter((category) => category.id !== action.category.id);
       default:
         return state;
     }
   }, []);
 
+  const addNewIngreident = () => {
+    setFormVisible(true);
+  };
+
   const query = {
     search: searchQuery,
-    ingredients: ingredientsQuery,
+    ingredients: categoriesQuery,
     pageSize: 10,
   };
 
@@ -35,7 +45,11 @@ export default function RecipesSearchScreen({ navigation }) {
           onChangeText={(query) => setSearchQuery(query)}
           value={searchQuery}
         />
-        <IngredientsInSearch state={ingredientsQuery} dispatch={dispatcher} />
+        <IngredientsInSearch
+          state={categoriesQuery}
+          dispatch={dispatch}
+          addNewIngredient={addNewIngreident}
+        />
       </View>
       <View style={styles.results}>
         <RecipeList
@@ -46,6 +60,17 @@ export default function RecipesSearchScreen({ navigation }) {
           }
         />
       </View>
+
+      <NewIngredientInSearchForm
+        visible={formVisible}
+        onSubmit={(ingredient) =>
+          dispatch({ type: "add", category: ingredient })
+        }
+        onClose={() => {
+          console.log("close modal");
+          setFormVisible(false);
+        }}
+      />
     </View>
   );
 }

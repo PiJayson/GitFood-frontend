@@ -2,6 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNotification } from "./NotificationProvider";
+import curlirize from "axios-curlirize";
+import { Platform } from "react-native";
 
 const RestApiContext = createContext();
 
@@ -11,7 +13,22 @@ export const RestApiProvider = ({ children }) => {
   const [isSignedIn, setIsSignedIn] = useState(
     async () => await AsyncStorage.getItem("AWTtoken"),
   );
+  const [username, setUsername] = useState('');
   const triggerNotification = useNotification();
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem("username");
+        setUsername(storedUsername);
+      } catch (error) {
+        console.error("Error fetching username: ", error);
+      }
+    };
+
+    fetchUsername();
+  }, []);
+
 
   const apiClient = axios.create({
     baseURL: "https://gitfood.fun:5255",
@@ -26,6 +43,8 @@ export const RestApiProvider = ({ children }) => {
       "Content-Type": "multipart/form-data",
     },
   });
+
+  curlirize(apiMultipart);
 
   apiClient.interceptors.request.use(async (config) => {
     const token = await AsyncStorage.getItem("AWTtoken");
@@ -58,6 +77,40 @@ export const RestApiProvider = ({ children }) => {
     },
   );
 
+  apiMultipart.interceptors.request.use(async (config) => {
+    const token = await AsyncStorage.getItem("AWTtoken");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    console.log(config.data);
+    return config;
+  });
+
+  apiMultipart.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+            break;
+          case 401:
+            break;
+          case 403:
+            triggerNotification("Forbidden action!");
+            break;
+          case 404:
+            triggerNotification("Resource not found!");
+            break;
+          default:
+            triggerNotification(error.response.data);
+            break;
+        }
+      }
+      return Promise.reject(error);
+    },
+  );
+
   /**
    * ENDPOINTS
    */
@@ -68,6 +121,8 @@ export const RestApiProvider = ({ children }) => {
     const response = await apiClient.post("/login", { login, password });
     console.log(response.data);
     await AsyncStorage.setItem("AWTtoken", response.data);
+    await AsyncStorage.setItem("username", login);
+    setUsername(login);
     setIsSignedIn(true);
     return response;
   };
@@ -79,6 +134,8 @@ export const RestApiProvider = ({ children }) => {
     });
     console.log(response.data);
     await AsyncStorage.setItem("AWTtoken", response.data);
+    await AsyncStorage.setItem("username", login);
+    setUsername(login);
     setIsSignedIn(true);
     return response;
   };
@@ -86,6 +143,7 @@ export const RestApiProvider = ({ children }) => {
   const signOut = async () => {
     await AsyncStorage.removeItem("AWTtoken");
     setIsSignedIn(false);
+    setUsername(null);
   };
 
   // Category
@@ -211,36 +269,65 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   }; // this
 
-  const addRecipesPhotos = async (recipeId, photos) => {
-    const data = new FormData();
+  const addRecipePhotos = async (recipeId, photos) => {
+    const formData = new FormData();
 
-    photos.forEach((photo) => {
-      data.append("photos", {
-        uri: photo.uri,
-        name: photo.fileName,
-        type: photo.type,
+    photos.assets.forEach((image, i) => {
+      formData.append("images", {
+        ...image,
+        uri:
+          Platform.OS === "android"
+            ? image.uri
+            : image.uri.replace("file://", ""),
+        name: `image-${i}`,
+        type: "image/jpeg", // it may be necessary in Android.
       });
     });
 
-    console.log(data);
+    console.log(formData);
 
     const response = await apiMultipart.post(
       `/recipe/addPhotos?recipeId=${recipeId}`,
-      data,
+      formData,
+      { curlirize: true },
     ); //
+    console.log(response.status, response.statusText);
+    console.log(response.data);
 
     return response.data;
   };
 
-  const getFoodCategorySuggestions = async (search) => {
+  const getMarkdown = async (path) => {
+    const response = await apiClient.get(`/${path}`);
+
+    console.log(response.data);
+    return response.data;
+  };
+
+  const updateMarkdown = async (recipeId, content) => {
+    console.log(recipeId, content);
+    const response = await apiClient.post(`/recipe/updateMarkdown?recipeId=${recipeId}`, {
+      Markdown: content
+    });
+
+    console.log(response.data);
+    return response.data;
+  };
+
+  const getCategorySuggestion = async (search) => {
+    // console.log(search);
+
     const response = await apiClient.get(
-      `/category/getSuggestions?search=${search}`,
+      `/Category/getSuggestions?name=${search}&resultsCount=10 `,
     );
+
+    // console.log(response.data);
     return response.data;
   };
 
   const value = {
     isSignedIn,
+    username,
 
     // Login
     login,
@@ -270,9 +357,11 @@ export const RestApiProvider = ({ children }) => {
 
     // Recipe
     getRecipesPage,
-    addRecipesPhotos,
+    getMarkdown,
+    updateMarkdown,
+    addRecipePhotos,
 
-    getFoodCategorySuggestions,
+    getCategorySuggestion,
   };
 
   return (
