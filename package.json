@@ -20,6 +20,7 @@
     "@types/react": "~18.2.79",
     "@zxing/library": "^0.20.0",
     "axios": "^1.6.8",
+    "axios-curlirize": "^2.0.0",
     "expo": "^51.0.2",
     "expo-barcode-scanner": "~13.0.1",
     "expo-camera": "~15.0.6",

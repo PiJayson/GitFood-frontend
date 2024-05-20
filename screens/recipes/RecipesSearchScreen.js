@@ -5,7 +5,7 @@ import RecipeList from "../../components/recipes/RecipeList";
 import IngredientsInSearch from "../../components/recipes/IngredientsInSearch";
 
 import { getRecipes } from "../../providers/ReactQueryProvider";
-import NewCategoryInSearchForm from "../../components/recipes/NewCategoryInSearchForm";
+import NewIngredientInSearchForm from "../../components/recipes/NewCategoryInSearchForm";
 
 export default function RecipesSearchScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -14,15 +14,18 @@ export default function RecipesSearchScreen({ navigation }) {
   const [categoriesQuery, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
       case "add":
+        if (state.find((category) => category.id === action.category.id)) {
+          return state;
+        }
         return [...state, action.category];
       case "remove":
-        return state.filter((category) => category !== action.category);
+        return state.filter((category) => category.id !== action.category.id);
       default:
         return state;
     }
   }, []);
 
-  const addNewCategory = () => {
+  const addNewIngreident = () => {
     setFormVisible(true);
   };
 
@@ -39,13 +42,13 @@ export default function RecipesSearchScreen({ navigation }) {
       <View style={styles.query}>
         <Searchbar
           placeholder="Search"
-          // onChangeText={(query) => setSearchQuery(query)}
+          onChangeText={(query) => setSearchQuery(query)}
           value={searchQuery}
         />
         <IngredientsInSearch
           state={categoriesQuery}
           dispatch={dispatch}
-          addNewCategory={addNewCategory}
+          addNewIngredient={addNewIngreident}
         />
       </View>
       <View style={styles.results}>
@@ -58,9 +61,15 @@ export default function RecipesSearchScreen({ navigation }) {
         />
       </View>
 
-      <NewCategoryInSearchForm
+      <NewIngredientInSearchForm
         visible={formVisible}
-        onSubmit={(ingredient) => dispatch({ type: "add", ingredient })}
+        onSubmit={(ingredient) =>
+          dispatch({ type: "add", category: ingredient })
+        }
+        onClose={() => {
+          console.log("close modal");
+          setFormVisible(false);
+        }}
       />
     </View>
   );

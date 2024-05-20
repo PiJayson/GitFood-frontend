@@ -1,40 +1,86 @@
 import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
-import { Modal, Text, Button, TextInput } from "react-native-paper";
-import { getFoodCategoriesSuggestion } from "../../providers/ReactQueryProvider";
+import { View, StyleSheet, FlatList } from "react-native";
+import { Modal, Text, Button, TextInput, Searchbar } from "react-native-paper";
+import { getCategorySuggestion } from "../../providers/ReactQueryProvider";
 import SimpleList from "../universal/SimpleList";
 import { useEffect } from "react";
+import { useDeferredValue } from "react";
 
-const NewCategoryInSearchForm = ({ visible, onSubmit, onClose }) => {
-  const [name, setName] = useState("");
+const NewIngredientInSearchForm = ({ visible, onSubmit, onClose }) => {
+  const [search, setSearch] = useState("");
 
-  const handleSubmit = () => {
-    onSubmit(name, createFridge);
-    setName("");
-  };
+  const searchValue = useDeferredValue(search, { timeoutMs: 3000 });
+  const { data } = getCategorySuggestion(searchValue);
+  // console.log("data@!:", data);
+
+  // if (data) {
+  //   data.map((item) => {
+  //     console.log(item);
+  //     console.log(typeof item.id);
+  //   });
+  // }
+
+  const dataArr = data
+    ? data.map((item) => {
+        return {
+          id: item.id,
+          name: item.innerInformation.name,
+          description: item.innerInformation.description,
+        };
+      })
+    : [];
+
+  // console.log("dataArr@!:", dataArr);
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.backdrop}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.header}>Add category to search</Text>
-          <View>
-            <TextInput
-              style={styles.input}
-              placeholder="Name"
-              value={name}
-              onChangeText={setName}
+    <Modal
+      visible={visible}
+      animationType="slide"
+      onRequestClose={() => {
+        onClose();
+        console.log("close request");
+      }}
+      onBackdropPress={() => {
+        onClose();
+        console.log("backdrop pressed");
+      }}
+      onDismiss={() => {
+        onClose();
+        console.log("dismissed");
+      }}
+      style={styles.modal}
+    >
+      <View style={styles.modalContainer}>
+        <Text style={styles.header}>Add ingredient to search</Text>
+        <View style={styles.search}>
+          {/* <TextInput
+            style={styles.input}
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
+          /> */}
+          <Searchbar
+            placeholder="Ingredient name"
+            value={search}
+            onChangeText={setSearch}
+            style={styles.input}
+          ></Searchbar>
+          {data && (
+            <FlatList
+              data={dataArr}
+              renderItem={({ item }) => (
+                <Button
+                  color="green"
+                  mode="outlined"
+                  onPress={() => onSubmit(item)}
+                  style={styles.category}
+                >
+                  {item.name}
+                </Button>
+              )}
+              keyExtractor={(item) => item.id}
             />
-          </View>
-          <View style={{ minHeight: 80 }}>
-            {/* {suggestions > 0 && (
-              <View style={{ zIndex: 2 }}>
-                <SimpleList items={suggestions} onSelect={handleSubmit} />
-              </View>
-            )} */}
-            <Button title="Save" onPress={handleSubmit} />
-            <Button title="Cancel" color="red" onPress={onClose} />
-          </View>
+          )}
         </View>
       </View>
     </Modal>
@@ -42,33 +88,50 @@ const NewCategoryInSearchForm = ({ visible, onSubmit, onClose }) => {
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  modal: {
+    flexDirection: "column",
+    position: "absolute",
+    flex: 0,
+    marginTop: 10,
+    minWidth: 400,
     justifyContent: "center",
     alignItems: "center",
-    height: 600,
+    alignSelf: "center",
   },
   modalContainer: {
-    flex: 1,
+    minWidth: 400,
+    flex: 0,
+    alignSelf: "center",
+    alignItems: "center",
     backgroundColor: "white",
-    padding: 20,
     width: "90%",
     borderRadius: 10,
-    minHeight: 400,
+    padding: 20,
+    // minHeight: 400,
+  },
+  search: {
+    maxHeight: 300,
+    minHeight: "60%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   input: {
-    height: 40,
-    marginBottom: 12,
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
+    width: "100%",
+    minWidth: "90%",
+    maxWidth: "90%",
+    marginBottom: 10,
   },
   header: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
   },
+  category: {
+    margin: 5,
+    maxWidth: "90%",
+    minWidth: "90%",
+  },
 });
 
-export default NewCategoryInSearchForm;
+export default NewIngredientInSearchForm;

@@ -21,12 +21,12 @@ const getRecipes = (query) => {
   });
 };
 
-const getFoodCategoriesSuggestion = (query) => {
-  const { getFoodCategorySuggestions } = useRestApi();
+const getCategorySuggestion = (query) => {
+  const { getCategorySuggestion } = useRestApi();
   return useQuery({
-    queryKey: ["foodCategoriesSuggestions", query],
-    queryFn: () => getFoodCategorySuggestions(query),
+    queryKey: ["CategorySuggestions", query],
+    queryFn: () => getCategorySuggestion(query),
   });
 };
 
-export { getRecipes, getFoodCategoriesSuggestion };
+export { getRecipes, getCategorySuggestion };

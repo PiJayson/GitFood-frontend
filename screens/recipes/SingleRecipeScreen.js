@@ -10,7 +10,7 @@ import { useRestApi } from "../../providers/RestApiProvider";
 export default function SingleRecipeScreen({ route, navigation }) {
   const { recipe } = route.params;
   const { name, description } = recipe;
-  const { addRecipesPhotos } = useRestApi();
+  const { addRecipePhotos } = useRestApi();
 
   const onAddPhoto = async () => {
     console.log("Add photo");
@@ -25,7 +25,7 @@ export default function SingleRecipeScreen({ route, navigation }) {
 
     if (!result.canceled) {
       // photos preprocessing
-      addRecipesPhotos(recipe.id, result);
+      addRecipePhotos(recipe.id, result);
     }
   };
 

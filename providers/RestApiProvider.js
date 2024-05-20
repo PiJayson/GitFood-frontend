@@ -2,6 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNotification } from "./NotificationProvider";
+import curlirize from "axios-curlirize";
+import { Platform } from "react-native";
 
 const RestApiContext = createContext();
 
@@ -27,6 +29,8 @@ export const RestApiProvider = ({ children }) => {
     },
   });
 
+  curlirize(apiMultipart);
+
   apiClient.interceptors.request.use(async (config) => {
     const token = await AsyncStorage.getItem("AWTtoken");
     if (token) {
@@ -40,8 +44,45 @@ export const RestApiProvider = ({ children }) => {
     (error) => {
       if (error.response) {
         switch (error.response.status) {
+          case 400:
+            setIsSignedIn(false);
+            break;
           case 401:
             setIsSignedIn(false);
+            break;
+          case 403:
+            triggerNotification("Forbidden action!");
+            break;
+          case 404:
+            triggerNotification("Resource not found!");
+            break;
+          default:
+            triggerNotification(error.response.data);
+            break;
+        }
+      }
+      return Promise.reject(error);
+    },
+  );
+
+  apiMultipart.interceptors.request.use(async (config) => {
+    const token = await AsyncStorage.getItem("AWTtoken");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    console.log(config.data);
+    return config;
+  });
+
+  apiMultipart.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+            break;
+          case 401:
             break;
           case 403:
             triggerNotification("Forbidden action!");
@@ -170,31 +211,42 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   }; // this
 
-  const addRecipesPhotos = async (recipeId, photos) => {
-    const data = new FormData();
+  const addRecipePhotos = async (recipeId, photos) => {
+    const formData = new FormData();
 
-    photos.forEach((photo) => {
-      data.append("photos", {
-        uri: photo.uri,
-        name: photo.fileName,
-        type: photo.type,
+    photos.assets.forEach((image, i) => {
+      formData.append("images", {
+        ...image,
+        uri:
+          Platform.OS === "android"
+            ? image.uri
+            : image.uri.replace("file://", ""),
+        name: `image-${i}`,
+        type: "image/jpeg", // it may be necessary in Android.
       });
     });
 
-    console.log(data);
+    console.log(formData);
 
     const response = await apiMultipart.post(
       `/recipe/addPhotos?recipeId=${recipeId}`,
-      data,
+      formData,
+      { curlirize: true },
     ); //
+    console.log(response.status, response.statusText);
+    console.log(response.data);
 
     return response.data;
   };
 
-  const getFoodCategorySuggestions = async (search) => {
+  const getCategorySuggestion = async (search) => {
+    // console.log(search);
+
     const response = await apiClient.get(
-      `/category/getSuggestions?search=${search}`,
+      `/Category/getSuggestions?name=${search}&resultsCount=10 `,
     );
+
+    // console.log(response.data);
     return response.data;
   };
 
@@ -221,9 +273,9 @@ export const RestApiProvider = ({ children }) => {
 
     // Recipe
     getRecipesPage,
-    addRecipesPhotos,
+    addRecipePhotos,
 
-    getFoodCategorySuggestions,
+    getCategorySuggestion,
   };
 
   return (
