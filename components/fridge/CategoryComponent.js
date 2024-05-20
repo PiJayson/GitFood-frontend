@@ -19,7 +19,7 @@ export default function CategoryComponent({
     <View style={styles.container}>
       <View style={styles.categoryHeader}>
         <Text style={styles.categoryName}>{category.categoryName}</Text>
-        <Text style={styles.categoryQuantity}>{category.quantity}x</Text>
+        <Text style={styles.categoryQuantity}>{category.quantity}</Text>
         <IconButton
           icon={isExpanded ? "chevron-up" : "chevron-down"}
           onPress={handleExpand}

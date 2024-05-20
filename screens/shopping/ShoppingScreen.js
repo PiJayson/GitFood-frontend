@@ -86,11 +86,13 @@ const ShoppingScreen = ({ navigation }) => {
         onClose={() => setShowFridgeSelector(false)}
         syncStore={syncFridgeStore}
       />
-      <CategoryList
-        syncStore={syncShoppingStore}
-        renderCategory={renderCategory}
-        updateProductQuantity={updateShoppingListQuantity}
-      />
+      <View style={{marginTop: 40, flex: 1}}>
+        <CategoryList
+          syncStore={syncShoppingStore}
+          renderCategory={renderCategory}
+          updateProductQuantity={updateShoppingListQuantity}
+        />
+      </View>
       <NewListForm
         visible={formVisible}
         onSubmit={syncShoppingStore.createStore}

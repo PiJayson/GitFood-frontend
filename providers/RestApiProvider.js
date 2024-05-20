@@ -20,6 +20,13 @@ export const RestApiProvider = ({ children }) => {
     },
   });
 
+  const apiMultipart = axios.create({
+    baseURL: "https://gitfood.fun:5255",
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   apiClient.interceptors.request.use(async (config) => {
     const token = await AsyncStorage.getItem("AWTtoken");
     if (token) {
@@ -51,7 +58,6 @@ export const RestApiProvider = ({ children }) => {
     },
   );
 
-
   /**
    * ENDPOINTS
    */
@@ -67,7 +73,10 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const register = async (login, password) => {
-    const response = await apiClient.post("/login/register", { login, password });
+    const response = await apiClient.post("/login/register", {
+      login,
+      password,
+    });
     console.log(response.data);
     await AsyncStorage.setItem("AWTtoken", response.data);
     setIsSignedIn(true);
@@ -93,21 +102,29 @@ export const RestApiProvider = ({ children }) => {
 
   // Product
 
-  const productAdd = async (name, description, barcode, categoryId, quantity) => {
+  const productAdd = async (
+    name,
+    description,
+    barcode,
+    categoryId,
+    quantity,
+  ) => {
     const response = await apiClient.post("/product/add", {
       description,
       name,
       barcode,
       categoryId,
-      quantity
+      quantity,
     });
     return response.data;
-  }
+  };
 
   const getProductByBarcode = async (barcode) => {
     try {
-    const response = await apiClient.get(`/product/getByBarcode?barcode=${barcode}`);
-    return response.data;
+      const response = await apiClient.get(
+        `/product/getByBarcode?barcode=${barcode}`,
+      );
+      return response.data;
     } catch (error) {
       if (error.response.status === 404) {
         return null;
@@ -132,7 +149,9 @@ export const RestApiProvider = ({ children }) => {
   };  
 
   const updateProductQuantity = async (fridgeId, productId, quantity) => {
-    return await apiClient.patch(`/fridge/updateProductQuantity?fridgeId=${fridgeId}&productId=${productId}&quantity=${quantity}`);
+    return await apiClient.patch(
+      `/fridge/updateProductQuantity?fridgeId=${fridgeId}&productId=${productId}&quantity=${quantity}`,
+    );
   };
 
   const createFridge = async (name) => {
@@ -182,13 +201,51 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const getRecipesPage = async (page, pageSize, search, ingredients) => {
+    const response = await apiClient.post(
+      `/recipe/getPaged?page=${page}&pageSize=${pageSize}`,
+      { search, ingredients },
+    );
+
+    // console.log(response.data);
+    return response.data;
+  }; // this
+
+  const addRecipesPhotos = async (recipeId, photos) => {
+    const data = new FormData();
+
+    photos.forEach((photo) => {
+      data.append("photos", {
+        uri: photo.uri,
+        name: photo.fileName,
+        type: photo.type,
+      });
+    });
+
+    console.log(data);
+
+    const response = await apiMultipart.post(
+      `/recipe/addPhotos?recipeId=${recipeId}`,
+      data,
+    ); //
+
+    return response.data;
+  };
+
+  const getFoodCategorySuggestions = async (search) => {
+    const response = await apiClient.get(
+      `/category/getSuggestions?search=${search}`,
+    );
+    return response.data;
+  };
+
   const value = {
     isSignedIn,
-    
+
     // Login
     login,
-    register,
     signOut,
+    register,
 
     // Category
     categoryGetAll,
@@ -210,6 +267,12 @@ export const RestApiProvider = ({ children }) => {
     getShoppingLists,
     updateShoppingListQuantity,
     createShoppingList,
+
+    // Recipe
+    getRecipesPage,
+    addRecipesPhotos,
+
+    getFoodCategorySuggestions,
   };
 
   return (

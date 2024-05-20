@@ -33,9 +33,9 @@ const ProductForm = ({ visible, onSubmit, onClose, categories = [], units = [], 
   const handleCategoryInput = (text) => {
     setCategoryName(text);
     setFilteredOptions(
-      categories.filter(option => 
-        option.toLowerCase().includes(text.toLowerCase())
-      )
+      categories.filter((option) =>
+        option.toLowerCase().includes(text.toLowerCase()),
+      ),
     );
     setShowDropdown(true);
   };
@@ -114,14 +114,14 @@ const ProductForm = ({ visible, onSubmit, onClose, categories = [], units = [], 
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
-    width: '90%',
+    width: "90%",
     borderRadius: 10,
   },
   input: {
@@ -132,9 +132,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   dropdown: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     maxHeight: 100,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 12,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
 });

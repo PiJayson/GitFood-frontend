@@ -52,7 +52,9 @@ export const syncFridgeStore = {
     const storeId = useFridgesStore().currentStoreId;
     if (!storeId) return undefined;
 
-    useFridgesStore().fridges.find((store) => store.id === storeId);
+    return useFridgesStore
+      .getState()
+      .fridges.find((store) => store.id === storeId);
   },
 
   loadStores: async (getFridges) => {

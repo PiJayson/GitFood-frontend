@@ -4,6 +4,7 @@ import ScannerComponent from "../../components/scanner/ScannerComponent";
 import ProductForm from "../../components/scanner/NewProductForm";
 import { useRestApi } from "../../providers/RestApiProvider";
 import { syncFridgeStore } from "../../screens/fridge/FridgeStore";
+import FridgeScreen from "./FridgeScreen";
 
 export default function FridgeScannerScreen({ navigation }) {
   const { getProductByBarcode, updateProductQuantity, categoryGetAll, productAdd, categoryGetUnits } = useRestApi();

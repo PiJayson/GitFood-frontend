@@ -16,7 +16,7 @@ import ProductComponent from "../../components/fridge/ProductComponent";
 const windowDimensions = Dimensions.get("window");
 
 const FridgeScreen = ({ navigation }) => {
-  const { updateProductQuantity } = useRestApi();
+  const { updateProductQuantity, getFridgeProducts } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
@@ -58,11 +58,14 @@ const FridgeScreen = ({ navigation }) => {
         syncStore={syncFridgeStore}
         addNewItemForm={() => setFormVisible(true)}
       />
-      <CategoryList
-        syncStore={syncFridgeStore}
-        renderCategory={renderCategory}
-        updateProductQuantity={updateProductQuantity}
-      />
+      <View style={{marginTop: 40, flex: 1}}>
+        <CategoryList
+          syncStore={syncFridgeStore}
+          renderCategory={renderCategory}
+          updateProductQuantity={updateProductQuantity}
+          onRefresh={async () => { console.log("refresh"); }}
+        />
+      </View>
       <Button
         title="Open Scanner"
         mode="outlined"
