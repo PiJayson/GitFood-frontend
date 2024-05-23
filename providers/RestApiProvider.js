@@ -141,7 +141,9 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const signOut = async () => {
+    await apiClient.delete('/login/signOut');
     await AsyncStorage.removeItem("AWTtoken");
+    await AsyncStorage.removeItem("username");
     setIsSignedIn(false);
     setUsername(null);
   };
