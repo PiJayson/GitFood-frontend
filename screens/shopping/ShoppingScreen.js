@@ -22,6 +22,7 @@ const ShoppingScreen = ({ navigation }) => {
   const [shoppingStarted, setShoppingStarted] = useState(false);
 
   const elements = syncShoppingStore.elements();
+  const currentStoreId = syncShoppingStore.currentStoreId();
 
   const finishedShopping = () => {
     console.log("Shopping finished");
@@ -99,9 +100,15 @@ const ShoppingScreen = ({ navigation }) => {
         onClose={() => setFormVisible(false)}
       />
       {!shoppingStarted ? (
-        <Button title="Start Shopping" mode="outlined" onPress={() => setShoppingStarted(true)}>
+        <>
+        {currentStoreId != -1 ? (
+          <Button mode="outlined" onPress={() => setShoppingStarted(true)}>
           Start Shopping
         </Button>
+        ) : (
+          <></>
+        )}
+      </>
       ) : (
         <>
           <Button title="Stop Shopping" mode="outlined" onPress={() => {

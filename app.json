@@ -24,7 +24,7 @@
       "package": "com.anonymous.GitFoodfrontend"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/fork.png"
     },
     "extra": {
       "eas": {
