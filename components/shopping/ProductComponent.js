@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import IncrementDecrement from "../universal/IncrementDecrement";
+import { theme } from "../../assets/theme";
 
 export default function ProductComponent({ baseProduct, updateProductQuantity, syncStore }) {
   const [product, setProduct] = useState(baseProduct);
@@ -56,12 +57,8 @@ const styles = StyleSheet.create({
   productQuantity: {
     fontSize: 16,
     flex: 1,
+    marginRight: 10,
+    fontWeight: 'bold',
     textAlign: 'right',
-  },
-  customButton: {
-    marginHorizontal: 5,
-    borderRadius: 10,
-    backgroundColor: 'purple',
-    iconColor: 'white',
-  },
+  }
 });

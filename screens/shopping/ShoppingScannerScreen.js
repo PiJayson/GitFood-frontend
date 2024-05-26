@@ -182,7 +182,7 @@ export default function ShoppingScannerScreen({ navigation }) {
           <Text style={styles.noProductText}>No Product Scanned</Text>
         )}
       </View>
-      <Button title="Stop Scanning" mode="outlined" onPress={navigation.goBack} >Stop Scanning</Button>
+      <Button title="Stop Scanning" style={{ maxWidth: 800 }} mode="outlined" onPress={navigation.goBack} >Stop Scanning</Button>
     </View>
   );
 }
@@ -190,13 +190,16 @@ export default function ShoppingScannerScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignSelf: "center",
     justifyContent: "center",
     alignItems: "center",
   },
   productDetails: {
     flex: 1,
-    justifyContent: "center",
+    alignSelf: "center",
     alignItems: "center",
+    justifyContent: "center",
+    maxWidth: 800,
     width: '90%',
   },
   productCard: {
@@ -204,6 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     width: '100%',
+    minHeight: 200,
     alignItems: 'flex-start',
     shadowColor: "#000",
     shadowOffset: {
