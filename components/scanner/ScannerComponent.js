@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { View, StyleSheet, Platform, Text } from "react-native";
+import { View, StyleSheet, Platform, Text, TouchableOpacity } from "react-native";
 import { Camera, CameraView, useCameraPermissions } from "expo-camera";
 import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import {
   BrowserMultiFormatReader,
   NotFoundException,
@@ -12,6 +13,9 @@ import {
 export default function ScannerComponent({ onBarcodeScanned, style }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [isFocused, setIsFocused] = useState(true);
+  const [facing, setFacing] = useState("back");
+  const [cameraDevices, setCameraDevices] = useState([]);
+  const [currentDeviceIndex, setCurrentDeviceIndex] = useState(0);
   const cameraRef = useRef(null);
   const videoRef = useRef(null);
   const codeReader = new BrowserMultiFormatReader();
@@ -23,13 +27,23 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
     }, []),
   );
 
+  const toggleFacingZxing = () => {
+    setCurrentDeviceIndex((prevIndex) => (prevIndex + 1) % cameraDevices.length);
+  };
+
+  const toggleFacingExpo = () => {
+    setFacing((prevFacing) => (prevFacing === "back" ? "front" : "back"));
+  };
+
   useEffect(() => {
     if (Platform.OS === "web") {
       const startScanning = async () => {
         try {
           const videoInputDevices = await codeReader.listVideoInputDevices();
+          setCameraDevices(videoInputDevices);
+
           if (videoInputDevices.length > 0) {
-            const selectedDeviceId = videoInputDevices[0].deviceId;
+            const selectedDeviceId = videoInputDevices[currentDeviceIndex].deviceId;
             await codeReader.decodeFromVideoDevice(
               selectedDeviceId,
               videoRef.current,
@@ -69,7 +83,7 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
         // setHasPermission(status === "granted");
       })();
     }
-  }, []);
+  }, [currentDeviceIndex]);
 
   useEffect(() => {
     if (!isFocused && cameraRef.current) {
@@ -82,6 +96,9 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
   if (Platform.OS === "web") {
     return (
       <View style={[styles.container, style]}>
+        <TouchableOpacity style={styles.switchButton} onPress={toggleFacingZxing}>
+          <Ionicons name="camera-reverse" size={30} color="white" />
+        </TouchableOpacity>
         <video ref={videoRef} style={styles.video} />
       </View>
     );
@@ -104,10 +121,13 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.switchButton} onPress={toggleFacingExpo}>
+        <Ionicons name="camera-reverse" size={30} color="white" />
+      </TouchableOpacity>
       {isFocused && (
         <CameraView
           style={styles.camera}
-          facing="back"
+          facing={facing}
           // ref={cameraRef}
           onBarcodeScanned={(event) => onBarcodeScanned(event.data)}
         />
@@ -131,5 +151,14 @@ const styles = StyleSheet.create({
   video: {
     width: "100%",
     height: "100%",
+  },
+  switchButton: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 20,
+    padding: 10,
+    zIndex: 1,
   },
 });

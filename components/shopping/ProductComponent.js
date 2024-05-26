@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     flex: 2,
+    marginLeft: 15,
     fontSize: 16,
   },
   incrementDecrementContainer: {

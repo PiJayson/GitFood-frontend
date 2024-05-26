@@ -190,7 +190,6 @@ export default function ShoppingScannerScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignSelf: "center",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -207,7 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     width: '100%',
-    minHeight: 200,
+    minHeight: 150,
     alignItems: 'flex-start',
     shadowColor: "#000",
     shadowOffset: {
