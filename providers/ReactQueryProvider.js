@@ -29,4 +29,19 @@ const getCategorySuggestion = (query) => {
   });
 };
 
-export { getRecipes, getCategorySuggestion };
+const getComments = (recipeId, pageSize) => {
+  const { getCommentsPage } = useRestApi();
+  return useInfiniteQuery({
+    queryKey: ["comments", recipeId],
+    queryFn: ({ pageParam = 1 }) =>
+      getCommentsPage(recipeId, pageParam, pageSize),
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < pageSize) {
+        return undefined;
+      }
+      return pages.length + 1;
+    },
+  });
+};
+
+export { getRecipes, getCategorySuggestion, getComments };

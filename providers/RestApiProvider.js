@@ -327,6 +327,20 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const postAddComment = async (recipeId, comment) => {
+    const response = await apiClient.post(`/recipe/addComment?recipeId=${recipeId}&comment=${comment}`);
+    
+    return response.data;
+  }
+
+  const getCommentsPage = async (recipeId, page, pageSize) => {
+    const response = await apiClient.get(
+      `/recipe/getCommentsPaged?recipeId=${recipeId}&page=${page}&pageSize=${pageSize}`,
+    );
+
+    return response.data;
+  };
+
   const value = {
     isSignedIn,
     username,
@@ -364,6 +378,8 @@ export const RestApiProvider = ({ children }) => {
     addRecipePhotos,
 
     getCategorySuggestion,
+    postAddComment,
+    getCommentsPage,
   };
 
   return (
