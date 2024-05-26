@@ -21,10 +21,11 @@ export default function FridgeGroup({ navigation }) {
   return (
     <EventProvider style={{ flex: 1 }}>
       <FridgeStack.Navigator>
-        <FridgeStack.Screen name="Fridge" component={FridgeScreen} />
+        <FridgeStack.Screen name="Fridge" component={FridgeScreen}  options={{ headerShown: false }}/>
         <FridgeStack.Screen
           name="FridgeScanner"
           component={FridgeScannerScreen}
+          options={{ headerShown: false }}
         />
       </FridgeStack.Navigator>
     </EventProvider>
