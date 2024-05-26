@@ -39,23 +39,29 @@ export default function CategoryComponent({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    padding: 15,
     margin: 10,
     borderColor: "black",
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 25,
   },
   categoryHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    height: 50,
   },
   categoryName: {
     fontSize: 18,
     fontWeight: "bold",
+    marginLeft: 20,
+    flex: 2,
   },
   categoryQuantity: {
-    fontSize: 18,
+    fontSize: 24,
+    marginLeft: 10,
+    flex: 1,
+    textAlign: 'right',
   },
   expandButton: {
     marginLeft: 10,

@@ -11,6 +11,7 @@ import CategoryList from "../../components/category_list/CategoryList";
 import CategoryComponent from "../../components/shopping/CategoryComponent";
 import ProductComponent from "../../components/shopping/ProductComponent";
 import FinishTransactionForm from "../../components/shopping/FinishTransactionForm";
+import Background from "../../components/universal/Background";
 
 const windowDimensions = Dimensions.get("window");
 
@@ -22,6 +23,7 @@ const ShoppingScreen = ({ navigation }) => {
   const [shoppingStarted, setShoppingStarted] = useState(false);
 
   const elements = syncShoppingStore.elements();
+  const currentStoreId = syncShoppingStore.currentStoreId();
 
   const finishedShopping = () => {
     console.log("Shopping finished");
@@ -75,51 +77,59 @@ const ShoppingScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
-      <ExpandableShoppingList
-        syncStore={syncShoppingStore}
-        addNewItemForm={() => setFormVisible(true)}
-      />
-      <FinishTransactionForm 
-        visible={showFridgeSelector}
-        onSubmit={handleFridgeSelect}
-        onClose={() => setShowFridgeSelector(false)}
-        syncStore={syncFridgeStore}
-      />
-      <View style={{marginTop: 40, flex: 1}}>
-        <CategoryList
+    <Background style={{ maxWidth: 800, padding: 0 }}>
+      <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
+        <ExpandableShoppingList
           syncStore={syncShoppingStore}
-          renderCategory={renderCategory}
-          updateProductQuantity={updateShoppingListQuantity}
+          addNewItemForm={() => setFormVisible(true)}
         />
-      </View>
-      <NewListForm
-        visible={formVisible}
-        onSubmit={syncShoppingStore.createStore}
-        onClose={() => setFormVisible(false)}
-      />
-      {!shoppingStarted ? (
-        <Button title="Start Shopping" mode="outlined" onPress={() => setShoppingStarted(true)}>
-          Start Shopping
-        </Button>
-      ) : (
-        <>
-          <Button title="Stop Shopping" mode="outlined" onPress={() => {
-            setShoppingStarted(false);
-            finishedShopping();
-          }}>
-            Stop Shopping
+        <FinishTransactionForm 
+          visible={showFridgeSelector}
+          onSubmit={handleFridgeSelect}
+          onClose={() => setShowFridgeSelector(false)}
+          syncStore={syncFridgeStore}
+        />
+        <View style={{marginTop: 45, flex: 1}}>
+          <CategoryList
+            syncStore={syncShoppingStore}
+            renderCategory={renderCategory}
+            updateProductQuantity={updateShoppingListQuantity}
+          />
+        </View>
+        <NewListForm
+          visible={formVisible}
+          onSubmit={syncShoppingStore.createStore}
+          onClose={() => setFormVisible(false)}
+        />
+        {!shoppingStarted ? (
+          <>
+          {currentStoreId != -1 ? (
+            <Button mode="outlined" onPress={() => setShoppingStarted(true)}>
+            Start Shopping
           </Button>
-          <Button
-            title="Open Scanner"
-            mode="outlined"
-            onPress={() => navigation.navigate("ShoppingScanner")}
-          >
-            Open Scanner
-          </Button>
+          ) : (
+            <></>
+          )}
         </>
-      )}
-    </View>
+        ) : (
+          <>
+            <Button title="Stop Shopping" mode="outlined" onPress={() => {
+              setShoppingStarted(false);
+              finishedShopping();
+            }}>
+              Stop Shopping
+            </Button>
+            <Button
+              title="Open Scanner"
+              mode="outlined"
+              onPress={() => navigation.navigate("ShoppingScanner")}
+            >
+              Open Scanner
+            </Button>
+          </>
+        )}
+      </View>
+    </Background>
   );
 };
 

@@ -12,6 +12,7 @@ import NewListForm from "../../components/fridge/NewListForm";
 import CategoryComponent from "../../components/fridge/CategoryComponent";
 import CategoryList from "../../components/category_list/CategoryList";
 import ProductComponent from "../../components/fridge/ProductComponent";
+import Background from "../../components/universal/Background";
 
 const windowDimensions = Dimensions.get("window");
 
@@ -21,6 +22,8 @@ const FridgeScreen = ({ navigation }) => {
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
   });
+
+  const currentStoreId = syncFridgeStore.currentStoreId();
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener(
@@ -53,32 +56,38 @@ const FridgeScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
-      <ExpandableFridgeList
-        syncStore={syncFridgeStore}
-        addNewItemForm={() => setFormVisible(true)}
-      />
-      <View style={{marginTop: 40, flex: 1}}>
-        <CategoryList
+    <Background style={{ maxWidth: 800, padding: 0 }}>
+      <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
+        <ExpandableFridgeList
           syncStore={syncFridgeStore}
-          renderCategory={renderCategory}
-          updateProductQuantity={updateProductQuantity}
-          onRefresh={async () => { console.log("refresh"); }}
+          addNewItemForm={() => setFormVisible(true)}
+        />
+        <View style={{marginTop: 45, flex: 1}}>
+          <CategoryList
+            syncStore={syncFridgeStore}
+            renderCategory={renderCategory}
+            updateProductQuantity={updateProductQuantity}
+            onRefresh={async () => { console.log("refresh"); }}
+          />
+        </View>
+        {currentStoreId != -1 ? (
+          <Button
+            title="Open Scanner"
+            mode="outlined"
+            onPress={() => navigation.navigate("FridgeScanner")}
+          >
+           Open Scanner
+          </Button>
+          ) : (
+            <></>
+        )}
+        <NewListForm
+          visible={formVisible}
+          onSubmit={syncFridgeStore.createStore}
+          onClose={() => setFormVisible(false)}
         />
       </View>
-      <Button
-        title="Open Scanner"
-        mode="outlined"
-        onPress={() => navigation.navigate("FridgeScanner")}
-      >
-        Open Scanner
-      </Button>
-      <NewListForm
-        visible={formVisible}
-        onSubmit={syncFridgeStore.createStore}
-        onClose={() => setFormVisible(false)}
-      />
-    </View>
+    </Background>
   );
 };
 

@@ -19,10 +19,11 @@ export default function ShoppingeGroup({ navigation }) {
   return (
     <EventProvider style={{ flex: 1 }}>
       <ShoppingStack.Navigator>
-        <ShoppingStack.Screen name="Shopping" component={ShoppingScreen} />
+        <ShoppingStack.Screen name="Shopping" component={ShoppingScreen} options={{ headerShown: false }}/>
         <ShoppingStack.Screen
           name="ShoppingScanner"
           component={ShoppingScannerScreen}
+          options={{ headerShown: false }}
         />
       </ShoppingStack.Navigator>
     </EventProvider>
