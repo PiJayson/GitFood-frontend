@@ -233,6 +233,10 @@ export const RestApiProvider = ({ children }) => {
     }));
   };
 
+  const patchFridgeShare = async (fridgeId, username) => {
+    await apiClient.patch(`/fridge/share?fridgeId=${fridgeId}&userLogin=${username}`);
+  }
+
   // Shopping
 
   const getShoppingProducts = async (shoppingId) => {
@@ -350,6 +354,7 @@ export const RestApiProvider = ({ children }) => {
     updateProductQuantity,
     createFridge,
     getFridges,
+    patchFridgeShare,
 
     // Shopping List
     getShoppingProducts,

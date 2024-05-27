@@ -11,6 +11,7 @@ export default function ExpandableList({
   isChosen,
   addNewItemForm,
   onExpand,
+  customComponent,
 }) {
   const [expanded, setExpanded] = React.useState(false);
 
@@ -56,6 +57,7 @@ export default function ExpandableList({
             left={(props) => <List.Icon {...props} icon="plus" />}
           />
         </ScrollView>
+        {customComponent}
       </List.Accordion>
     </View>
   );

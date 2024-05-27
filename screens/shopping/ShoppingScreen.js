@@ -45,6 +45,10 @@ const ShoppingScreen = ({ navigation }) => {
     setShowFridgeSelector(false);
   };
 
+  const handleShare = async () => {
+    console.log("adsf");
+  }
+
   useEffect(() => {
     const subscription = Dimensions.addEventListener(
       "change",
@@ -82,6 +86,7 @@ const ShoppingScreen = ({ navigation }) => {
         <ExpandableShoppingList
           syncStore={syncShoppingStore}
           addNewItemForm={() => setFormVisible(true)}
+          handleShare={handleShare}
         />
         <FinishTransactionForm 
           visible={showFridgeSelector}
