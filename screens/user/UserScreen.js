@@ -1,8 +1,9 @@
 // components/CustomDrawerContent.js
 import React, { useState } from 'react';
-import { View, Text, Button, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { useRestApi } from '../../providers/RestApiProvider';
+import Button from '../../components/universal/Button';
 
 const UserScreen = (props) => {
   const { username, signOut } = useRestApi();
@@ -18,7 +19,9 @@ const UserScreen = (props) => {
           <Text style={styles.username}>{username}</Text>
         </View>
         <View style={styles.logoutButton}>
-          <Button title="Logout" onPress={signOut} />
+          <Button title="Logout" mode="outlined" onPress={signOut} >
+            Logout
+          </Button>
         </View>
       </DrawerContentScrollView>
     </>

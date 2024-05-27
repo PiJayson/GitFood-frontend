@@ -1,12 +1,17 @@
-import React, { useState } from "react";
-import { View, StyleSheet, FlatList, Modal } from "react-native";
-import { Text, Button, TextInput, Searchbar } from "react-native-paper";
+import React, { useDeferredValue, useEffect, useState } from "react";
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  StyleSheet,
+  View,
+  Platform,
+} from "react-native";
+import OutsidePressHandler, { EventProvider } from "react-native-outside-press";
+import { Button, Searchbar, Text } from "react-native-paper";
+import { theme } from "../../assets/theme";
 import { getCategorySuggestion } from "../../providers/ReactQueryProvider";
 import SimpleList from "../universal/SimpleList";
-import { useEffect } from "react";
-import { useDeferredValue } from "react";
-import { theme } from "../../assets/theme";
-import OutsidePressHandler, { EventProvider } from "react-native-outside-press";
 
 const NewIngredientInSearchForm = ({
   visible,
@@ -54,6 +59,7 @@ const NewIngredientInSearchForm = ({
     >
       <EventProvider style={{ flex: 1 }}>
         <View style={styles.modalContainer}>
+          {/* <KeyboardAvoidingView behavior="height" style={styles.modalContainer}> */}
           <OutsidePressHandler onOutsidePress={onClose} style={{ flex: 1 }}>
             <Text style={styles.header}>Add ingredient to search</Text>
             <View style={styles.search}>
@@ -88,6 +94,7 @@ const NewIngredientInSearchForm = ({
               )}
             </View>
           </OutsidePressHandler>
+          {/* </KeyboardAvoidingView> */}
         </View>
       </EventProvider>
     </Modal>
@@ -97,13 +104,15 @@ const NewIngredientInSearchForm = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    height: "50%",
+    height: "69%",
     width: "100%",
     backgroundColor: theme.colors.background,
     borderTopRightRadius: 18,
     borderTopLeftRadius: 18,
     position: "absolute",
+    flexDirection: "column",
     bottom: 0,
+    justifyContent: "flex-end",
     alignContent: "center",
   },
   search: {

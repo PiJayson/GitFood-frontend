@@ -1,41 +1,38 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { getStatusBarHeight } from "react-native-status-bar-height";
 import { IconButton } from "react-native-paper";
 
-export default function IncrementDecrement({ update }) {
+export default function IncrementDecrement({ update, containerStyle, buttonStyle }) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <IconButton
         mode="outlined"
         icon="plus"
-        style={styles.button}
+        style={[styles.button, buttonStyle]}
         onPress={() => update(1)}
+        iconColor={buttonStyle?.iconColor || 'black'}  // Set icon color from style prop
+        containerColor={buttonStyle?.containerColor || 'transparent'}  // Set container color from style prop
       />
       <IconButton
         mode="outlined"
         icon="minus"
-        style={styles.button}
+        style={[styles.button, buttonStyle]}
         onPress={() => update(-1)}
+        iconColor={buttonStyle?.iconColor || 'black'}  // Set icon color from style prop
+        containerColor={buttonStyle?.containerColor || 'transparent'}  // Set container color from style prop
       />
     </View>
   );
-} //we should change this to Icons
+}
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    flex: 1,
-    paddingLeft: 8,
-    maxHeight: 100,
-    right: 0,
-    height: 30,
-    maxWidth: 90,
+    justifyContent: "center",
+    alignItems: "center",
     width: 90,
-    marginTow: 5,
-    marginBottom: 10,
   },
   button: {
-    margin: 5,
+    marginHorizontal: 5,
   },
 });

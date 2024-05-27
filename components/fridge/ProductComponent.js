@@ -25,9 +25,11 @@ export default function ProductComponent({ baseProduct, updateProductQuantity, s
 
   return (
     <View style={styles.productItem}>
-        <Text style={styles.productName}>{product.productName}</Text>
-        <Text style={styles.productQuantity}>{product.quantity}</Text>
-        <IncrementDecrement update={updateCount} />
+      <Text style={styles.productName}>{product.productName}</Text>
+      <View style={styles.incrementDecrementContainer}>
+        <IncrementDecrement update={updateCount} buttonStyle={styles.customButton} />
+      </View>
+      <Text style={styles.productQuantity}>{product.quantity}</Text>
     </View>
   );
 }
@@ -38,15 +40,26 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+    width: '100%',
   },
   productName: {
-    flex: 1,
+    flex: 2,
+    marginLeft: 15,
     fontSize: 16,
   },
-  productQuantity: {
-    width: 50,
-    textAlign: "center",
+  incrementDecrementContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
+  productQuantity: {
+    fontSize: 16,
+    flex: 1,
+    marginRight: 20,
+    fontWeight: 'bold',
+    textAlign: 'right',
+  }
 });

@@ -10,6 +10,7 @@ export default function RecipesScreen({ navigation }) {
       <FridgesStack.Screen
         name="BrowseRecipes"
         component={RecipesSearchScreen}
+        options={{ headerShown: false }}
       />
       <FridgesStack.Screen name="Recipe" component={SingleRecipeScreen} />
     </FridgesStack.Navigator>

@@ -144,11 +144,11 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const signOut = async () => {
+    await apiClient.delete("/login/signOut");
     await AsyncStorage.removeItem("AWTtoken");
     await AsyncStorage.removeItem("username");
     setIsSignedIn(false);
     setUsername(null);
-    await apiClient.delete("/login/signOut");
   };
 
   // Category
@@ -303,12 +303,7 @@ export const RestApiProvider = ({ children }) => {
       };
     });
 
-    // body.append("images", {
-    //   files,
-    // });
-
     console.log(body);
-    // body.append("Content-Type", "image/png");
 
     await fetch(
       `https://gitfood.fun:5255/recipe/addPhotos?recipeId=${recipeId}`,
@@ -330,13 +325,6 @@ export const RestApiProvider = ({ children }) => {
         console.log("response" + JSON.stringify(res));
       })
       .catch((e) => console.log(e));
-
-    // const response = await apiMultipart.post(
-    //   `/recipe/addPhotos?recipeId=${recipeId}`,
-    //   {
-    //     files,
-    //   },
-    // );
 
     return response.data;
   };
@@ -362,13 +350,26 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const getCategorySuggestion = async (query) => {
-    // console.log(search);
-
     const response = await apiClient.get(
       `/Category/getSuggestions?name=${query.search}&resultsCount=${query.count} `,
     );
 
-    // console.log(response.data);
+    return response.data;
+  };
+
+  const postAddComment = async (recipeId, comment) => {
+    const response = await apiClient.post(
+      `/recipe/addComment?recipeId=${recipeId}&comment=${comment}`,
+    );
+
+    return response.data;
+  };
+
+  const getCommentsPage = async (recipeId, page, pageSize) => {
+    const response = await apiClient.get(
+      `/recipe/getCommentsPaged?recipeId=${recipeId}&page=${page}&pageSize=${pageSize}`,
+    );
+
     return response.data;
   };
 
@@ -409,6 +410,8 @@ export const RestApiProvider = ({ children }) => {
     addRecipePhotos,
 
     getCategorySuggestion,
+    postAddComment,
+    getCommentsPage,
   };
 
   return (
