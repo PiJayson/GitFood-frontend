@@ -44,6 +44,7 @@ export default function RecipesSearchScreen({ navigation }) {
           placeholder="Search"
           onChangeText={(query) => setSearchQuery(query)}
           value={searchQuery}
+          style={{ width: "100%", maxWidth: 700, alignSelf: "center" }}
         />
         <IngredientsInSearch
           state={categoriesQuery}
@@ -67,9 +68,9 @@ export default function RecipesSearchScreen({ navigation }) {
           dispatch({ type: "add", category: ingredient })
         }
         onClose={() => {
-          console.log("close modal");
           setFormVisible(false);
         }}
+        selected={categoriesQuery.map((category) => category.id)}
       />
     </View>
   );
@@ -78,20 +79,27 @@ export default function RecipesSearchScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
+    // padding: 15,
     width: "100%",
-    margin: 12,
+    // margin: 12,
+    height: "100%",
     alignSelf: "center",
     alignItems: "center",
     justifyContent: "center",
   },
   query: {
     width: "100%",
-    marginBottom: 10,
-    flex: 1,
+    marginBottom: 2,
+    marginTop: 2,
+    flexDirection: "column",
+    // alignItems: "center",
+    // zIndex: 1,
   },
   results: {
-    flex: 3,
+    flex: 1,
     width: "100%",
+    // flexGrow: 1,
+    // height: "100%",
+    // width: "100%",
   },
 });

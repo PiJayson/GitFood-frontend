@@ -1,19 +1,28 @@
-import React, {useEffect, useState, useRef} from "react";
-import { View, StyleSheet, TextInput, Button, Alert, ActivityIndicator, ScrollView } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Button,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
 import { Text } from "react-native-paper";
 import Header from "../../components/universal/Header";
 import BackButton from "../../components/universal/BackButton";
 import AddPhotoButton from "../../components/universal/AddPhotoButton";
 import * as ImagePicker from "expo-image-picker";
 import { useRestApi } from "../../providers/RestApiProvider";
-import Markdown from 'react-native-markdown-display';
+import Markdown from "react-native-markdown-display";
 
 export default function SingleRecipeScreen({ route, navigation }) {
   const { recipe } = route.params;
   const { name, description } = recipe;
-  const { addRecipesPhotos, getMarkdown, updateMarkdown, username } = useRestApi();
+  const { addRecipePhotos, getMarkdown, updateMarkdown, username } =
+    useRestApi();
   const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
 
   useEffect(() => {
     const fetchMarkdown = async () => {
@@ -46,7 +55,7 @@ export default function SingleRecipeScreen({ route, navigation }) {
   };
 
   const handleSave = async () => {
-    console.log(recipe, username)
+    console.log(recipe, username);
     await updateMarkdown(recipe.id, content);
     setIsEditing(false);
   };
@@ -60,39 +69,34 @@ export default function SingleRecipeScreen({ route, navigation }) {
   };
 
   return (
-      <ScrollView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <BackButton goBack={navigation.goBack} />
-      <Header>{name}</Header>
-      <Text>{description}</Text>
-      {/* <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
+    <ScrollView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <BackButton goBack={navigation.goBack} />
+        <Header>{name}</Header>
+        <Text>{description}</Text>
+        {/* <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
       <Text>Ingredients</Text>
       <Text>{ingredients.join(", ")}</Text> */}
-      {/* <Text>Instructions</Text>
+        {/* <Text>Instructions</Text>
       <Text>{instructions}</Text> */}
-      <AddPhotoButton onPress={onAddPhoto} />
-      {username == recipe.author && 
-        <Button
-        title={isEditing ? 'Save' : 'Edit'}
-        onPress={handleEdit}
-        />
-      }
-      {isEditing ? (
-        <View style={styles.editorContainer}>
-          <TextInput
-            style={styles.textInput}
-            multiline
-            value={content}
-            onChangeText={setContent}
-          />
-        </View>
-      ) : (
-          <Markdown>
-          {content}
-        </Markdown>
-      )}
-    </View>
-      </ScrollView>
+        <AddPhotoButton onPress={onAddPhoto} />
+        {username == recipe.author && (
+          <Button title={isEditing ? "Save" : "Edit"} onPress={handleEdit} />
+        )}
+        {isEditing ? (
+          <View style={styles.editorContainer}>
+            <TextInput
+              style={styles.textInput}
+              multiline
+              value={content}
+              onChangeText={setContent}
+            />
+          </View>
+        ) : (
+          <Markdown>{content}</Markdown>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -108,14 +112,14 @@ const styles = StyleSheet.create({
   },
   editorContainer: {
     flex: 1,
-    width: '100%',
+    width: "100%",
   },
   textInput: {
     height: 200,
-    width: '100%',
-    textAlignVertical: 'top',
+    width: "100%",
+    textAlignVertical: "top",
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
   },
 });

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNotification } from "./NotificationProvider";
 import curlirize from "axios-curlirize";
 import { Platform } from "react-native";
+import * as FileSystem from "expo-file-system";
 
 const RestApiContext = createContext();
 
@@ -13,14 +14,15 @@ export const RestApiProvider = ({ children }) => {
   const [isSignedIn, setIsSignedIn] = useState(
     async () => await AsyncStorage.getItem("AWTtoken"),
   );
-  const [username, setUsername] = useState('');
+
+  const [username, setUsername] = useState("");
   const triggerNotification = useNotification();
 
   useEffect(() => {
     const fetchUsername = async () => {
       try {
         const storedUsername = await AsyncStorage.getItem("username");
-        setUsername(storedUsername);
+        setUsername("Maciej1");
       } catch (error) {
         console.error("Error fetching username: ", error);
       }
@@ -28,7 +30,6 @@ export const RestApiProvider = ({ children }) => {
 
     fetchUsername();
   }, []);
-
 
   const apiClient = axios.create({
     baseURL: "https://gitfood.fun:5255",
@@ -59,6 +60,8 @@ export const RestApiProvider = ({ children }) => {
     (error) => {
       if (error.response) {
         switch (error.response.status) {
+          case 400:
+            setIsSignedIn(false);
           case 401:
             setIsSignedIn(false);
             break;
@@ -145,7 +148,7 @@ export const RestApiProvider = ({ children }) => {
     await AsyncStorage.removeItem("username");
     setIsSignedIn(false);
     setUsername(null);
-    await apiClient.delete('/login/signOut');
+    await apiClient.delete("/login/signOut");
   };
 
   // Category
@@ -203,10 +206,10 @@ export const RestApiProvider = ({ children }) => {
   const patchFridgeAddProducts = async (products, fridgeId) => {
     const response = await apiClient.patch("/fridge/addProducts", {
       products,
-      fridgeId
+      fridgeId,
     });
     return response.data;
-  };  
+  };
 
   const updateProductQuantity = async (fridgeId, productId, quantity) => {
     return await apiClient.patch(
@@ -236,7 +239,9 @@ export const RestApiProvider = ({ children }) => {
   // Shopping
 
   const getShoppingProducts = async (shoppingId) => {
-    const response = await apiClient.get(`/shoppingList/get?shoppingListId=${shoppingId}`);
+    const response = await apiClient.get(
+      `/shoppingList/get?shoppingListId=${shoppingId}`,
+    );
 
     console.log("data: ", response.data, shoppingId);
     return response.data;
@@ -251,50 +256,87 @@ export const RestApiProvider = ({ children }) => {
     }));
   };
 
-  const updateShoppingListQuantity = async (shoppingId, categoryId, quantity) => {
-    return await apiClient.patch(`/shoppingList/update?shoppingListId=${shoppingId}&categoryId=${categoryId}&quantity=${quantity}`);
+  const updateShoppingListQuantity = async (
+    shoppingId,
+    categoryId,
+    quantity,
+  ) => {
+    return await apiClient.patch(
+      `/shoppingList/update?shoppingListId=${shoppingId}&categoryId=${categoryId}&quantity=${quantity}`,
+    );
   };
 
   const createShoppingList = async (name) => {
     const response = await apiClient.post(`/shoppingList/create?name=${name}`);
-    
+
     return response.data;
   };
 
   const getRecipesPage = async (page, pageSize, search, ingredients) => {
+    console.log(search, ingredients);
+
     const response = await apiClient.post(
       `/recipe/getPaged?page=${page}&pageSize=${pageSize}`,
-      { search, ingredients },
+      { searchName: search, categoryIds: [] },
     );
 
-    // console.log(response.data);
+    console.log(response.data);
     return response.data;
   }; // this
 
   const addRecipePhotos = async (recipeId, photos) => {
-    const formData = new FormData();
+    let body = new FormData();
+    const files = photos.assets.map((photo) => {
+      const uri = photo.uri;
+      const name = photo.fileName;
+      const type = photo.mimeType;
 
-    photos.assets.forEach((image, i) => {
-      formData.append("images", {
-        ...image,
-        uri:
-          Platform.OS === "android"
-            ? image.uri
-            : image.uri.replace("file://", ""),
-        name: `image-${i}`,
-        type: "image/jpeg", // it may be necessary in Android.
+      body.append("images", {
+        uri,
+        name,
+        type,
       });
+      return {
+        uri,
+        name,
+        type,
+      };
     });
 
-    console.log(formData);
+    // body.append("images", {
+    //   files,
+    // });
 
-    const response = await apiMultipart.post(
-      `/recipe/addPhotos?recipeId=${recipeId}`,
-      formData,
-      { curlirize: true },
-    ); //
-    console.log(response.status, response.statusText);
-    console.log(response.data);
+    console.log(body);
+    // body.append("Content-Type", "image/png");
+
+    await fetch(
+      `https://gitfood.fun:5255/recipe/addPhotos?recipeId=${recipeId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${await AsyncStorage.getItem("AWTtoken")}`,
+          "Content-Type": "multipart/form-data",
+        },
+        body: body,
+      },
+    )
+      .then((res) => {
+        console.log(res.status);
+        return res.json();
+      })
+      // .then((res) => res.json())
+      .then((res) => {
+        console.log("response" + JSON.stringify(res));
+      })
+      .catch((e) => console.log(e));
+
+    // const response = await apiMultipart.post(
+    //   `/recipe/addPhotos?recipeId=${recipeId}`,
+    //   {
+    //     files,
+    //   },
+    // );
 
     return response.data;
   };
@@ -308,19 +350,22 @@ export const RestApiProvider = ({ children }) => {
 
   const updateMarkdown = async (recipeId, content) => {
     console.log(recipeId, content);
-    const response = await apiClient.post(`/recipe/updateMarkdown?recipeId=${recipeId}`, {
-      Markdown: content
-    });
+    const response = await apiClient.post(
+      `/recipe/updateMarkdown?recipeId=${recipeId}`,
+      {
+        Markdown: content,
+      },
+    );
 
     console.log(response.data);
     return response.data;
   };
 
-  const getCategorySuggestion = async (search) => {
+  const getCategorySuggestion = async (query) => {
     // console.log(search);
 
     const response = await apiClient.get(
-      `/Category/getSuggestions?name=${search}&resultsCount=10 `,
+      `/Category/getSuggestions?name=${query.search}&resultsCount=${query.count} `,
     );
 
     // console.log(response.data);

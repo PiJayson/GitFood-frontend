@@ -108,10 +108,9 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
         <CameraView
           style={styles.camera}
           facing="back"
-          // ref={cameraRef}
           onBarcodeScanned={(event) => onBarcodeScanned(event.data)}
         />
-      )} */}
+      )}
     </View>
   );
 }
