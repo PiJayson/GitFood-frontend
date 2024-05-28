@@ -34,6 +34,7 @@ export default function RecipeList({ dataSource, onLikeRecipe, onViewRecipe }) {
   ) : (
     <FlatList
       data={data.pages.flat()}
+      contentContainerStyle={{ flexGrow: 1 }}
       renderItem={({ item }) => (
         <RecipeCard
           recipe={item}
@@ -55,6 +56,6 @@ export default function RecipeList({ dataSource, onLikeRecipe, onViewRecipe }) {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+    height: "100%",
   },
-  query: {},
 });

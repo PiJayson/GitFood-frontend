@@ -29,6 +29,14 @@ const getCategorySuggestion = (query) => {
   });
 };
 
+const getSearchSuggestion = (query) => {
+  const { getFoodCategorySuggestion } = useRestApi();
+  return useQuery({
+    queryKey: ["SearchSuggestions", query],
+    queryFn: () => getFoodCategorySuggestion(query),
+  });
+};
+
 const getComments = (recipeId, pageSize) => {
   const { getCommentsPage } = useRestApi();
   return useInfiniteQuery({
@@ -44,4 +52,4 @@ const getComments = (recipeId, pageSize) => {
   });
 };
 
-export { getRecipes, getCategorySuggestion, getComments };
+export { getRecipes, getCategorySuggestion, getSearchSuggestion, getComments };

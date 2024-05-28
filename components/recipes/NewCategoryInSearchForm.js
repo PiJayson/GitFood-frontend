@@ -79,7 +79,7 @@ const NewIngredientInSearchForm = ({
                 <FlatList
                   style={styles.categories}
                   data={dataArr}
-                  ListFooterComponent={<View style={{ height: 100 }} />}
+                  ListFooterComponent={<View style={{ height: 50 }} />}
                   renderItem={({ item }) => (
                     <Button
                       mode="text"

@@ -3,8 +3,6 @@ import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNotification } from "./NotificationProvider";
 import curlirize from "axios-curlirize";
-import { Platform } from "react-native";
-import * as FileSystem from "expo-file-system";
 
 const RestApiContext = createContext();
 
@@ -22,7 +20,7 @@ export const RestApiProvider = ({ children }) => {
     const fetchUsername = async () => {
       try {
         const storedUsername = await AsyncStorage.getItem("username");
-        setUsername("Maciej1");
+        setUsername(storedUsername);
       } catch (error) {
         console.error("Error fetching username: ", error);
       }
@@ -357,6 +355,14 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const getFoodCategorySuggestion = async (query) => {
+    const response = await apiClient.get(
+      `/FoodCategory/getSuggestions?name=${query.search}&resultsCount=${query.count} `,
+    );
+
+    return response.data;
+  };
+
   const postAddComment = async (recipeId, comment) => {
     const response = await apiClient.post(
       `/recipe/addComment?recipeId=${recipeId}&comment=${comment}`,
@@ -408,6 +414,7 @@ export const RestApiProvider = ({ children }) => {
     getMarkdown,
     updateMarkdown,
     addRecipePhotos,
+    getFoodCategorySuggestion,
 
     getCategorySuggestion,
     postAddComment,

@@ -34,7 +34,7 @@ export default function RecipeCard({ recipe, onViewRecipe, onLikeRecipe }) {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
+    marginVertical: 5,
     marginHorizontal: 10,
     borderRadius: 10,
     maxWidth: 800,
