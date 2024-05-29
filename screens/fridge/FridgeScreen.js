@@ -6,21 +6,23 @@ import { Dimensions } from "react-native";
 import { useState, useEffect } from "react";
 import { theme } from "../../assets/theme";
 import { useRestApi } from "../../providers/RestApiProvider";
-import ExpandableFridgeList from "../../components/fridge/ExpandableFridgeList";
 import { syncFridgeStore } from "./FridgeStore";
-import NewListForm from "../../components/fridge/NewListForm";
 import CategoryComponent from "../../components/fridge/CategoryComponent";
 import CategoryList from "../../components/category_list/CategoryList";
 import ProductComponent from "../../components/fridge/ProductComponent";
 import Background from "../../components/universal/Background";
 import ShareForm from "../../components/fridge/ShareForm";
+import ExpandableList from "../../components/universal/ExpandableList";
+import AddStore from "../../components/universal/AddStore";
+import EditFridge from "../../components/fridge/EditFridge";
 
 const windowDimensions = Dimensions.get("window");
 
 const FridgeScreen = ({ navigation }) => {
-  const { updateProductQuantity, patchFridgeShare } = useRestApi();
+  const { updateProductQuantity, patchFridgeShare, getFridgeProducts, createFridge, username } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
   const [shareFormVisible, setShareFormVisible] = useState(false);
+  const [editedFridgeId, setEditedFridgeId] = useState(null);
   const [dimensions, setDimensions] = useState({
     window: windowDimensions,
   });
@@ -28,14 +30,12 @@ const FridgeScreen = ({ navigation }) => {
   const currentStoreId = syncFridgeStore.currentStoreId();
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener(
-      "change",
-      ({ window, screen }) => {
-        setDimensions({ window, screen });
-      },
-    );
+    const subscription = Dimensions.addEventListener("change", ({ window, screen }) => {
+      setDimensions({ window, screen });
+    });
+
     return () => subscription?.remove();
-  });
+  }, []);
 
   const renderProduct = ({ baseProduct, syncStore, updateProductQuantity }) => (
     <ProductComponent
@@ -57,24 +57,26 @@ const FridgeScreen = ({ navigation }) => {
     />
   );
 
-  const handleShare = () => {
-    setShareFormVisible(true);
-  };
+  const handleAddStore = async (fridgeName) => {
+    await syncFridgeStore.createStore(fridgeName.name, username, createFridge);
+    setFormVisible(false);
+  }
 
-  const handleShareSubmit = async ({ fridge, username }) => {
-    await patchFridgeShare(fridge.id, username);
-    setShareFormVisible(false);
-  };
+  const handleEdit = (fridge) => {
+    setEditedFridgeId(fridge.id);
+    setShareFormVisible(true);
+  }
 
   return (
     <Background style={{ maxWidth: 800, padding: 0 }}>
       <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
-        <ExpandableFridgeList
-          syncStore={syncFridgeStore}
-          addNewItemForm={() => setFormVisible(true)}
-          handleShare={handleShare}
+        <ExpandableList
+          items={syncFridgeStore.stores()}
+          onAddNew={() => setFormVisible(true)}
+          onSelect={(item) => syncFridgeStore.setStore(item, getFridgeProducts)}
+          onEdit={handleEdit}
         />
-        <View style={{marginTop: 45, flex: 1}}>
+        <View style={{flex: 1}}>
           <CategoryList
             syncStore={syncFridgeStore}
             renderCategory={renderCategory}
@@ -93,15 +95,15 @@ const FridgeScreen = ({ navigation }) => {
           ) : (
             <></>
         )}
-        <NewListForm
+        <AddStore
           visible={formVisible}
-          onSubmit={syncFridgeStore.createStore}
+          onSubmit={handleAddStore}
           onClose={() => setFormVisible(false)}
         />
-        <ShareForm
+        <EditFridge
           visible={shareFormVisible}
-          onSubmit={handleShareSubmit}
           onClose={() => setShareFormVisible(false)}
+          fridgeId={editedFridgeId}
           syncStore={syncFridgeStore}
         />
       </View>

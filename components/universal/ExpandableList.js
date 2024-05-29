@@ -1,80 +1,99 @@
-import * as React from "react";
-import { ScrollView } from "react-native";
-import { View, StyleSheet } from "react-native";
-import { List } from "react-native-paper";
+// components/ExpandableList.js
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { List, IconButton, Button } from 'react-native-paper';
 
-export default function ExpandableList({
-  title,
-  items,
-  itemName,
-  chooseItem,
-  isChosen,
-  addNewItemForm,
-  onExpand,
-  customComponent,
-}) {
-  const [expanded, setExpanded] = React.useState(false);
+const ExpandableList = ({ items, onSelect, onAddNew, onEdit }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const handlePress = () => setExpanded(!expanded);
+
+  const handleSelect = (item) => {
+    setSelectedItem(item);
+    setExpanded(false);
+    onSelect(item);
+  };
+
+  const containerStyle = Platform.OS === 'web' ? { zIndex: 1 } : {};
 
   return (
-    <View style={styles.container}>
-      <List.Accordion
-        title={title}
-        left={(props) => <List.Icon {...props} icon="folder" />}
-        expanded={expanded}
-        onPress={() => {
-          setExpanded(!expanded);
-          onExpand();
-        }}
-        // style={{ position: "absolute" }}
-      >
-        <ScrollView style={styles.scrollView}>
-          {items.map((item) =>
-            isChosen(item) ? (
-              <List.Item
-                title={itemName(item) + " (chosen)"}
-                key={item.id}
-                onPress={() => {
-                  chooseItem(item);
-                  setExpanded(false);
-                }}
-                icon="check"
-                style={{ backgroundColor: "lightblue" }}
-              />
-            ) : (
-              <List.Item
-                title={itemName(item)}
-                key={item.id}
-                onPress={() => {
-                  chooseItem(item);
-                  setExpanded(false);
-                }}
-              />
-            ),
-          )}
-          <List.Item
-            title="Add new"
-            onPress={addNewItemForm}
-            left={(props) => <List.Icon {...props} icon="plus" />}
-          />
-        </ScrollView>
-        {customComponent}
-      </List.Accordion>
+    <View style={containerStyle}>
+      <TouchableOpacity style={styles.header} onPress={handlePress}>
+        <List.Icon icon="folder" />
+        <List.Item title={selectedItem ? selectedItem.name : "Select an item"} />
+        <IconButton style={styles.iconButton} icon={expanded ? "chevron-up" : "chevron-down"} />
+      </TouchableOpacity>
+      {expanded && (
+        <View style={styles.expandedContainer}>
+          <ScrollView style={styles.scrollContainer}>
+            {items.map((item, index) => (
+              <View key={item.id} style={styles.itemContainer}>
+                <TouchableOpacity
+                  style={styles.item}
+                  onPress={() => handleSelect(item)}
+                >
+                  <List.Icon icon="magnify" />
+                  <List.Item title={item.name} />
+                </TouchableOpacity>
+                <IconButton
+                  icon="dots-vertical"
+                  onPress={() => onEdit(item)}
+                />
+              </View>
+            ))}
+          </ScrollView>
+          <Button mode="contained" onPress={onAddNew} style={styles.addButton}>
+            Add New
+          </Button>
+        </View>
+      )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    zIndex: 10,
-    position: "absolute",
-    borderRadius: 10,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 10,
-    shadowColor: "#000",
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  expandedContainer: {
+    position: 'absolute',
+    top: 80,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    elevation: 5,
+    zIndex: 10,
+  },
+  scrollContainer: {
     maxHeight: 300,
   },
-  scrollView: {
-    maxHeight: 300,
-    backgroundColor: "white",
+  iconButton: {
+    marginLeft: 'auto',
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    marginBottom: 5,
+  },
+  item: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addButton: {
+    marginTop: 10,
+    backgroundColor: '#6200ee',
   },
 });
+
+export default ExpandableList;
