@@ -5,9 +5,11 @@ import RecipeList from "../../components/recipes/RecipeList";
 import IngredientsInSearch from "../../components/recipes/IngredientsInSearch";
 import { getRecipes } from "../../providers/ReactQueryProvider";
 import NewIngredientInSearchForm from "../../components/recipes/NewCategoryInSearchForm";
+import OutsidePressHandler, { EventProvider } from "react-native-outside-press";
 
 export default function RecipesSearchScreen({ navigation }) {
   const [search, setSearch] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [formVisible, setFormVisible] = React.useState(false);
 
   const [active, setActive] = React.useState(false);
@@ -48,7 +50,7 @@ export default function RecipesSearchScreen({ navigation }) {
   };
 
   const query = {
-    search: searchValue,
+    search: searchQuery,
     ingredients: ingredientsQuery,
     pageSize: 10,
   };
@@ -64,39 +66,67 @@ export default function RecipesSearchScreen({ navigation }) {
             setActive(true);
             setSearch(query);
           }}
+          onIconPress={() => {
+            setActive(false);
+            setSearchQuery(search);
+          }}
+          onClearIconPress={() => {
+            console.log("clear");
+            setActive(false);
+            setSearch("");
+            setSearchQuery("");
+          }}
           value={searchValue}
           style={styles.searchbar}
         />
       </View>
       <View style={styles.content}>
-        {active && (
-          <View style={styles.searchResults}>
-            <FlatList
-              data={data}
-              ListHeaderComponent={<View style={{ height: 10 }} />}
-              renderItem={({ item }) => (
-                <Button
-                  mode={item.type === "recipe" ? "contained" : "outlined"}
-                >
-                  {item.name}
-                </Button>
-              )}
-              keyExtractor={(item) => item.name}
+        <EventProvider>
+          {active && (
+            <View style={styles.searchResults}>
+              <OutsidePressHandler
+                onOutsidePress={() => {
+                  setActive(false);
+                  setSearchQuery(search);
+                  console.log("outside");
+                }}
+              >
+                <FlatList
+                  data={data}
+                  ListHeaderComponent={<View style={{ height: 10 }} />}
+                  renderItem={({ item }) => (
+                    <Button
+                      onPress={() => {
+                        setActive(false);
+                        setSearch(item.name);
+                        setSearchQuery(item.name);
+                      }}
+                      mode={item.type === "recipe" ? "contained" : "outlined"}
+                    >
+                      {item.name}
+                    </Button>
+                  )}
+                  keyExtractor={(item) => item.name}
+                />
+              </OutsidePressHandler>
+            </View>
+          )}
+
+          <IngredientsInSearch
+            state={ingredientsQuery}
+            dispatch={dispatch}
+            addNewIngredient={addNewIngredient}
+          />
+          <View style={styles.results}>
+            <RecipeList
+              dataSource={dataSource}
+              onLikeRecipe={(recipe) => console.log("like", recipe)}
+              onViewRecipe={(recipe) =>
+                navigation.navigate("Recipe", { recipe })
+              }
             />
           </View>
-        )}
-        <IngredientsInSearch
-          state={ingredientsQuery}
-          dispatch={dispatch}
-          addNewIngredient={addNewIngredient}
-        />
-        <View style={styles.results}>
-          <RecipeList
-            dataSource={dataSource}
-            onLikeRecipe={(recipe) => console.log("like", recipe)}
-            onViewRecipe={(recipe) => navigation.navigate("Recipe", { recipe })}
-          />
-        </View>
+        </EventProvider>
       </View>
 
       <NewIngredientInSearchForm
@@ -127,6 +157,7 @@ const styles = StyleSheet.create({
     top: -10,
     alignSelf: "center",
     maxHeight: 500,
+    height: 300,
     width: "90%",
     maxWidth: 650,
     position: "absolute",
