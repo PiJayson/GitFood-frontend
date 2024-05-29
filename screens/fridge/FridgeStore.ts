@@ -16,6 +16,8 @@ export interface Fridge {
   // userLogin: string; // maybe something more intuitive
   name: string;
   id: number;
+  owner: string;
+  sharedWith: string[];
 }
 
 export interface FridgeListProduct {
@@ -49,9 +51,15 @@ export const syncFridgeStore = {
 
   currentStoreId: () => useFridgesStore().currentStoreId,
   currentStore: () => {
-    const storeId = useFridgesStore().currentStoreId;
+    const storeId = useFridgesStore.getState().currentStoreId;
     if (!storeId) return undefined;
 
+    return useFridgesStore
+      .getState()
+      .fridges.find((store) => store.id === storeId);
+  },
+
+  getStore: (storeId) => {
     return useFridgesStore
       .getState()
       .fridges.find((store) => store.id === storeId);
@@ -206,12 +214,44 @@ export const syncFridgeStore = {
     });
   },
 
-  createStore: async (fridgeName: string, createStore) => {
+  createStore: async (fridgeName: string, owner: string, createStore) => {
     const id = await createStore(fridgeName);
     console.log("Creating fridge", fridgeName, id);
 
     useFridgesStore.setState((state) => ({
-      fridges: [...state.fridges, { id, name: fridgeName }],
+      fridges: [...state.fridges, { id, name: fridgeName, owner: owner, sharedWith: []}],
+    }));
+  },
+
+  removeStore: async (fridgeId: number, removeStore) => {
+    await removeStore(fridgeId);
+    useFridgesStore.setState((state) => ({
+      fridges: state.fridges.filter((fridge) => fridge.id !== fridgeId),
+    }));
+  },
+
+  shareStore: async (fridgeId: number, username: string, shareStore) => {
+    await shareStore(fridgeId, username);
+    useFridgesStore.setState((state) => ({
+      fridges: state.fridges.map((fridge) =>
+        fridge.id === fridgeId ? { ...fridge, sharedWith: [...fridge.sharedWith, username] } : fridge
+      ),
+    }));
+  },
+
+  unshareStore: async (fridgeId: number, username: string, unshareStore) => {
+    await unshareStore(fridgeId, username);
+    useFridgesStore.setState((state) => ({
+      fridges: state.fridges.map((fridge) =>
+        fridge.id === fridgeId ? { ...fridge, sharedWith: fridge.sharedWith.filter((user) => user !== username) } : fridge
+      ),
+    }));
+  },
+
+  beUnsharedStore: async (fridgeId: number, beUnsharedStore) => {
+    await beUnsharedStore(fridgeId);
+    useFridgesStore.setState((state) => ({
+      fridges: state.fridges.filter((fridge) => fridge.id !== fridgeId),
     }));
   },
 };

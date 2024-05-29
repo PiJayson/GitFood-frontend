@@ -5,18 +5,18 @@ import { theme } from "../../assets/theme";
 import { useRestApi } from "../../providers/RestApiProvider";
 import { syncShoppingStore } from "./ShoppingStore";
 import { syncFridgeStore } from "../fridge/FridgeStore";
-import ExpandableShoppingList from "../../components/shopping/ExpandableShoppingList";
-import NewListForm from "../../components/shopping/NewListForm";
 import CategoryList from "../../components/category_list/CategoryList";
 import CategoryComponent from "../../components/shopping/CategoryComponent";
 import ProductComponent from "../../components/shopping/ProductComponent";
 import FinishTransactionForm from "../../components/shopping/FinishTransactionForm";
 import Background from "../../components/universal/Background";
+import ExpandableList from "../../components/universal/ExpandableList";
+import AddStore from "../../components/universal/AddStore";
 
 const windowDimensions = Dimensions.get("window");
 
 const ShoppingScreen = ({ navigation }) => {
-  const { updateShoppingListQuantity, patchFridgeAddProducts, getFridges } = useRestApi();
+  const { updateShoppingListQuantity, patchFridgeAddProducts, getShoppingProducts, createShoppingList } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
   const [showFridgeSelector, setShowFridgeSelector] = useState(false);
   const [dimensions, setDimensions] = useState({ window: windowDimensions });
@@ -44,6 +44,10 @@ const ShoppingScreen = ({ navigation }) => {
 
     setShowFridgeSelector(false);
   };
+
+  const handleShare = async () => {
+    console.log("not supported");
+  }
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener(
@@ -76,12 +80,19 @@ const ShoppingScreen = ({ navigation }) => {
     />
   );
 
+  const handleAddStore = async (ShoppingStoreName) => {
+    await syncShoppingStore.createStore(ShoppingStoreName.name, createShoppingList);
+    setFormVisible(false);
+  }
+
   return (
     <Background style={{ maxWidth: 800, padding: 0 }}>
       <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
-        <ExpandableShoppingList
-          syncStore={syncShoppingStore}
-          addNewItemForm={() => setFormVisible(true)}
+        <ExpandableList
+          items={syncShoppingStore.stores()}
+          onAddNew={() => setFormVisible(true)}
+          onSelect={(item) => syncShoppingStore.setStore(item, getShoppingProducts)}
+          onEdit={handleShare}
         />
         <FinishTransactionForm 
           visible={showFridgeSelector}
@@ -96,9 +107,9 @@ const ShoppingScreen = ({ navigation }) => {
             updateProductQuantity={updateShoppingListQuantity}
           />
         </View>
-        <NewListForm
+        <AddStore
           visible={formVisible}
-          onSubmit={syncShoppingStore.createStore}
+          onSubmit={handleAddStore}
           onClose={() => setFormVisible(false)}
         />
         {!shoppingStarted ? (
