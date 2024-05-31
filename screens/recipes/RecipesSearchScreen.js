@@ -6,8 +6,10 @@ import IngredientsInSearch from "../../components/recipes/IngredientsInSearch";
 import { getRecipes } from "../../providers/ReactQueryProvider";
 import NewIngredientInSearchForm from "../../components/recipes/NewCategoryInSearchForm";
 import OutsidePressHandler, { EventProvider } from "react-native-outside-press";
+import { useNavigation } from "@react-navigation/native";
 
-export default function RecipesSearchScreen({ navigation }) {
+export default function RecipesSearchScreen() {
+  const navigation = useNavigation();
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [formVisible, setFormVisible] = React.useState(false);

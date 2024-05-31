@@ -1,16 +1,16 @@
+import NewSingleRecipeScreen from "./NewSingleRecipeScreen";
 import RecipesSearchScreen from "./RecipesSearchScreen";
 import SingleRecipeScreen from "./SingleRecipeScreen";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-const FridgesStack = createStackNavigator();
+const FridgesStack = createNativeStackNavigator();
 
 export default function RecipesScreen({ navigation }) {
   return (
-    <FridgesStack.Navigator screenOptions={{ headerShown: true }}>
+    <FridgesStack.Navigator screenOptions={{ headerShown: false }}>
       <FridgesStack.Screen
         name="BrowseRecipes"
         component={RecipesSearchScreen}
-        options={{ headerShown: false }}
       />
       <FridgesStack.Screen name="Recipe" component={SingleRecipeScreen} />
     </FridgesStack.Navigator>

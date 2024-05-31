@@ -1,4 +1,4 @@
-import { RefreshControlComponent, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Chip } from "react-native-paper";
 
 export default function IngredientsInSearch({

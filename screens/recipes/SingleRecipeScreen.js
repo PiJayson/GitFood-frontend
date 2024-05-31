@@ -1,45 +1,120 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, TextInput, Button, ScrollView } from "react-native";
-import { Text } from "react-native-paper";
-import Header from "../../components/universal/Header";
-import BackButton from "../../components/universal/BackButton";
-import AddPhotoButton from "../../components/universal/AddPhotoButton";
-import * as ImagePicker from "expo-image-picker";
-import { useRestApi } from "../../providers/RestApiProvider";
+import React, { useRef, useEffect, useState, useReducer } from "react";
+import { ScrollView, View, Animated, StyleSheet } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import SafeAreaView from "react-native-safe-area-view";
+import AnimatedHeaderWithImage from "../../components/universal/AnimatedHeaderWithImage";
+import { Button, Text, ActivityIndicator, Divider } from "react-native-paper";
 import Markdown from "react-native-markdown-display";
-import CommentList from "../../components/recipes/CommentList";
-import AddComment from "../../components/recipes/AddComment";
+
+import { useRestApi } from "../../providers/RestApiProvider";
 import { getComments } from "../../providers/ReactQueryProvider";
 
-export default function SingleRecipeScreen({ route, navigation }) {
+import CommentList from "../../components/recipes/CommentList";
+import Title from "../../components/universal/Title";
+import Header from "../../components/universal/Header";
+import BackButton from "../../components/universal/BackButton";
+
+import RecipeIngredients from "../../components/recipes/RecipeIngredients";
+import { theme } from "../../assets/theme";
+import SectionHeader from "../../components/recipes/SectionHeader";
+
+const HEADER_HEIGHT = 400;
+
+export default function NewSingleRecipeScreen({ route, navigation }) {
   const { recipe } = route.params;
-  const { name, description } = recipe;
+  const offset = useRef(new Animated.Value(0)).current;
+
+  // const { name, description } = recipe;
   const {
-    addRecipesPhotos,
+    addRecipePhotos,
     getMarkdown,
     updateMarkdown,
     username,
     postAddComment,
+    getRecipeById,
+    recipeLike,
   } = useRestApi();
-  const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState("");
+
+  const [componentsOnEdit, editReducer] = useReducer(
+    (state, action) => {
+      switch (action.type) {
+        case "title":
+          return { ...state, title: !state.title };
+        case "ingredients":
+          return { ...state, ingredients: !state.ingredients };
+        default:
+          return state;
+      }
+    },
+    {
+      title: false,
+      ingredients: false,
+      instruction: false,
+    },
+  );
+  const [recipeState, recipeReducer] = useReducer(
+    (state, action) => {
+      switch (action.type) {
+        case "setDetails":
+          return {
+            ...state,
+            ingredients: action.ingredients,
+            imagePaths: action.imagePaths,
+          };
+        case "setMarkdown":
+          return { ...state, markdown: action.markdown };
+        case "setDetails":
+          return { ...state, details: action.payload };
+        case "setTitle":
+          return { ...state, title: action.payload };
+        case "setIngredients":
+      }
+    },
+    {
+      authorized: recipe.author === username,
+      id: recipe.id,
+      name: recipe.name,
+      author: recipe.author,
+      title: recipe.title,
+      markdownPath: recipe.markdownPath,
+      description: recipe.description,
+      isLiked: false,
+      titleImage: recipe.titleImage
+        ? recipe.titleImage
+        : "https://strefainwestorow.pl/sites/default/files/styles/bootstrap_thumbnail_image/public/Software%20Mansion_3.jpg?itok=X1PXpOpv",
+    },
+  );
 
   const {
     data: commentPages,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch: refetchComments,
   } = getComments(recipe.id, 10);
 
   const comments = commentPages?.pages.flat() ?? [];
-  console.log("comm: ", comments);
 
   useEffect(() => {
+    const fetchRecipeDetails = async () => {
+      try {
+        const recipeDetails = await getRecipeById(recipe.id);
+        console.log("recipeDetails: ", recipeDetails);
+        recipeReducer({
+          type: "setDetails",
+          ingredients: recipeDetails.ingredients,
+          imagePaths: recipeDetails.imagePaths,
+        });
+      } catch (error) {
+        console.error("Error fetching recipe details: ", error);
+      }
+    };
+
+    fetchRecipeDetails();
+
     const fetchMarkdown = async () => {
       try {
         const markdown = await getMarkdown(recipe.markdownPath);
-        setContent(markdown);
+        recipeReducer({ type: "setMarkdown", markdown: markdown });
       } catch (error) {
         console.error("Error fetching markdown: ", error);
       }
@@ -48,106 +123,142 @@ export default function SingleRecipeScreen({ route, navigation }) {
     fetchMarkdown();
   }, [recipe.id, getMarkdown]);
 
-  const onAddPhoto = async () => {
-    console.log("Add photo");
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      allowsMultipleSelection: true,
-      aspect: [4, 3],
-    });
-
-    console.log(result);
-
-    if (!result.canceled) {
-      // photos preprocessing
-      addRecipePhotos(recipe.id, result);
-    }
+  const likeButtonAction = async () => {
+    console.log("likeButtonAction");
+    // await recipeLike(recipe.id);
   };
 
-  const handleSave = async () => {
-    console.log(recipe, username);
-    await updateMarkdown(recipe.id, content);
-    setIsEditing(false);
-  };
-
-  const handleEdit = () => {
-    if (isEditing) {
-      handleSave();
-    } else {
-      setIsEditing(true);
-    }
-  };
-
-  const handleAddComment = async (comment) => {
-    const newComment = { username, comment };
-    await postAddComment(recipe.id, comment);
-    refetchComments();
-  };
+  actions = recipeState.authorized
+    ? {
+        title: () => editReducer({ type: "title" }),
+        description: () => editReducer({ type: "description" }),
+        ingredients: () => editReducer({ type: "ingredients" }),
+        instruction: () => editReducer({ type: "instruction" }),
+      }
+    : {
+        like: likeButtonAction,
+      };
 
   return (
-    <ScrollView style={{ flex: 1 }}>
-      <View style={styles.container}>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1 }} forceInset={{ top: "always" }}>
         <BackButton goBack={navigation.goBack} />
-        <Header>{name}</Header>
-        <Text>{description}</Text>
-        <AddPhotoButton onPress={onAddPhoto} />
-        {username == recipe.author && (
-          <Button title={isEditing ? "Save" : "Edit"} onPress={handleEdit} />
-        )}
-        {isEditing ? (
-          <View style={styles.editorContainer}>
-            <TextInput
-              style={styles.textInput}
-              multiline
-              value={content}
-              onChangeText={setContent}
-            />
-          </View>
-        ) : (
-          <Markdown>{content}</Markdown>
-        )}
-        <View style={styles.commentSection}>
-          <AddComment onAddComment={handleAddComment} />
-          <CommentList comments={comments} />
-          {isFetchingNextPage && <ActivityIndicator />}
-          {hasNextPage && (
-            <Button onPress={fetchNextPage} mode="contained">
-              Load more comments
-            </Button>
+        <AnimatedHeaderWithImage
+          animatedValue={offset}
+          imageUri={recipeState.titleImage}
+          title={recipeState.name}
+          state={{ isAuthor: recipeState.authorized, isLiked: recipe.isLiked }}
+          action={recipeState.authorized ? actions.title : actions.like}
+        />
+        <ScrollView
+          style={{
+            flex: 1,
+            paddingTop: 20,
+          }}
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: offset } } }],
+            { useNativeDriver: false },
           )}
-        </View>
-      </View>
-    </ScrollView>
+        >
+          <View style={styles.container}>
+            <View style={styles.square}>
+              <SectionHeader
+                title="Description"
+                editAction={actions.description}
+              />
+              <Text style={styles.description}>{recipeState.description}</Text>
+            </View>
+            <View style={styles.square}>
+              <SectionHeader
+                title="Ingredients"
+                editAction={actions.ingredients}
+              />
+              {recipeState.ingredients ? (
+                <RecipeIngredients ingredientsList={recipeState.ingredients} />
+              ) : (
+                <ActivityIndicator />
+              )}
+            </View>
+            <View style={styles.markdown}>
+              <SectionHeader
+                title="Instructions"
+                editAction={actions.instruction}
+              />
+              {recipeState.markdown ? (
+                <Markdown>{recipeState.markdown}</Markdown>
+              ) : (
+                <ActivityIndicator />
+              )}
+            </View>
+            <View style={styles.commentSection}>
+              <CommentList comments={comments} />
+              {isFetchingNextPage && <ActivityIndicator />}
+              {hasNextPage && (
+                <Button onPress={fetchNextPage} mode="contained">
+                  Load more comments
+                </Button>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
     width: "100%",
     maxWidth: 800,
-    margin: 12,
     alignSelf: "center",
     alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 5,
+    paddingBottom: 20,
+    marginBottom: 20,
   },
-  editorContainer: {
-    flex: 1,
-    width: "100%",
-  },
-  textInput: {
-    height: 200,
-    width: "100%",
-    textAlignVertical: "top",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
+  scrollViewContent: {
+    paddingTop: HEADER_HEIGHT + 50,
+    alignItems: "center",
   },
   commentSection: {
     flex: 1,
     width: "100%",
-    marginTop: 100,
+    marginTop: 20,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+  },
+  square: {
+    width: "100%",
+    paddingVertical: 20,
+    paddingHorizontal: 5,
+    // alignItems: "center",
+    alignSelf: "center",
+    // backgroundColor: "grey",
+    // borderRadius: 5,
+
+    // borderWidth: 1,
+    marginVertical: 20,
+  },
+  markdown: {
+    width: "100%",
+    paddingVertical: 20,
+    paddingHorizontal: 5,
+    // alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: "white", // change to better color
+    borderRadius: 10,
+    borderColor: theme.colors.primary,
+    borderWidth: 3,
+    marginVertical: 20,
+  },
+
+  description: {
+    fontSize: 16,
   },
 });

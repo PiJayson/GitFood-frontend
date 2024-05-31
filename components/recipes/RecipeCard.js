@@ -1,34 +1,45 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { Card, Button, IconButton, Title, Paragraph } from "react-native-paper";
+import { StyleSheet, View, Image } from "react-native";
+import { IconButton, Text } from "react-native-paper";
+import Title from "../../components/universal/Title";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { theme } from "../../assets/theme";
 
-export default function RecipeCard({ recipe, onViewRecipe, onLikeRecipe }) {
+import defaultRecipImage from "../../assets/burger.jpeg";
+
+export default function RecipeCard({
+  index,
+  recipe,
+  onViewRecipe,
+  onLikeRecipe,
+}) {
+  const mainImage = recipe.titleImage
+    ? recipe.titleImage
+    : "https://strefainwestorow.pl/sites/default/files/styles/bootstrap_thumbnail_image/public/Software%20Mansion_3.jpg?itok=X1PXpOpv";
   return (
-    <Card style={styles.container}>
-      <Card.Cover
-        source={
-          recipe.image
-            ? { uri: recipe.image }
-            : require("../../assets/burger.jpeg")
-        }
-        resizeMode="cover"
+    <Animated.View
+      entering={FadeInDown.delay(200 * index)}
+      style={styles.container}
+    >
+      <Animated.Image
+        sharedTransitionTag={`image-${recipe.id}`}
+        source={{ uri: mainImage }}
         style={styles.image}
       />
-      <Card.Content>
-        <Title style={styles.title}>{recipe.name}</Title>
-        <Paragraph>{recipe.description}</Paragraph>
-      </Card.Content>
-      <Card.Actions>
-        <IconButton
-          icon={"arrow-right-circle"}
-          onPress={() => onViewRecipe(recipe)}
-        />
-        <IconButton icon={"heart"} onPress={() => onLikeRecipe(recipe)}>
-          Like Recipe
-        </IconButton>
-      </Card.Actions>
-    </Card>
+      <View style={styles.titleContainer}>
+        <Title>{recipe.name}</Title>
+      </View>
+      <View style={styles.actions}>
+        <Text>{recipe.description}</Text>
+        <View style={styles.buttons}>
+          <IconButton
+            icon={"arrow-right-circle"}
+            onPress={() => onViewRecipe(recipe)}
+          />
+          <IconButton icon={"heart"} onPress={() => onLikeRecipe(recipe)} />
+        </View>
+      </View>
+    </Animated.View>
   );
 }
 
@@ -37,21 +48,28 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginHorizontal: 10,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    width: "100%",
     maxWidth: 800,
-    minWidth: 350,
-    alignContent: "center",
     alignSelf: "center",
-
-    Width: "100%",
+    backgroundColor: "#fff",
   },
   image: {
-    resizeMode: "contain",
-    Width: "100%",
-    maxHeight: 300,
+    height: 200,
+    // borderTopLeftRadius: 10,
+    // borderTopRightRadius: 10,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: theme.colors.primary,
+  titleContainer: {
+    paddingHorizontal: 10,
+  },
+  buttons: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
   },
 });

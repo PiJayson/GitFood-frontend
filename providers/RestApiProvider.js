@@ -59,9 +59,11 @@ export const RestApiProvider = ({ children }) => {
       if (error.response) {
         switch (error.response.status) {
           case 400:
-            setIsSignedIn(false);
+            // setIsSignedIn(false);
+            triggerNotification("Bad request!");
           case 401:
             setIsSignedIn(false);
+            // triggerNotification("Unauthorized action!");
             break;
           case 403:
             triggerNotification("Forbidden action!");
@@ -282,6 +284,11 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   }; // this
 
+  const getRecipeById = async (recipeId) => {
+    const response = await apiClient.get(`/recipe/getById?id=${recipeId}`);
+    return response.data;
+  };
+
   const addRecipePhotos = async (recipeId, photos) => {
     let body = new FormData();
     const files = photos.assets.map((photo) => {
@@ -330,7 +337,7 @@ export const RestApiProvider = ({ children }) => {
   const getMarkdown = async (path) => {
     const response = await apiClient.get(`/${path}`);
 
-    console.log(response.data);
+    // console.log(response.data);
     return response.data;
   };
 
@@ -359,6 +366,12 @@ export const RestApiProvider = ({ children }) => {
     const response = await apiClient.get(
       `/FoodCategory/getSuggestions?name=${query.search}&resultsCount=${query.count} `,
     );
+
+    return response.data;
+  };
+
+  const recipeLike = async (recipeId) => {
+    const response = await apiClient.post(`/recipe/like?recipeId=${recipeId}`);
 
     return response.data;
   };
@@ -411,10 +424,12 @@ export const RestApiProvider = ({ children }) => {
 
     // Recipe
     getRecipesPage,
+    getRecipeById,
     getMarkdown,
     updateMarkdown,
     addRecipePhotos,
     getFoodCategorySuggestion,
+    recipeLike,
 
     getCategorySuggestion,
     postAddComment,

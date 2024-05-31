@@ -1,7 +1,7 @@
 import React from "react";
 import RenderSpinner from "../universal/RenderSpinner";
 import RecipeCard from "./RecipeCard";
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 
 export default function RecipeList({ dataSource, onLikeRecipe, onViewRecipe }) {
@@ -24,38 +24,37 @@ export default function RecipeList({ dataSource, onLikeRecipe, onViewRecipe }) {
     }
   };
 
-  // if (!isLoading) {
-  //   console.log(data);
-  //   console.log(data.pages.flat());
-  // }
-
   return isLoading ? (
     <RenderSpinner />
   ) : (
-    <FlatList
-      data={data.pages.flat()}
-      contentContainerStyle={{ flexGrow: 1 }}
-      renderItem={({ item }) => (
-        <RecipeCard
-          recipe={item}
-          onLikeRecipe={onLikeRecipe}
-          onViewRecipe={onViewRecipe}
-        />
-      )}
-      showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}
-      keyExtractor={(item) => item.id}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={isFetchingNextPage ? <RenderSpinner /> : null}
-      style={styles.container}
-    />
+    <View style={styles.listContainer}>
+      <FlatList
+        data={data.pages.flat()}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item, index }) => (
+          <RecipeCard
+            index={index}
+            recipe={item}
+            onLikeRecipe={onLikeRecipe}
+            onViewRecipe={onViewRecipe}
+          />
+        )}
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item) => item.id}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={isFetchingNextPage ? <RenderSpinner /> : null}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  listContainer: {
+    flex: 1,
     width: "100%",
-    height: "100%",
+  },
+  listContent: {
+    paddingHorizontal: 10,
   },
 });
