@@ -3,12 +3,21 @@ import { ScrollView, View, Animated, StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import SafeAreaView from "react-native-safe-area-view";
 import AnimatedHeaderWithImage from "../../components/universal/AnimatedHeaderWithImage";
-import { Button, Text, ActivityIndicator, Divider } from "react-native-paper";
+import AnimatedHeaderEditable from "../../components/universal/AnimatedHeaderEditable";
+import * as ImagePicker from "expo-image-picker";
+import {
+  Button,
+  Text,
+  TextInput,
+  ActivityIndicator,
+  Divider,
+} from "react-native-paper";
 import Markdown from "react-native-markdown-display";
 
 import { useRestApi } from "../../providers/RestApiProvider";
 import { getComments } from "../../providers/ReactQueryProvider";
 
+import AddComment from "../../components/recipes/AddComment";
 import CommentList from "../../components/recipes/CommentList";
 import Title from "../../components/universal/Title";
 import Header from "../../components/universal/Header";
@@ -17,6 +26,7 @@ import BackButton from "../../components/universal/BackButton";
 import RecipeIngredients from "../../components/recipes/RecipeIngredients";
 import { theme } from "../../assets/theme";
 import SectionHeader from "../../components/recipes/SectionHeader";
+import RecipeIngredientsEdit from "../../components/recipes/RecipeIngredientsEdit";
 
 const HEADER_HEIGHT = 400;
 
@@ -24,32 +34,43 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
   const { recipe } = route.params;
   const offset = useRef(new Animated.Value(0)).current;
 
+  const [lastUpdated, setLastUpdated] = useState(new Date().getTime());
+
   // const { name, description } = recipe;
   const {
     addRecipePhotos,
     getMarkdown,
-    updateMarkdown,
     username,
     postAddComment,
-    getRecipeById,
+    getRecipeDetails,
     recipeLike,
+    updateRecipeName,
+    updateRecipeDescription,
+    updateRecipeIngredient,
+    updateMarkdown,
+    addRecipeMainPhoto,
   } = useRestApi();
 
-  const [componentsOnEdit, editReducer] = useReducer(
+  const [editState, editReducer] = useReducer(
     (state, action) => {
       switch (action.type) {
-        case "title":
-          return { ...state, title: !state.title };
+        case "header":
+          return { ...state, header: !state.header };
+        case "description":
+          return { ...state, description: !state.description };
         case "ingredients":
           return { ...state, ingredients: !state.ingredients };
+        case "markdown":
+          return { ...state, markdown: !state.markdown };
         default:
           return state;
       }
     },
     {
-      title: false,
+      header: false,
+      description: false,
       ingredients: false,
-      instruction: false,
+      markdown: false,
     },
   );
   const [recipeState, recipeReducer] = useReducer(
@@ -60,14 +81,21 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
             ...state,
             ingredients: action.ingredients,
             imagePaths: action.imagePaths,
+            name: action.name,
+            description: action.description,
           };
         case "setMarkdown":
           return { ...state, markdown: action.markdown };
         case "setDetails":
           return { ...state, details: action.payload };
         case "setTitle":
-          return { ...state, title: action.payload };
+          return { ...state, name: action.newTitle };
         case "setIngredients":
+          return { ...state, ingredients: action.newIngredients };
+        case "setDescription":
+          return { ...state, description: action.newDescription };
+        default:
+          return state;
       }
     },
     {
@@ -81,7 +109,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
       isLiked: false,
       titleImage: recipe.titleImage
         ? recipe.titleImage
-        : "https://strefainwestorow.pl/sites/default/files/styles/bootstrap_thumbnail_image/public/Software%20Mansion_3.jpg?itok=X1PXpOpv",
+        : "https://gitfood.fun:5254/recipe_files/default_logo.png",
     },
   );
 
@@ -97,12 +125,14 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
   useEffect(() => {
     const fetchRecipeDetails = async () => {
       try {
-        const recipeDetails = await getRecipeById(recipe.id);
+        const recipeDetails = await getRecipeDetails(recipe.id);
         console.log("recipeDetails: ", recipeDetails);
         recipeReducer({
           type: "setDetails",
           ingredients: recipeDetails.ingredients,
           imagePaths: recipeDetails.imagePaths,
+          name: recipeDetails.name,
+          description: recipeDetails.description,
         });
       } catch (error) {
         console.error("Error fetching recipe details: ", error);
@@ -121,7 +151,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
     };
 
     fetchMarkdown();
-  }, [recipe.id, getMarkdown]);
+  }, [lastUpdated]);
 
   const likeButtonAction = async () => {
     console.log("likeButtonAction");
@@ -130,26 +160,140 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
 
   actions = recipeState.authorized
     ? {
-        title: () => editReducer({ type: "title" }),
-        description: () => editReducer({ type: "description" }),
+        title: async () => {
+          if (editState.header) {
+            const response = await updateRecipeName(
+              recipe.id,
+              recipeState.name,
+            );
+            console.log("response: ", response);
+          }
+          editReducer({ type: "header" });
+          setLastUpdated(new Date().getTime());
+        },
+        description: async () => {
+          if (editState.description) {
+            const response = await updateRecipeDescription(
+              recipe.id,
+              recipeState.description,
+            );
+            console.log("response: ", response);
+          }
+          editReducer({ type: "description" });
+          setLastUpdated(new Date().getTime());
+        },
         ingredients: () => editReducer({ type: "ingredients" }),
-        instruction: () => editReducer({ type: "instruction" }),
+        markdown: async () => {
+          if (editState.markdown) {
+            const response = await updateMarkdown(
+              recipeState.id,
+              recipeState.markdown,
+            );
+            console.log("response: ", response);
+          }
+          editReducer({ type: "markdown" });
+          setLastUpdated(new Date().getTime());
+        },
       }
     : {
         like: likeButtonAction,
       };
 
+  const handleAddComment = async (comment) => {
+    const newComment = { username, comment };
+    await postAddComment(recipe.id, comment);
+    refetchComments();
+  };
+
+  const handleAddMainPhotoAction = async () => {
+    console.log("Add photo");
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      addRecipePhotos(recipe.id, result);
+    }
+  };
+
+  const animatedHeader = recipeState.authorized ? (
+    editState.header ? (
+      <AnimatedHeaderEditable
+        animatedValue={offset}
+        imageUri={recipeState.titleImage}
+        title={recipeState.name}
+        updateTitle={(title) => {
+          console.log("title: ", title);
+          recipeReducer({ type: "setTitle", newTitle: title });
+        }}
+        onAddPhoto={handleAddMainPhotoAction}
+        action={actions.title}
+      />
+    ) : (
+      <AnimatedHeaderWithImage
+        animatedValue={offset}
+        imageUri={recipeState.titleImage}
+        title={recipeState.name}
+        state={{ isAuthor: true }}
+        action={actions.title}
+      />
+    )
+  ) : (
+    <AnimatedHeaderWithImage
+      animatedValue={offset}
+      imageUri={recipeState.titleImage}
+      title={recipeState.name}
+      state={{ isLiked: recipe.isLiked }}
+      action={actions.like}
+    />
+  );
+
+  const ingredients = editState.ingredients ? (
+    <View style={styles.square}>
+      <SectionHeader title="Ingredients" editAction={actions.ingredients} />
+      {recipeState.ingredients ? (
+        <RecipeIngredientsEdit ingredientsList={recipeState.ingredients} />
+      ) : (
+        <ActivityIndicator />
+      )}
+    </View>
+  ) : (
+    <View style={styles.square}>
+      <SectionHeader title="Ingredients" editAction={actions.ingredients} />
+      {recipeState.ingredients ? (
+        <RecipeIngredients ingredientsList={recipeState.ingredients} />
+      ) : (
+        <ActivityIndicator />
+      )}
+    </View>
+  );
+
+  const description = editState.description ? (
+    <View style={styles.square}>
+      <SectionHeader title="Description" editAction={actions.description} />
+      <TextInput
+        style={styles.description}
+        value={recipeState.description}
+        onChangeText={(text) =>
+          recipeReducer({ type: "setDescription", newDescription: text })
+        }
+      />
+    </View>
+  ) : (
+    <View style={styles.square}>
+      <SectionHeader title="Description" editAction={actions.description} />
+      <Text style={styles.description}>{recipeState.description}</Text>
+    </View>
+  );
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }} forceInset={{ top: "always" }}>
         <BackButton goBack={navigation.goBack} />
-        <AnimatedHeaderWithImage
-          animatedValue={offset}
-          imageUri={recipeState.titleImage}
-          title={recipeState.name}
-          state={{ isAuthor: recipeState.authorized, isLiked: recipe.isLiked }}
-          action={recipeState.authorized ? actions.title : actions.like}
-        />
+        {animatedHeader}
         <ScrollView
           style={{
             flex: 1,
@@ -164,36 +308,35 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
           )}
         >
           <View style={styles.container}>
-            <View style={styles.square}>
-              <SectionHeader
-                title="Description"
-                editAction={actions.description}
-              />
-              <Text style={styles.description}>{recipeState.description}</Text>
-            </View>
-            <View style={styles.square}>
-              <SectionHeader
-                title="Ingredients"
-                editAction={actions.ingredients}
-              />
-              {recipeState.ingredients ? (
-                <RecipeIngredients ingredientsList={recipeState.ingredients} />
-              ) : (
-                <ActivityIndicator />
-              )}
-            </View>
+            {description}
+            {ingredients}
             <View style={styles.markdown}>
               <SectionHeader
                 title="Instructions"
-                editAction={actions.instruction}
+                editAction={actions.markdown}
               />
               {recipeState.markdown ? (
-                <Markdown>{recipeState.markdown}</Markdown>
+                editState.markdown ? (
+                  <View style={styles.editorContainer}>
+                    <TextInput
+                      style={styles.textInput}
+                      multiline
+                      value={recipeState.markdown}
+                      onChangeText={(text) => {
+                        recipeReducer({ type: "setMarkdown", markdown: text });
+                        console.log(recipeState.markdown);
+                      }}
+                    />
+                  </View>
+                ) : (
+                  <Markdown>{recipeState.markdown}</Markdown>
+                )
               ) : (
                 <ActivityIndicator />
               )}
             </View>
             <View style={styles.commentSection}>
+              <AddComment onAddComment={handleAddComment} />
               <CommentList comments={comments} />
               {isFetchingNextPage && <ActivityIndicator />}
               {hasNextPage && (

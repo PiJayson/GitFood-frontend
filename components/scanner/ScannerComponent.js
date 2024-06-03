@@ -87,7 +87,6 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
     } else {
       (async () => {
         const { status } = await Camera.requestCameraPermissionsAsync();
-        console.log(status);
 
         // setHasPermission(status === "granted");
       })();

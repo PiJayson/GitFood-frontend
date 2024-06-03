@@ -1,16 +1,19 @@
 import React from "react";
 import { Animated, Image, StyleSheet, View } from "react-native";
-import { IconButton } from "react-native-paper";
+import { IconButton, TextInput } from "react-native-paper";
+
 import Title from "./Title";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { theme } from "../../assets/theme";
 
 const HEADER_HEIGHT = 400;
 
-const AnimatedHeaderWithImage = ({
+const AnimatedHeaderEditable = ({
   animatedValue,
   imageUri,
   title,
-  state,
+  updateTitle,
+  onAddPhoto,
   action,
 }) => {
   const insets = useSafeAreaInsets();
@@ -37,17 +40,38 @@ const AnimatedHeaderWithImage = ({
           style={styles.image}
           resizeMode="cover"
         />
+        <IconButton
+          icon="upload"
+          size={50}
+          style={{
+            position: "absolute",
+            alignSelf: "center",
+            top: "50%",
+          }}
+          iconColor="green"
+          onPress={onAddPhoto}
+        />
       </Animated.View>
       <Animated.View style={{ height: 44 }} />
       <Animated.View style={styles.titleContainer}>
         <Animated.View style={styles.titleWrapper}>
-          <Title>{title}</Title>
+          <TextInput
+            value={title}
+            onChangeText={(text) => updateTitle(text)}
+            mode="outlined"
+            multiline={true}
+            textColor={theme.colors.primary}
+            style={{
+              flex: 1,
+              fontSize: 36,
+              fontWeight: "bold",
+              alignSelf: "center",
+            }}
+            outlineColor="white"
+            underlineColor="black"
+          />
         </Animated.View>
-        <IconButton
-          icon={state.isAuthor ? "pencil" : "heart"}
-          onPress={action}
-          style={styles.iconButton}
-        />
+        <IconButton icon={"check"} onPress={action} style={styles.iconButton} />
       </Animated.View>
     </Animated.View>
   );
@@ -75,6 +99,9 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   titleWrapper: {
+    alignItems: "center",
+    paddingVertical: 6,
+    width: "100%",
     marginLeft: 20, // Add some space between left edge
     flex: 1, // Title takes up remaining space
     flexShrink: 1, // Title can shrink if necessary
@@ -85,4 +112,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AnimatedHeaderWithImage;
+export default AnimatedHeaderEditable;

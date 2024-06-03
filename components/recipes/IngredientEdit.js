@@ -2,14 +2,12 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { IconButton, Text } from "react-native-paper";
 
-export default function Ingredient({ ingredient }) {
+export default function IngredientEdit({ ingredient }) {
   const enough = ingredient.required < ingredient.inFridge;
 
   return (
     <View style={styles.container}>
-      <IconButton
-        icon={enough ? "check-circle-outline" : "checkbox-blank-circle-outline"}
-      />
+      <IconButton icon="plus" onPress={() => console.log("")} />
       <Text style={styles.text}>
         {ingredient.name} ({ingredient.required})
       </Text>

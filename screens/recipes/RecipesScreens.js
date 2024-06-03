@@ -1,4 +1,3 @@
-import NewSingleRecipeScreen from "./NewSingleRecipeScreen";
 import RecipesSearchScreen from "./RecipesSearchScreen";
 import SingleRecipeScreen from "./SingleRecipeScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";

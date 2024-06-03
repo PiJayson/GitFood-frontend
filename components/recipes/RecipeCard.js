@@ -15,7 +15,7 @@ export default function RecipeCard({
 }) {
   const mainImage = recipe.titleImage
     ? recipe.titleImage
-    : "https://strefainwestorow.pl/sites/default/files/styles/bootstrap_thumbnail_image/public/Software%20Mansion_3.jpg?itok=X1PXpOpv";
+    : "https://gitfood.fun:5254/recipe_files/default_logo.png";
   return (
     <Animated.View
       entering={FadeInDown.delay(200 * index)}

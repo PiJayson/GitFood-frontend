@@ -2,29 +2,25 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Button } from "react-native-paper";
 
-import Ingredient from "./Ingredient";
 import { syncFridgeStore } from "../../screens/fridge/FridgeStore";
+import IngredientEdit from "./IngredientEdit";
 
-export default function RecipeIngredients({ ingredientsList }) {
+export default function RecipeIngredientsEdit({ ingredientsList }) {
   const ingredients = ingredientsList.map((ingredient) => ({
     ...ingredient,
     inFridge: syncFridgeStore
       .elements()
-      .some(
-        (el) =>
-          el.categoryId === ingredient.id && el.quantity > Ingredient.quantity,
-      ),
+      .some((el) => el.categoryId === ingredient.id).quantity,
   }));
 
   const fridge = syncFridgeStore.currentStore();
-  const fridgeName = fridge ? fridge.name : "No fridge selected";
 
   return (
     <View style={styles.container}>
-      <Button mode="contained">{fridgeName}</Button>
+      {/* <Button>Choose Fridge</Button> */}
       <View style={styles.ingredientsContainer}>
         {ingredients.map((ingredient) => (
-          <Ingredient ingredient={ingredient} />
+          <IngredientEdit ingredient={ingredient} />
         ))}
       </View>
     </View>

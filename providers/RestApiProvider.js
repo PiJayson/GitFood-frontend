@@ -61,9 +61,10 @@ export const RestApiProvider = ({ children }) => {
           case 400:
             // setIsSignedIn(false);
             triggerNotification("Bad request!");
+            break;
           case 401:
             setIsSignedIn(false);
-            // triggerNotification("Unauthorized action!");
+            triggerNotification("Unauthorized action!");
             break;
           case 403:
             triggerNotification("Forbidden action!");
@@ -71,6 +72,8 @@ export const RestApiProvider = ({ children }) => {
           case 404:
             triggerNotification("Resource not found!");
             break;
+          case 405:
+            triggerNotification("Method not allowed!");
           default:
             triggerNotification(error.response.data);
             break;
@@ -230,10 +233,7 @@ export const RestApiProvider = ({ children }) => {
 
     // realy backend can do better
 
-    return response.data.map((fridge) => ({
-      id: fridge.item1,
-      name: fridge.item2,
-    }));
+    return response.data;
   };
 
   // Shopping
@@ -284,8 +284,11 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   }; // this
 
-  const getRecipeById = async (recipeId) => {
-    const response = await apiClient.get(`/recipe/getById?id=${recipeId}`);
+  const getRecipeDetails = async (recipeId) => {
+    const response = await apiClient.get(
+      `/recipe/getRecipeDetails?recipeId=${recipeId}`,
+    );
+
     return response.data;
   };
 
@@ -330,8 +333,45 @@ export const RestApiProvider = ({ children }) => {
         console.log("response" + JSON.stringify(res));
       })
       .catch((e) => console.log(e));
+  };
 
-    return response.data;
+  const addRecipeMainPhoto = async (recipeId, photo) => {
+    let body = new FormData();
+    const uri = photo.uri;
+    const name = photo.fileName;
+    const type = photo.mimeType;
+
+    try {
+      body.append("image", {
+        uri,
+        name,
+        type,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    await fetch(
+      `https://gitfood.fun:5255/recipe/addOrUpdateMainPhoto?recipeId=${recipeId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${await AsyncStorage.getItem("AWTtoken")}`,
+          "Content-Type": "multipart/form-data",
+        },
+        body: body,
+      },
+    )
+      .then((res) => {
+        console.log(res.status);
+        console.log(res);
+        return res.json();
+      })
+      // .then((res) => res.json())
+      .then((res) => {
+        console.log("response" + JSON.stringify(res));
+      })
+      .catch((e) => console.log(e));
   };
 
   const getMarkdown = async (path) => {
@@ -372,6 +412,46 @@ export const RestApiProvider = ({ children }) => {
 
   const recipeLike = async (recipeId) => {
     const response = await apiClient.post(`/recipe/like?recipeId=${recipeId}`);
+
+    return response.data;
+  };
+
+  const recipeUnlike = async (recipeId) => {
+    const response = await apiClient.post(
+      `/recipe/unlike?recipeId=${recipeId}`,
+    );
+
+    return response.data;
+  };
+
+  const updateRecipeName = async (recipeId, name) => {
+    const response = await apiClient.post(
+      `/recipe/updateName?recipeId=${recipeId}&name=${name}`,
+    );
+
+    return response.data;
+  };
+
+  const updateRecipeDescription = async (recipeId, description) => {
+    // send description, as data will be string not json
+    const response = await apiClient.post(
+      `/recipe/updateDescription?recipeId=${recipeId}`,
+      {
+        description: description,
+      },
+    );
+
+    return response.data;
+  };
+
+  const updateRecipeIngredient = async (
+    recipeId,
+    ingredientCategory,
+    quantity,
+  ) => {
+    const response = await apiClient.post(
+      `/recipe/updateIngredient?recipeId=${recipeId}&categoryId=${ingredientCategory}&quantity=${quantity}`,
+    );
 
     return response.data;
   };
@@ -424,12 +504,17 @@ export const RestApiProvider = ({ children }) => {
 
     // Recipe
     getRecipesPage,
-    getRecipeById,
+    getRecipeDetails,
     getMarkdown,
-    updateMarkdown,
-    addRecipePhotos,
     getFoodCategorySuggestion,
     recipeLike,
+    updateRecipeName,
+    updateRecipeDescription,
+    updateRecipeIngredient,
+    updateMarkdown,
+
+    addRecipePhotos,
+    addRecipeMainPhoto,
 
     getCategorySuggestion,
     postAddComment,
