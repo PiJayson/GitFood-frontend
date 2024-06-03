@@ -108,7 +108,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
       description: recipe.description,
       isLiked: false,
       titleImage: recipe.titleImage
-        ? recipe.titleImage
+        ? "https://gitfood.fun:5255/" + recipe.titleImage
         : "https://gitfood.fun:5254/recipe_files/default_logo.png",
     },
   );
@@ -118,11 +118,13 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch: refetchComments,
   } = getComments(recipe.id, 10);
 
   const comments = commentPages?.pages.flat() ?? [];
 
   useEffect(() => {
+    console.log("reload");
     const fetchRecipeDetails = async () => {
       try {
         const recipeDetails = await getRecipeDetails(recipe.id);
@@ -202,6 +204,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
   const handleAddComment = async (comment) => {
     const newComment = { username, comment };
     await postAddComment(recipe.id, comment);
+    // setLastUpdated(new Date().getTime());
     refetchComments();
   };
 

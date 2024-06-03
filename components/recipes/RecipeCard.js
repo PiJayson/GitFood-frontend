@@ -14,7 +14,7 @@ export default function RecipeCard({
   onLikeRecipe,
 }) {
   const mainImage = recipe.titleImage
-    ? recipe.titleImage
+    ? "https://gitfood.fun:5255/" + recipe.titleImage
     : "https://gitfood.fun:5254/recipe_files/default_logo.png";
   return (
     <Animated.View
