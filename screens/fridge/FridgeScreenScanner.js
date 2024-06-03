@@ -93,11 +93,11 @@ export default function FridgeScannerScreen({ navigation }) {
   };
 
   const handleAddProduct = async (productData) => {
-    const categoryId = categories.find(
+    const category = categories.find(
       (category) => category.name == productData.categoryName,
-    ).id;
+    );
 
-    const productId = await productAdd(productData.productName, productData.description, productData.barcode, categoryId, productData.quantity);
+    const productId = await productAdd(productData.productName, productData.description, productData.barcode, category.id, productData.quantity);
 
     const newScannedItem = {
       ...lastScannedItem,
@@ -105,9 +105,9 @@ export default function FridgeScannerScreen({ navigation }) {
       productName: productData.productName,
       categoryName: productData.categoryName,
       productId: productId,
-      categoryId: categoryId,
+      categoryId: category.id,
       quantity: productData.quantity,
-      unit: productData.unit,
+      unit: category.unit,
     };
 
     setLastScannedItem(newScannedItem);
@@ -168,7 +168,7 @@ export default function FridgeScannerScreen({ navigation }) {
             <ProductForm
               visible={formVisible}
               initialData={lastScannedItem}
-              categories={categories.map(category => category.name)}
+              categories={categories}
               units={units}
               onSubmit={handleAddProduct}
               onClose={() => {

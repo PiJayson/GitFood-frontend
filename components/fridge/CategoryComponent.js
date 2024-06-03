@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { IconButton } from "react-native-paper";
+import { theme } from "../../assets/theme";
 
 export default function CategoryComponent({
   item: category,
@@ -19,7 +20,10 @@ export default function CategoryComponent({
     <View style={styles.container}>
       <View style={styles.categoryHeader}>
         <Text style={styles.categoryName}>{category.categoryName}</Text>
-        <Text style={styles.categoryQuantity}>{category.quantity}</Text>
+        <Text style={styles.categoryQuantity}>
+          {category.quantity}
+          <Text style={styles.unit}> {category.unit}</Text>
+        </Text>
         <IconButton
           icon={isExpanded ? "chevron-up" : "chevron-down"}
           onPress={handleExpand}
@@ -66,4 +70,8 @@ const styles = StyleSheet.create({
   expandButton: {
     marginLeft: 10,
   },
+  unit: {
+    fontWeight: "bold",
+    color: theme.colors.primary
+  }
 });

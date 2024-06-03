@@ -45,13 +45,16 @@ export default function CategoryComponent({
           <IncrementDecrement update={updateCount} buttonStyle={styles.customButton}/>
         </View>
         {!shoppingStarted && (
-          <Text style={styles.categoryQuantity}>{category.quantity}</Text>
+          <Text style={styles.categoryQuantity}>
+            {category.quantity}
+            <Text style={styles.unit}> {category.unit}</Text></Text>
         )}
         {shoppingStarted && (
           <Text style={styles.categoryQuantity}>
             {boughtItems}
           <Text style={styles.slash}> / </Text>
             {category.quantity}
+            <Text style={styles.unit}> {category.unit}</Text>
           </Text>
         )}
         <View style={styles.toggleButtonContainer}>
@@ -124,5 +127,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     iconColor: 'white',
   },
+  unit: {
+    fontWeight: "bold",
+    color: theme.colors.primary
+  }
 });
 
