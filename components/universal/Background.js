@@ -3,20 +3,26 @@ import {
   ImageBackground,
   StyleSheet,
   KeyboardAvoidingView,
+  SafeAreaView,
 } from "react-native";
 import { theme } from "../../assets/theme";
 
 export default function Background({ children, style }) {
   return (
-    <ImageBackground
-      source={require("../../assets/background_dot.png")}
-      resizeMode="repeat"
-      style={StyleSheet.flatten([styles.background])}
-    >
-      <KeyboardAvoidingView style={[styles.container, style]} behavior="padding">
-        {children}
-      </KeyboardAvoidingView>
-    </ImageBackground>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ImageBackground
+        source={require("../../assets/background_dot.png")}
+        resizeMode="repeat"
+        style={StyleSheet.flatten([styles.background])}
+      >
+        <KeyboardAvoidingView
+          style={[styles.container, style]}
+          behavior="padding"
+        >
+          {children}
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </SafeAreaView>
   );
 }
 

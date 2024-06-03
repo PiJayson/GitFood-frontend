@@ -3,7 +3,6 @@ import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNotification } from "./NotificationProvider";
 import curlirize from "axios-curlirize";
-import { Platform } from "react-native";
 
 const RestApiContext = createContext();
 
@@ -13,7 +12,8 @@ export const RestApiProvider = ({ children }) => {
   const [isSignedIn, setIsSignedIn] = useState(
     async () => await AsyncStorage.getItem("AWTtoken"),
   );
-  const [username, setUsername] = useState('');
+
+  const [username, setUsername] = useState("");
   const triggerNotification = useNotification();
 
   useEffect(() => {
@@ -28,7 +28,6 @@ export const RestApiProvider = ({ children }) => {
 
     fetchUsername();
   }, []);
-
 
   const apiClient = axios.create({
     baseURL: "https://gitfood.fun:5255",
@@ -59,8 +58,13 @@ export const RestApiProvider = ({ children }) => {
     (error) => {
       if (error.response) {
         switch (error.response.status) {
+          case 400:
+            // setIsSignedIn(false);
+            triggerNotification("Bad request!");
+            break;
           case 401:
             setIsSignedIn(false);
+            triggerNotification("Unauthorized action!");
             break;
           case 403:
             triggerNotification("Forbidden action!");
@@ -68,6 +72,8 @@ export const RestApiProvider = ({ children }) => {
           case 404:
             triggerNotification("Resource not found!");
             break;
+          case 405:
+            triggerNotification("Method not allowed!");
           default:
             triggerNotification(error.response.data);
             break;
@@ -141,7 +147,7 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const signOut = async () => {
-    await apiClient.delete('/login/signOut');
+    await apiClient.delete("/login/signOut");
     await AsyncStorage.removeItem("AWTtoken");
     await AsyncStorage.removeItem("username");
     setIsSignedIn(false);
@@ -203,10 +209,10 @@ export const RestApiProvider = ({ children }) => {
   const patchFridgeAddProducts = async (products, fridgeId) => {
     const response = await apiClient.patch("/fridge/addProducts", {
       products,
-      fridgeId
+      fridgeId,
     });
     return response.data;
-  };  
+  };
 
   const updateProductQuantity = async (fridgeId, productId, quantity) => {
     return await apiClient.patch(
@@ -249,7 +255,9 @@ export const RestApiProvider = ({ children }) => {
   // Shopping
 
   const getShoppingProducts = async (shoppingId) => {
-    const response = await apiClient.get(`/shoppingList/get?shoppingListId=${shoppingId}`);
+    const response = await apiClient.get(
+      `/shoppingList/get?shoppingListId=${shoppingId}`,
+    );
 
     console.log("data: ", response.data, shoppingId);
     return response.data;
@@ -264,79 +272,219 @@ export const RestApiProvider = ({ children }) => {
     }));
   };
 
-  const updateShoppingListQuantity = async (shoppingId, categoryId, quantity) => {
-    return await apiClient.patch(`/shoppingList/update?shoppingListId=${shoppingId}&categoryId=${categoryId}&quantity=${quantity}`);
+  const updateShoppingListQuantity = async (
+    shoppingId,
+    categoryId,
+    quantity,
+  ) => {
+    return await apiClient.patch(
+      `/shoppingList/update?shoppingListId=${shoppingId}&categoryId=${categoryId}&quantity=${quantity}`,
+    );
   };
 
   const createShoppingList = async (name) => {
     const response = await apiClient.post(`/shoppingList/create?name=${name}`);
-    
+
     return response.data;
   };
 
   const getRecipesPage = async (page, pageSize, search, ingredients) => {
+    console.log(search, ingredients);
+
     const response = await apiClient.post(
       `/recipe/getPaged?page=${page}&pageSize=${pageSize}`,
-      { search, ingredients },
+      { searchName: search, categoryIds: [] },
     );
 
-    // console.log(response.data);
+    console.log(response.data);
     return response.data;
   }; // this
 
-  const addRecipePhotos = async (recipeId, photos) => {
-    const formData = new FormData();
-
-    photos.assets.forEach((image, i) => {
-      formData.append("images", {
-        ...image,
-        uri:
-          Platform.OS === "android"
-            ? image.uri
-            : image.uri.replace("file://", ""),
-        name: `image-${i}`,
-        type: "image/jpeg", // it may be necessary in Android.
-      });
-    });
-
-    console.log(formData);
-
-    const response = await apiMultipart.post(
-      `/recipe/addPhotos?recipeId=${recipeId}`,
-      formData,
-      { curlirize: true },
-    ); //
-    console.log(response.status, response.statusText);
-    console.log(response.data);
+  const getRecipeDetails = async (recipeId) => {
+    const response = await apiClient.get(
+      `/recipe/getRecipeDetails?recipeId=${recipeId}`,
+    );
 
     return response.data;
+  };
+
+  const addRecipePhotos = async (recipeId, photos) => {
+    let body = new FormData();
+    const files = photos.assets.map((photo) => {
+      const uri = photo.uri;
+      const name = photo.fileName;
+      const type = photo.mimeType;
+
+      body.append("images", {
+        uri,
+        name,
+        type,
+      });
+      return {
+        uri,
+        name,
+        type,
+      };
+    });
+
+    console.log(body);
+
+    await fetch(
+      `https://gitfood.fun:5255/recipe/addPhotos?recipeId=${recipeId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${await AsyncStorage.getItem("AWTtoken")}`,
+          "Content-Type": "multipart/form-data",
+        },
+        body: body,
+      },
+    )
+      .then((res) => {
+        console.log(res.status);
+        return res.json();
+      })
+      // .then((res) => res.json())
+      .then((res) => {
+        console.log("response" + JSON.stringify(res));
+      })
+      .catch((e) => console.log(e));
+  };
+
+  const addRecipeMainPhoto = async (recipeId, photo) => {
+    let body = new FormData();
+    const uri = photo.uri;
+    const name = photo.fileName;
+    const type = photo.mimeType;
+
+    try {
+      body.append("image", {
+        uri,
+        name,
+        type,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    await fetch(
+      `https://gitfood.fun:5255/recipe/addOrUpdateMainPhoto?recipeId=${recipeId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${await AsyncStorage.getItem("AWTtoken")}`,
+          "Content-Type": "multipart/form-data",
+        },
+        body: body,
+      },
+    )
+      .then((res) => {
+        console.log(res.status);
+        console.log(res);
+        return res.json();
+      })
+      // .then((res) => res.json())
+      .then((res) => {
+        console.log("response" + JSON.stringify(res));
+      })
+      .catch((e) => console.log(e));
   };
 
   const getMarkdown = async (path) => {
     const response = await apiClient.get(`/${path}`);
 
-    console.log(response.data);
+    // console.log(response.data);
     return response.data;
   };
 
   const updateMarkdown = async (recipeId, content) => {
     console.log(recipeId, content);
-    const response = await apiClient.post(`/recipe/updateMarkdown?recipeId=${recipeId}`, {
-      Markdown: content
-    });
+    const response = await apiClient.post(
+      `/recipe/updateMarkdown?recipeId=${recipeId}`,
+      {
+        Markdown: content,
+      },
+    );
 
     console.log(response.data);
     return response.data;
   };
 
-  const getCategorySuggestion = async (search) => {
-    // console.log(search);
-
+  const getCategorySuggestion = async (query) => {
     const response = await apiClient.get(
-      `/Category/getSuggestions?name=${search}&resultsCount=10 `,
+      `/Category/getSuggestions?name=${query.search}&resultsCount=${query.count} `,
     );
 
-    // console.log(response.data);
+    return response.data;
+  };
+
+  const getFoodCategorySuggestion = async (query) => {
+    const response = await apiClient.get(
+      `/FoodCategory/getSuggestions?name=${query.search}&resultsCount=${query.count} `,
+    );
+
+    return response.data;
+  };
+
+  const recipeLike = async (recipeId) => {
+    const response = await apiClient.post(`/recipe/like?recipeId=${recipeId}`);
+
+    return response.data;
+  };
+
+  const recipeUnlike = async (recipeId) => {
+    const response = await apiClient.post(
+      `/recipe/unlike?recipeId=${recipeId}`,
+    );
+
+    return response.data;
+  };
+
+  const updateRecipeName = async (recipeId, name) => {
+    const response = await apiClient.post(
+      `/recipe/updateName?recipeId=${recipeId}&name=${name}`,
+    );
+
+    return response.data;
+  };
+
+  const updateRecipeDescription = async (recipeId, description) => {
+    // send description, as data will be string not json
+    const response = await apiClient.post(
+      `/recipe/updateDescription?recipeId=${recipeId}`,
+      {
+        description: description,
+      },
+    );
+
+    return response.data;
+  };
+
+  const updateRecipeIngredient = async (
+    recipeId,
+    ingredientCategory,
+    quantity,
+  ) => {
+    const response = await apiClient.post(
+      `/recipe/updateIngredient?recipeId=${recipeId}&categoryId=${ingredientCategory}&quantity=${quantity}`,
+    );
+
+    return response.data;
+  };
+
+  const postAddComment = async (recipeId, comment) => {
+    const response = await apiClient.post(
+      `/recipe/addComment?recipeId=${recipeId}&comment=${comment}`,
+    );
+
+    return response.data;
+  };
+
+  const getCommentsPage = async (recipeId, page, pageSize) => {
+    const response = await apiClient.get(
+      `/recipe/getCommentsPaged?recipeId=${recipeId}&page=${page}&pageSize=${pageSize}`,
+    );
+
     return response.data;
   };
 
@@ -376,11 +524,21 @@ export const RestApiProvider = ({ children }) => {
 
     // Recipe
     getRecipesPage,
+    getRecipeDetails,
     getMarkdown,
+    getFoodCategorySuggestion,
+    recipeLike,
+    updateRecipeName,
+    updateRecipeDescription,
+    updateRecipeIngredient,
     updateMarkdown,
+
     addRecipePhotos,
+    addRecipeMainPhoto,
 
     getCategorySuggestion,
+    postAddComment,
+    getCommentsPage,
   };
 
   return (

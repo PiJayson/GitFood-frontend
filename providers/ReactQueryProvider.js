@@ -29,4 +29,27 @@ const getCategorySuggestion = (query) => {
   });
 };
 
-export { getRecipes, getCategorySuggestion };
+const getSearchSuggestion = (query) => {
+  const { getFoodCategorySuggestion } = useRestApi();
+  return useQuery({
+    queryKey: ["SearchSuggestions", query],
+    queryFn: () => getFoodCategorySuggestion(query),
+  });
+};
+
+const getComments = (recipeId, pageSize) => {
+  const { getCommentsPage } = useRestApi();
+  return useInfiniteQuery({
+    queryKey: ["comments", recipeId],
+    queryFn: ({ pageParam = 1 }) =>
+      getCommentsPage(recipeId, pageParam, pageSize),
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < pageSize) {
+        return undefined;
+      }
+      return pages.length + 1;
+    },
+  });
+};
+
+export { getRecipes, getCategorySuggestion, getSearchSuggestion, getComments };

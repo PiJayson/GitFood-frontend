@@ -38,14 +38,15 @@ type FridgeListProductState = {
   fridgeListProducts: FridgeListProduct[];
 }; // using arrays here is causing a lot of reloads
 
-export const useFridgesStore = create<FridgeListProductState & FridgesState>(() => ({
-  fridgeListProducts: [],
-  fridges: [],
-  currentStoreId: -1,
-}));
+export const useFridgesStore = create<FridgeListProductState & FridgesState>(
+  () => ({
+    fridgeListProducts: [],
+    fridges: [],
+    currentStoreId: -1,
+  }),
+);
 
 export const syncFridgeStore = {
-
   elements: () => useFridgesStore().fridgeListProducts, // useShallow will be needed here, at least i think so
   stores: () => useFridgesStore().fridges, // no need for useShallow here, at least i think so, well i was wrong
 
@@ -79,40 +80,45 @@ export const syncFridgeStore = {
     console.log("Setting fridge: ", fridge, fridgeId);
     const { products } = await getFridgeProducts(fridgeId);
 
-    const fridgeListProducts: FridgeListProduct[] = products.reduce((acc: FridgeListProduct[], product: any) => {
-      const parsedProduct: Product = {
-        description: product.description,
-        productName: product.name,
-        categoryName: product.categoryName,
-        barcode: product.barcode,
-        productId: product.id,
-        categoryId: product.categoryId,
-        quantity: product.quantity,
-        unit: product.categoryUnit,
-      };
+    const fridgeListProducts: FridgeListProduct[] = products.reduce(
+      (acc: FridgeListProduct[], product: any) => {
+        const parsedProduct: Product = {
+          description: product.description,
+          productName: product.name,
+          categoryName: product.categoryName,
+          barcode: product.barcode,
+          productId: product.id,
+          categoryId: product.categoryId,
+          quantity: product.quantity,
+          unit: product.categoryUnit,
+        };
 
-      const categoryIndex = acc.findIndex((cat) => cat.categoryId === parsedProduct.categoryId);
-      if (categoryIndex === -1) {
-        acc.push({
-          description: parsedProduct.description,
-          categoryName: parsedProduct.categoryName,
-          categoryId: parsedProduct.categoryId,
-          quantity: parsedProduct.quantity,
-          unit: parsedProduct.unit,
-          products: [parsedProduct],
-        });
-      } else {
-        acc[categoryIndex].products.push(parsedProduct);
-        acc[categoryIndex].quantity += parsedProduct.quantity;
-      }
-      return acc;
-    }, []);
+        const categoryIndex = acc.findIndex(
+          (cat) => cat.categoryId === parsedProduct.categoryId,
+        );
+        if (categoryIndex === -1) {
+          acc.push({
+            description: parsedProduct.description,
+            categoryName: parsedProduct.categoryName,
+            categoryId: parsedProduct.categoryId,
+            quantity: parsedProduct.quantity,
+            unit: parsedProduct.unit,
+            products: [parsedProduct],
+          });
+        } else {
+          acc[categoryIndex].products.push(parsedProduct);
+          acc[categoryIndex].quantity += parsedProduct.quantity;
+        }
+        return acc;
+      },
+      [],
+    );
 
     console.log("Fridge products", products, fridgeListProducts);
 
     useFridgesStore.setState({
       currentStoreId: fridgeId,
-      fridgeListProducts: fridgeListProducts
+      fridgeListProducts: fridgeListProducts,
     });
   },
 
@@ -128,7 +134,9 @@ export const syncFridgeStore = {
     console.log("sent");
 
     useFridgesStore.setState((state) => {
-      const categoryIndex = state.fridgeListProducts.findIndex((cat) => cat.categoryId === product.categoryId);
+      const categoryIndex = state.fridgeListProducts.findIndex(
+        (cat) => cat.categoryId === product.categoryId,
+      );
       if (categoryIndex === -1) {
         return {
           fridgeListProducts: [
@@ -156,10 +164,7 @@ export const syncFridgeStore = {
     });
   },
 
-  updateProduct: async (
-    product: Product, updateProductQuantity
-  ) => {
-    // change, no prevProduct needed !!!
+  updateProduct: async (product: Product, updateProductQuantity) => {
     await updateProductQuantity(
       useFridgesStore.getState().currentStoreId,
       product.productId,
@@ -169,11 +174,15 @@ export const syncFridgeStore = {
     console.log("Updating product in store", product);
 
     useFridgesStore.setState((state) => {
-      const categoryIndex = state.fridgeListProducts.findIndex((cat) => cat.categoryId === product.categoryId);
+      const categoryIndex = state.fridgeListProducts.findIndex(
+        (cat) => cat.categoryId === product.categoryId,
+      );
       if (categoryIndex === -1) return state;
 
       const updatedCategory = { ...state.fridgeListProducts[categoryIndex] };
-      const productIndex = updatedCategory.products.findIndex((p) => p.productId === product.productId);
+      const productIndex = updatedCategory.products.findIndex(
+        (p) => p.productId === product.productId,
+      );
       if (productIndex === -1) return state;
 
       const oldQuantity = updatedCategory.products[productIndex].quantity;
@@ -194,13 +203,17 @@ export const syncFridgeStore = {
     );
 
     console.log("Removing product from store", product);
-    
+
     useFridgesStore.setState((state) => {
-      const categoryIndex = state.fridgeListProducts.findIndex((cat) => cat.categoryId === product.categoryId);
+      const categoryIndex = state.fridgeListProducts.findIndex(
+        (cat) => cat.categoryId === product.categoryId,
+      );
       if (categoryIndex === -1) return state;
 
       const updatedCategory = { ...state.fridgeListProducts[categoryIndex] };
-      updatedCategory.products = updatedCategory.products.filter((p) => p.productId !== product.productId);
+      updatedCategory.products = updatedCategory.products.filter(
+        (p) => p.productId !== product.productId,
+      );
       updatedCategory.quantity -= product.quantity;
 
       const updatedFridgeListProducts = [...state.fridgeListProducts];

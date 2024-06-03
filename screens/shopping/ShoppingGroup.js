@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { EventProvider } from "react-native-outside-press";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { syncShoppingStore } from "./ShoppingStore";
 import { useRestApi } from "../../providers/RestApiProvider";
 import ShoppingScreen from "./ShoppingScreen";
 import ShoppingScannerScreen from "./ShoppingScannerScreen";
 
-const ShoppingStack = createStackNavigator();
+const ShoppingStack = createNativeStackNavigator();
 
 export default function ShoppingeGroup({ navigation }) {
   // load the categories from the server
@@ -19,7 +19,11 @@ export default function ShoppingeGroup({ navigation }) {
   return (
     <EventProvider style={{ flex: 1 }}>
       <ShoppingStack.Navigator>
-        <ShoppingStack.Screen name="Shopping" component={ShoppingScreen} options={{ headerShown: false }}/>
+        <ShoppingStack.Screen
+          name="Shopping"
+          component={ShoppingScreen}
+          options={{ headerShown: false }}
+        />
         <ShoppingStack.Screen
           name="ShoppingScanner"
           component={ShoppingScannerScreen}

@@ -1,4 +1,4 @@
-import { RefreshControlComponent, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Chip } from "react-native-paper";
 
 export default function IngredientsInSearch({
@@ -6,12 +6,14 @@ export default function IngredientsInSearch({
   dispatch,
   addNewIngredient,
 }) {
+  console.log("IngredientsInSearch", state);
+
   return (
     <View style={styles.container}>
       {state.map((ingredient) => (
         <Chip
           key={ingredient.id}
-          onClose={() => dispatch({ type: "remove", category: ingredient })}
+          onClose={() => dispatch({ type: "remove", category: ingredient.id })}
           style={styles.chip}
         >
           {ingredient.name}
@@ -28,6 +30,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "center",
   },
   chip: {
     margin: 2,

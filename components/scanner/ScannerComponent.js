@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { View, StyleSheet, Platform, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Platform,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { Camera, CameraView, useCameraPermissions } from "expo-camera";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,7 +34,9 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
   );
 
   const toggleFacingZxing = () => {
-    setCurrentDeviceIndex((prevIndex) => (prevIndex + 1) % cameraDevices.length);
+    setCurrentDeviceIndex(
+      (prevIndex) => (prevIndex + 1) % cameraDevices.length,
+    );
   };
 
   const toggleFacingExpo = () => {
@@ -43,7 +51,8 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
           setCameraDevices(videoInputDevices);
 
           if (videoInputDevices.length > 0) {
-            const selectedDeviceId = videoInputDevices[currentDeviceIndex].deviceId;
+            const selectedDeviceId =
+              videoInputDevices[currentDeviceIndex].deviceId;
             await codeReader.decodeFromVideoDevice(
               selectedDeviceId,
               videoRef.current,
@@ -78,7 +87,6 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
     } else {
       (async () => {
         const { status } = await Camera.requestCameraPermissionsAsync();
-        console.log(status);
 
         // setHasPermission(status === "granted");
       })();
@@ -96,7 +104,10 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
   if (Platform.OS === "web") {
     return (
       <View style={[styles.container, style]}>
-        <TouchableOpacity style={styles.switchButton} onPress={toggleFacingZxing}>
+        <TouchableOpacity
+          style={styles.switchButton}
+          onPress={toggleFacingZxing}
+        >
           <Ionicons name="camera-reverse" size={30} color="white" />
         </TouchableOpacity>
         <video ref={videoRef} style={styles.video} />
@@ -128,7 +139,6 @@ export default function ScannerComponent({ onBarcodeScanned, style }) {
         <CameraView
           style={styles.camera}
           facing={facing}
-          // ref={cameraRef}
           onBarcodeScanned={(event) => onBarcodeScanned(event.data)}
         />
       )}
