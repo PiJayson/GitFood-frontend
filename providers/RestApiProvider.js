@@ -228,6 +228,10 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const removeFridge = async (fridgeID) => {
+    await apiClient.delete(`/fridge/remove?fridgeId=${fridgeID}`);
+  };
+
   const getFridges = async () => {
     const response = await apiClient.get("/fridge/getMap");
 
@@ -235,6 +239,18 @@ export const RestApiProvider = ({ children }) => {
 
     return response.data;
   };
+
+  const patchFridgeShare = async (fridgeId, username) => {
+    await apiClient.patch(`/fridge/share?fridgeId=${fridgeId}&userLogin=${username}`);
+  }
+
+  const deleteFridgeUnshare = async (fridgeId, username) => {
+    await apiClient.delete(`/fridge/unshare?fridgeId=${fridgeId}&userLogin=${username}`);
+  }
+
+  const deleteFridgeBeUnshared = async (fridgeId) => {
+    await apiClient.delete(`/fridge/beUnshared?fridgeId=${fridgeId}`);
+  }
 
   // Shopping
 
@@ -494,7 +510,11 @@ export const RestApiProvider = ({ children }) => {
     patchFridgeAddProducts,
     updateProductQuantity,
     createFridge,
+    removeFridge,
     getFridges,
+    patchFridgeShare,
+    deleteFridgeUnshare,
+    deleteFridgeBeUnshared,
 
     // Shopping List
     getShoppingProducts,

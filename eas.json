@@ -10,7 +10,12 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": {},
+    "production": {
+      "android": {
+        "buildType": "apk",
+        "artifactPath": "git-food.apk"
+      }
+    },
     "local": {
       "android": {
         "buildType": "apk"
