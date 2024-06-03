@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TextInput } from "react-native";
 import IncrementDecrement from "../universal/IncrementDecrement";
 import { theme } from "../../assets/theme";
 
@@ -7,7 +7,8 @@ export default function ProductComponent({ baseProduct, updateProductQuantity, s
   const [product, setProduct] = useState(baseProduct);
 
   const updateCount = (change) => {
-    if (product.quantity + change < 0 || product.quantity + change >= 100) {
+    const newQuantity = product.quantity + change;
+    if (newQuantity < 0 || newQuantity >= 999) {
       return;
     }
 
@@ -23,13 +24,27 @@ export default function ProductComponent({ baseProduct, updateProductQuantity, s
     syncStore.updateProduct(newProduct, updateProductQuantity);
   };
 
+  const handleQuantityChange = (text) => {
+    const newQuantity = parseInt(text, 10);
+    if (!isNaN(newQuantity) && newQuantity >= 0 && newQuantity < 999) {
+      const newProduct = { ...product, quantity: newQuantity };
+      setProduct(newProduct);
+      syncStore.updateProduct(newProduct, updateProductQuantity);
+    }
+  };
+
   return (
     <View style={styles.productItem}>
       <Text style={styles.productName}>{product.productName}</Text>
       <View style={styles.incrementDecrementContainer}>
         <IncrementDecrement update={updateCount} buttonStyle={styles.customButton} />
       </View>
-      <Text style={styles.productQuantity}>{product.quantity}</Text>
+      <TextInput
+        style={styles.productQuantity}
+        value={String(product.quantity)}
+        keyboardType="numeric"
+        onChangeText={handleQuantityChange}
+      />
     </View>
   );
 }
@@ -57,9 +72,10 @@ const styles = StyleSheet.create({
   },
   productQuantity: {
     fontSize: 16,
-    flex: 1,
-    marginRight: 10,
+    flex: 0.5,
+    marginRight: 20,
     fontWeight: 'bold',
     textAlign: 'right',
+    textAlignVertical: 'center',
   }
 });

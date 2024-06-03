@@ -100,7 +100,7 @@ const ShoppingScreen = ({ navigation }) => {
           onClose={() => setShowFridgeSelector(false)}
           syncStore={syncFridgeStore}
         />
-        <View style={{marginTop: 45, flex: 1}}>
+        <View style={{flex: 1}}>
           <CategoryList
             syncStore={syncShoppingStore}
             renderCategory={renderCategory}

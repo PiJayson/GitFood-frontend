@@ -52,7 +52,7 @@ const EditFridge = ({ visible, onClose, fridgeId, syncStore }) => {
               </Button>
               <Text style={styles.subHeader}>Shared With</Text>
               <ScrollView style={styles.scrollableList}>
-                {fridge.sharedWith.map(user => (
+                {fridge && fridge.sharedWith.map(user => (
                   <View key={user} style={styles.userItem}>
                     <Text style={styles.username}>{user}</Text>
                     <TouchableOpacity onPress={() => handleRemoveUser(user)}>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
-  Button,
   StyleSheet,
   Modal,
   Text,
@@ -10,13 +9,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../../assets/theme';
+import Button from "../universal/Button";
 
 const ProductForm = ({
   visible,
   onSubmit,
   onClose,
   categories = [],
-  units = [],
   initialData = {},
 }) => {
   const [productName, setProductName] = useState(initialData.productName || "");
@@ -26,7 +27,6 @@ const ProductForm = ({
   const [categoryName, setCategoryName] = useState(
     initialData.categoryName || "",
   );
-  const [unit, setUnit] = useState(initialData.unit || units[0] || "");
   const [filteredOptions, setFilteredOptions] = useState(categories);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -36,7 +36,6 @@ const ProductForm = ({
     setBarcode(initialData.barcode || "");
     setQuantity(initialData.quantity || "");
     setCategoryName(initialData.categoryName || "");
-    setUnit(initialData.unit || units[0] || "");
   }, [initialData]);
 
   const handleSubmit = () => {
@@ -46,28 +45,26 @@ const ProductForm = ({
       barcode,
       quantity,
       categoryName,
-      unit,
     });
     setProductName("");
     setDescription("");
     setBarcode("");
     setQuantity("");
     setCategoryName("");
-    setUnit(units[0] || "");
   };
 
   const handleCategoryInput = (text) => {
     setCategoryName(text);
     setFilteredOptions(
       categories.filter((option) =>
-        option.toLowerCase().includes(text.toLowerCase()),
+        option.name.toLowerCase().includes(text.toLowerCase()),
       ),
     );
     setShowDropdown(true);
   };
 
   const selectCategory = (option) => {
-    setCategoryName(option);
+    setCategoryName(option.name);
     setShowDropdown(false);
   };
 
@@ -89,7 +86,6 @@ const ProductForm = ({
             placeholder="Description"
             value={description}
             onChangeText={setDescription}
-            multiline
           />
           <TextInput
             style={styles.input}
@@ -113,26 +109,23 @@ const ProductForm = ({
           {showDropdown && (
             <FlatList
               data={filteredOptions}
-              keyExtractor={(item) => item}
+              keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => selectCategory(item)}>
-                  <Text style={styles.dropdownItem}>{item}</Text>
+                  <Text style={styles.dropdownItem}>{item.name}</Text>
                 </TouchableOpacity>
               )}
               style={styles.dropdown}
             />
           )}
-          <Picker
-            selectedValue={unit}
-            style={styles.input}
-            onValueChange={(itemValue) => setUnit(itemValue)}
-          >
-            {units.map((unit) => (
-              <Picker.Item label={unit} value={unit} key={unit} />
-            ))}
-          </Picker>
-          <Button title="Save" onPress={handleSubmit} />
-          <Button title="Cancel" color="red" onPress={onClose} />
+          <View style={styles.buttonContainer}>
+            <Button title="Finish" mode="outlined" style={styles.button} textStyle={styles.buttonText} onPress={handleSubmit}>
+              Finish
+            </Button>
+            <Button title="Close" mode="outlined" style={styles.cancelButton} onPress={onClose}>
+              Close
+            </Button>
+          </View>
         </View>
       </View>
     </Modal>
@@ -142,22 +135,30 @@ const ProductForm = ({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 20,
-    width: "90%",
-    borderRadius: 10,
+    width: '90%',
+    maxWidth: 800,
+    borderRadius: 30,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     height: 40,
-    marginBottom: 12,
+    borderColor: '#ccc',
     borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    marginVertical: 10,
   },
   dropdown: {
     backgroundColor: "white",
@@ -170,10 +171,31 @@ const styles = StyleSheet.create({
   dropdownItem: {
     padding: 10,
   },
-  header: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+  picker: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 25,
+    marginVertical: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+  },
+  button: {
+    backgroundColor: theme.colors.primary,
+    width: '40%',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  cancelButton: {
+    width: '40%',
+  },
+  cancelButtonText: {
+    color: 'white',
   },
 });
 
