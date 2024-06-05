@@ -27,6 +27,7 @@ import FridgeIcon from "./components/svg/FridgeIcon";
 import ShoppingIcon from "./components/svg/ShoppingIcon";
 import RecipesIcon from "./components/svg/RecipesIcon";
 import MainHeader from "./components/universal/MainHeader";
+import VerificationScreen from "./screens/login/VerificationScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -100,6 +101,7 @@ function AppNavigation() {
           <Stack.Screen name="Start" component={StartScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name="Verification" component={VerificationScreen} />
         </Stack.Navigator>
       )}
     </NavigationContainer>

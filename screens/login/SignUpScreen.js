@@ -10,30 +10,36 @@ import BackButton from "../../components/universal/BackButton";
 import { theme } from "../../assets/theme";
 import { usernameValidator } from "../../utils/UsernameValidator";
 import { passwordValidator } from "../../utils/PasswordValidator";
+import { emailValidator } from "../../utils/EmailValidator";
 import { useRestApi } from "../../providers/RestApiProvider";
 
 const SignUpScreen = ({ navigation }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
+  const [email, setEmail] = useState({ value: "", error: "" });
   const [isWaiting, setIsWaiting] = useState(false);
   const { register } = useRestApi();
 
   const handleSignUp = async () => {
     console.log("Username:", username);
     console.log("Password:", password);
+    console.log("Email:", email);
 
     const usernameError = usernameValidator(username.value);
     const passwordError = passwordValidator(password.value);
+    const emailError = emailValidator(email.value);
 
-    if (usernameError || passwordError) {
+    if (usernameError || passwordError || emailError) {
       setUsername({ ...username, error: usernameError });
       setPassword({ ...password, error: passwordError });
+      setEmail({ ...email, error: emailError });
       return;
     }
 
     try {
       setIsWaiting(true);
-      await register(username.value, password.value);
+      await register(email.value, username.value, password.value);
+      navigation.navigate("Verification", { email: email.value, login: username.value });
     } finally {
       setIsWaiting(false);
     }
@@ -44,6 +50,17 @@ const SignUpScreen = ({ navigation }) => {
       <BackButton goBack={navigation.goBack} />
       <Logo />
       <Header>Create Account</Header>
+      <TextInput
+        label="Email"
+        returnKeyType="next"
+        value={email.value}
+        disable={isWaiting}
+        onChangeText={(text) => setEmail({ value: text, error: "" })}
+        error={!!email.error}
+        errorText={email.error}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
       <TextInput
         label="Username"
         returnKeyType="next"

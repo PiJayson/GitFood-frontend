@@ -58,10 +58,6 @@ export const RestApiProvider = ({ children }) => {
     (error) => {
       if (error.response) {
         switch (error.response.status) {
-          case 400:
-            // setIsSignedIn(false);
-            triggerNotification("Bad request!");
-            break;
           case 401:
             setIsSignedIn(false);
             triggerNotification("Unauthorized action!");
@@ -133,16 +129,22 @@ export const RestApiProvider = ({ children }) => {
     return response;
   };
 
-  const register = async (login, password) => {
+  const register = async (email, login, password) => {
     const response = await apiClient.post("/login/register", {
+      email,
       login,
       password,
     });
-    console.log(response.data);
-    await AsyncStorage.setItem("AWTtoken", response.data);
-    await AsyncStorage.setItem("username", login);
-    setUsername(login);
-    setIsSignedIn(true);
+    return response;
+  };
+
+  const verify = async (token, login) => {
+    const response = await apiClient.post(`/login/verify?token=${token}&login=${login}`);
+    return response;
+  };
+
+  const resendVerification = async (login) => {
+    const response = await apiClient.post(`/login/resendVerification?login=${login}`);
     return response;
   };
 
@@ -496,6 +498,8 @@ export const RestApiProvider = ({ children }) => {
     login,
     signOut,
     register,
+    verify,
+    resendVerification,
 
     // Category
     categoryGetAll,
