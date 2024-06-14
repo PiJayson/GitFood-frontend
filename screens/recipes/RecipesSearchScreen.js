@@ -17,7 +17,7 @@ export default function RecipesSearchScreen() {
   const [formVisible, setFormVisible] = React.useState(false);
   const [recipeFormVisible, setRecipeFormVisible] = React.useState(false);
 
-  const { createRecipe, getRecipeDetails } = useRestApi();
+  const { createRecipe, getRecipeDetails, likeRecipe, unlikeRecipe } = useRestApi();
 
   const [active, setActive] = React.useState(false);
   const searchValue = useDeferredValue(search, { timeoutMs: 3000 });
@@ -67,6 +67,16 @@ export default function RecipesSearchScreen() {
     setRecipeFormVisible(false);
     navigation.navigate("Recipe", { recipe })
   }
+
+  const handleLikeRecipe = async (recipe) => {
+    if (recipe.isLiked) {
+      await unlikeRecipe(recipe.id);
+    } else {
+      await likeRecipe(recipe.id);
+    }
+
+    dataSource.refetch();
+  };
 
   const query = {
     search: searchQuery,
@@ -142,7 +152,7 @@ export default function RecipesSearchScreen() {
           <View style={styles.results}>
             <RecipeList
               dataSource={dataSource}
-              onLikeRecipe={(recipe) => console.log("like", recipe)}
+              onLikeRecipe={handleLikeRecipe}
               onViewRecipe={(recipe) =>
                 navigation.navigate("Recipe", { recipe })
               }

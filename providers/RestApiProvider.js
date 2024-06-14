@@ -511,6 +511,18 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const likeRecipe = async (recipeId) => {
+    const response = await apiClient.post(`/recipe/like?recipeId=${recipeId}`,);
+
+    return response.data;
+  }
+
+  const unlikeRecipe = async (recipeId) => {
+    const response = await apiClient.post(`/recipe/unlike?recipeId=${recipeId}`,);
+
+    return response.data;
+  }
+
   const value = {
     isSignedIn,
     username,
@@ -566,6 +578,8 @@ export const RestApiProvider = ({ children }) => {
     getCategorySuggestion,
     postAddComment,
     getCommentsPage,
+    likeRecipe,
+    unlikeRecipe,
   };
 
   return (

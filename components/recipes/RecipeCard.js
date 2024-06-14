@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Image } from "react-native";
-import { IconButton, Text } from "react-native-paper";
+import { IconButton, Text  } from "react-native-paper";
 import Title from "../../components/universal/Title";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { theme } from "../../assets/theme";
@@ -16,6 +16,7 @@ export default function RecipeCard({
   const mainImage = recipe.titleImage
     ? "https://gitfood.fun:5255/" + recipe.titleImage
     : "https://gitfood.fun:5254/recipe_files/default_logo.png";
+
   return (
     <Animated.View
       entering={FadeInDown.delay(200 * index)}
@@ -32,11 +33,18 @@ export default function RecipeCard({
       <View style={styles.actions}>
         <Text>{recipe.description}</Text>
         <View style={styles.buttons}>
+          <View style={styles.likesContainer}>
+            <IconButton
+              icon="heart"
+              iconColor={recipe.isLiked ? theme.colors.primary : theme.colors.accent}
+              onPress={() => onLikeRecipe(recipe)}
+            />
+            <Text>{recipe.numberOfLikes}</Text>
+          </View>
           <IconButton
-            icon={"arrow-right-circle"}
+            icon="arrow-right-circle"
             onPress={() => onViewRecipe(recipe)}
           />
-          <IconButton icon={"heart"} onPress={() => onLikeRecipe(recipe)} />
         </View>
       </View>
     </Animated.View>
@@ -57,19 +65,21 @@ const styles = StyleSheet.create({
   },
   image: {
     height: 200,
-    // borderTopLeftRadius: 10,
-    // borderTopRightRadius: 10,
   },
   titleContainer: {
     paddingHorizontal: 10,
   },
   buttons: {
-    flexDirection: "row-reverse",
+    flexDirection: "row",
     alignItems: "center",
   },
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 10,
+  },
+  likesContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
