@@ -290,6 +290,27 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const patchAddCategory = async (shoppingListId, categoryId, quantity) => {
+    const response = await apiClient.patch(`/shoppingList/update?shoppingListId=${shoppingListId}&categoryId=${categoryId}&quantity=${quantity}`);
+
+    return response.data;
+  };
+
+  // Recipe
+
+  const createRecipe = async (name, description, markdown, ingredients, categories) => {
+    const response = await apiClient.post(`/recipe/create`, {
+      name,
+      description,
+      markdown,
+      ingredients,
+      categories
+    });
+
+    return response.data;
+  };
+
+
   const getRecipesPage = async (page, pageSize, search, ingredients) => {
     console.log(search, ingredients);
 
@@ -490,6 +511,18 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const likeRecipe = async (recipeId) => {
+    const response = await apiClient.post(`/recipe/like?recipeId=${recipeId}`,);
+
+    return response.data;
+  }
+
+  const unlikeRecipe = async (recipeId) => {
+    const response = await apiClient.post(`/recipe/unlike?recipeId=${recipeId}`,);
+
+    return response.data;
+  }
+
   const value = {
     isSignedIn,
     username,
@@ -525,8 +558,10 @@ export const RestApiProvider = ({ children }) => {
     getShoppingLists,
     updateShoppingListQuantity,
     createShoppingList,
+    patchAddCategory,
 
     // Recipe
+    createRecipe,
     getRecipesPage,
     getRecipeDetails,
     getMarkdown,
@@ -543,6 +578,8 @@ export const RestApiProvider = ({ children }) => {
     getCategorySuggestion,
     postAddComment,
     getCommentsPage,
+    likeRecipe,
+    unlikeRecipe,
   };
 
   return (

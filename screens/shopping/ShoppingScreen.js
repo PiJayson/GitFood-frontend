@@ -12,12 +12,14 @@ import FinishTransactionForm from "../../components/shopping/FinishTransactionFo
 import Background from "../../components/universal/Background";
 import ExpandableList from "../../components/universal/ExpandableList";
 import AddStore from "../../components/universal/AddStore";
+import AddCategoryToShoppingList from "../../components/shopping/AddCategoryToShoppingList";
 
 const windowDimensions = Dimensions.get("window");
 
 const ShoppingScreen = ({ navigation }) => {
-  const { updateShoppingListQuantity, patchFridgeAddProducts, getShoppingProducts, createShoppingList } = useRestApi();
+  const { updateShoppingListQuantity, patchFridgeAddProducts, getShoppingProducts, createShoppingList, patchAddCategory } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
+  const [addProductFormVisible, setAddProductFormVisible] = useState(false);
   const [showFridgeSelector, setShowFridgeSelector] = useState(false);
   const [dimensions, setDimensions] = useState({ window: windowDimensions });
   const [shoppingStarted, setShoppingStarted] = useState(false);
@@ -32,6 +34,11 @@ const ShoppingScreen = ({ navigation }) => {
   };
 
   const handleFridgeSelect = async (fridge) => {
+    if (!fridge) {
+      setShowFridgeSelector(false)
+      return
+    }
+    
     const products = elements.flatMap(category => category.products).map(product => ({
       productId: product.productId,
       quantity: product.quantity
@@ -85,6 +92,27 @@ const ShoppingScreen = ({ navigation }) => {
     setFormVisible(false);
   }
 
+  const handleAddCategory = async (category, quantity) => {
+    const newItem = {
+      description: category.description,
+      categoryName: category.name,
+      categoryId: category.id,
+      quantity: quantity,
+      unit: category.unit,
+      products: []
+    };
+
+    const existingCategory = elements.find(cat => cat.categoryId === category.id);
+
+    if (existingCategory) {
+      await syncShoppingStore.updateCategory(newItem, patchAddCategory);
+    }
+    else {
+      await syncShoppingStore.addCategory(newItem, patchAddCategory);
+    }
+    setAddProductFormVisible(false);
+  }
+
   return (
     <Background style={{ maxWidth: 800, padding: 0 }}>
       <View style={[{ maxHeight: dimensions.window.height }, styles.background]}>
@@ -94,10 +122,25 @@ const ShoppingScreen = ({ navigation }) => {
           onSelect={(item) => syncShoppingStore.setStore(item, getShoppingProducts)}
           onEdit={handleShare}
         />
+        {currentStoreId != -1 && (
+          <Button
+            title="Add Product"
+            mode="outlined"
+            onPress={() => setAddProductFormVisible(true)}
+          >
+            Add Product
+          </Button>
+        )}
         <FinishTransactionForm 
           visible={showFridgeSelector}
           onSubmit={handleFridgeSelect}
           onClose={() => setShowFridgeSelector(false)}
+          syncStore={syncFridgeStore}
+        />
+        <AddCategoryToShoppingList 
+          visible={addProductFormVisible}
+          onSubmit={handleAddCategory}
+          onClose={() => setAddProductFormVisible(false)}
           syncStore={syncFridgeStore}
         />
         <View style={{flex: 1}}>

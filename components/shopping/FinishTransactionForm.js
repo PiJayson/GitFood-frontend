@@ -22,10 +22,8 @@ const FinishTransactionForm = ({ visible, onSubmit, onClose, syncStore }) => {
   };
 
   const handleSubmit = () => {
-    if (selectedFridge) {
-      onSubmit(selectedFridge);
-      setSelectedFridge(null);
-    }
+    onSubmit(selectedFridge);
+    setSelectedFridge(null);
   };
 
   return (

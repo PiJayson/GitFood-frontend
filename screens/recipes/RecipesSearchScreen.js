@@ -7,12 +7,17 @@ import { getRecipes } from "../../providers/ReactQueryProvider";
 import NewIngredientInSearchForm from "../../components/recipes/NewCategoryInSearchForm";
 import OutsidePressHandler, { EventProvider } from "react-native-outside-press";
 import { useNavigation } from "@react-navigation/native";
+import AddRecipeForm from "../../components/recipes/AddRecipeForm";
+import { useRestApi } from "../../providers/RestApiProvider";
 
 export default function RecipesSearchScreen() {
   const navigation = useNavigation();
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [formVisible, setFormVisible] = React.useState(false);
+  const [recipeFormVisible, setRecipeFormVisible] = React.useState(false);
+
+  const { createRecipe, getRecipeDetails, likeRecipe, unlikeRecipe } = useRestApi();
 
   const [active, setActive] = React.useState(false);
   const searchValue = useDeferredValue(search, { timeoutMs: 3000 });
@@ -49,6 +54,28 @@ export default function RecipesSearchScreen() {
 
   const addNewIngredient = () => {
     setFormVisible(true);
+  };
+
+  const addNewRecipe = () => {
+    setRecipeFormVisible(true);
+  };
+
+  const handleAddRecipe = async (recipeName) => {
+    const recipeId = await createRecipe(recipeName, "", "", [], []);
+    const recipe = await getRecipeDetails(recipeId);
+    
+    setRecipeFormVisible(false);
+    navigation.navigate("Recipe", { recipe })
+  }
+
+  const handleLikeRecipe = async (recipe) => {
+    if (recipe.isLiked) {
+      await unlikeRecipe(recipe.id);
+    } else {
+      await likeRecipe(recipe.id);
+    }
+
+    dataSource.refetch();
   };
 
   const query = {
@@ -119,10 +146,13 @@ export default function RecipesSearchScreen() {
             dispatch={dispatch}
             addNewIngredient={addNewIngredient}
           />
+          <Button onPress={addNewRecipe} mode="contained" style={styles.addRecipeButton}>
+            Add Recipe
+          </Button>
           <View style={styles.results}>
             <RecipeList
               dataSource={dataSource}
-              onLikeRecipe={(recipe) => console.log("like", recipe)}
+              onLikeRecipe={handleLikeRecipe}
               onViewRecipe={(recipe) =>
                 navigation.navigate("Recipe", { recipe })
               }
@@ -136,6 +166,12 @@ export default function RecipesSearchScreen() {
         onSubmit={(ingredient) => dispatch({ type: "add", ingredient })}
         onClose={() => setFormVisible(false)}
         selected={ingredientsQuery.map((ingredient) => ingredient.id)}
+      />
+
+      <AddRecipeForm
+        visible={recipeFormVisible}
+        onSubmit={handleAddRecipe}
+        onClose={() => setRecipeFormVisible(false)}
       />
     </SafeAreaView>
   );
@@ -172,9 +208,17 @@ const styles = StyleSheet.create({
     width: "95%",
     alignSelf: "center",
   },
+  addRecipeButton: {
+    width: "90%",
+    maxWidth: 300,
+    alignSelf: "center",
+    marginTop: 10,
+    marginBottom: 10,
+  },
   results: {
     flex: 1,
     width: "100%",
     marginTop: 10,
   },
 });
+

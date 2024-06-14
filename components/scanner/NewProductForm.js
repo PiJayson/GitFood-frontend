@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  TextInput,
   StyleSheet,
   Modal,
   Text,
   FlatList,
   TouchableOpacity,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../assets/theme';
 import Button from "../universal/Button";
+import TextInput from "../universal/TextInput";
 
 const ProductForm = ({
   visible,
@@ -24,11 +22,10 @@ const ProductForm = ({
   const [description, setDescription] = useState(initialData.description || "");
   const [barcode, setBarcode] = useState(initialData.barcode || "");
   const [quantity, setQuantity] = useState(initialData.quantity || "");
-  const [categoryName, setCategoryName] = useState(
-    initialData.categoryName || "",
-  );
+  const [categoryName, setCategoryName] = useState(initialData.categoryName || "");
   const [filteredOptions, setFilteredOptions] = useState(categories);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     setProductName(initialData.productName || "");
@@ -38,19 +35,32 @@ const ProductForm = ({
     setCategoryName(initialData.categoryName || "");
   }, [initialData]);
 
+  const validateFields = () => {
+    const newErrors = {};
+    if (!productName) newErrors.productName = "Product name is required";
+    if (!description) newErrors.description = "Description is required";
+    if (!barcode) newErrors.barcode = "Barcode is required";
+    if (!quantity) newErrors.quantity = "Quantity is required";
+    if (!categoryName) newErrors.categoryName = "Category is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = () => {
-    onSubmit({
-      productName,
-      description,
-      barcode,
-      quantity,
-      categoryName,
-    });
-    setProductName("");
-    setDescription("");
-    setBarcode("");
-    setQuantity("");
-    setCategoryName("");
+    if (validateFields()) {
+      onSubmit({
+        productName,
+        description,
+        barcode,
+        quantity,
+        categoryName,
+      });
+      setProductName("");
+      setDescription("");
+      setBarcode("");
+      setQuantity("");
+      setCategoryName("");
+    }
   };
 
   const handleCategoryInput = (text) => {
@@ -73,38 +83,38 @@ const ProductForm = ({
       <View style={styles.backdrop}>
         <View style={styles.modalContainer}>
           <Text style={styles.header}>
-            {initialData.productId == -1 ? "Add New Product" : "Edit Product"}
+            {initialData.productId === -1 ? "Add New Product" : "Edit Product"}
           </Text>
           <TextInput
-            style={styles.input}
-            placeholder="Name"
+            label="Name"
             value={productName}
             onChangeText={setProductName}
+            errorText={errors.productName}
           />
           <TextInput
-            style={styles.input}
-            placeholder="Description"
+            label="Description"
             value={description}
             onChangeText={setDescription}
+            errorText={errors.description}
           />
           <TextInput
-            style={styles.input}
-            placeholder="Barcode"
+            label="Barcode"
             value={barcode}
             onChangeText={setBarcode}
+            errorText={errors.barcode}
           />
           <TextInput
-            style={styles.input}
-            placeholder="Quantity"
+            label="Quantity"
             value={quantity}
             onChangeText={(text) => setQuantity(Number(text))}
             keyboardType="numeric"
+            errorText={errors.quantity}
           />
           <TextInput
-            style={styles.input}
-            placeholder="Category"
+            label="Category"
             value={categoryName}
             onChangeText={handleCategoryInput}
+            errorText={errors.categoryName}
           />
           {showDropdown && (
             <FlatList
@@ -152,14 +162,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    marginVertical: 10,
-  },
   dropdown: {
     backgroundColor: "white",
     maxHeight: 100,
@@ -170,13 +172,6 @@ const styles = StyleSheet.create({
   },
   dropdownItem: {
     padding: 10,
-  },
-  picker: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 25,
-    marginVertical: 10,
   },
   buttonContainer: {
     flexDirection: 'row',
