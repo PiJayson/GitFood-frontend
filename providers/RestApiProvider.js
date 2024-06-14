@@ -201,6 +201,12 @@ export const RestApiProvider = ({ children }) => {
     }
   };
 
+  const getProductSuggestion = async (barcode) => {
+    const response = await apiClient.get(`/product/suggest?barcode=${barcode}`,);
+    
+    return response.data;
+  };
+
   const getFridgeProducts = async (fridgeId) => {
     const response = await apiClient.get("/fridge/get", {
       params: { fridgeId },
@@ -541,6 +547,7 @@ export const RestApiProvider = ({ children }) => {
     // Product
     productAdd,
     getProductByBarcode,
+    getProductSuggestion,
 
     // Fridge
     getFridgeProducts,

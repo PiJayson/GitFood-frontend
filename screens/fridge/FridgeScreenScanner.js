@@ -9,7 +9,7 @@ import IncrementDecrement from "../../components/universal/IncrementDecrement";
 import { theme } from "../../assets/theme";
 
 export default function FridgeScannerScreen({ navigation }) {
-  const { getProductByBarcode, updateProductQuantity, categoryGetAll, productAdd, categoryGetUnits } = useRestApi();
+  const { getProductByBarcode, updateProductQuantity, categoryGetAll, productAdd, categoryGetUnits, getProductSuggestion } = useRestApi();
   const [formVisible, setFormVisible] = useState(false);
   const [categories, setCategories] = useState([]);
   const [units, setUnits] = useState([]);
@@ -76,7 +76,10 @@ export default function FridgeScannerScreen({ navigation }) {
         );
       }
     } else {
-      const newScannedItem = {
+      // Get suggestion about product data.
+      const productSuggestion = await getProductSuggestion(scannedData);
+      
+      let newScannedItem = {
         description: "",
         productName: "",
         categoryName: "",
@@ -86,6 +89,14 @@ export default function FridgeScannerScreen({ navigation }) {
         unit: "amount",
         quantity: 1,
       };
+
+      if (productSuggestion) {
+        newScannedItem.description = productSuggestion.product.innerInformation.description;
+        newScannedItem.productName = productSuggestion.product.innerInformation.name;
+        newScannedItem.categoryName = productSuggestion.category.innerInformation.name;
+        newScannedItem.categoryId = productSuggestion.category.id;
+        newScannedItem.unit = productSuggestion.category.innerInformation.unit;
+      }
 
       setLastScannedItem(newScannedItem);
       setFormVisible(true);
