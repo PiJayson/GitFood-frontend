@@ -34,6 +34,11 @@ const ShoppingScreen = ({ navigation }) => {
   };
 
   const handleFridgeSelect = async (fridge) => {
+    if (!fridge) {
+      setShowFridgeSelector(false)
+      return
+    }
+    
     const products = elements.flatMap(category => category.products).map(product => ({
       productId: product.productId,
       quantity: product.quantity

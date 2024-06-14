@@ -173,7 +173,7 @@ export default function FridgeScannerScreen({ navigation }) {
               onSubmit={handleAddProduct}
               onClose={() => {
                 setFormVisible(false);
-                lastScannedItem = null;
+                setLastScannedItem(null);
               }}
             />
           </View>
