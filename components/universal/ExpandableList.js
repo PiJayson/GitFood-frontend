@@ -45,16 +45,28 @@ const ExpandableList = ({ items, onSelect, onAddNew, onEdit }) => {
                   style={styles.item}
                   onPress={() => handleSelect(item)}
                 >
-                  <List.Icon icon="magnify" />
+                  {/* <List.Icon icon="magnify" /> */}
                   <List.Item title={item.name} />
                 </TouchableOpacity>
-                <IconButton icon="dots-vertical" onPress={() => onEdit(item)} />
+                {onEdit && (
+                  <IconButton
+                    icon="dots-vertical"
+                    onPress={() => onEdit(item)}
+                  />
+                )}
               </View>
             ))}
           </ScrollView>
-          <Button mode="contained" onPress={onAddNew} style={styles.addButton}>
-            Add New
-          </Button>
+
+          {onAddNew && (
+            <Button
+              mode="contained"
+              onPress={onAddNew}
+              style={styles.addButton}
+            >
+              Add New
+            </Button>
+          )}
         </View>
       )}
     </View>

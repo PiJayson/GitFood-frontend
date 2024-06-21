@@ -26,14 +26,6 @@ const NewIngredientInSearchForm = ({
     search: searchValue,
     count: 10 + selected.length,
   });
-  // console.log("data@!:", data);
-
-  // if (data) {
-  //   data.map((item) => {
-  //     console.log(item);
-  //     console.log(typeof item.id);
-  //   });
-  // }
 
   const dataArr = data
     ? data
@@ -63,12 +55,6 @@ const NewIngredientInSearchForm = ({
           <OutsidePressHandler onOutsidePress={onClose} style={{ flex: 1 }}>
             <Text style={styles.header}>Add ingredient to search</Text>
             <View style={styles.search}>
-              {/* <TextInput
-            style={styles.input}
-            placeholder="Name"
-            value={name}
-            onChangeText={setName}
-          /> */}
               <Searchbar
                 placeholder="Ingredient name"
                 value={search}

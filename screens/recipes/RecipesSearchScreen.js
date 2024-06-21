@@ -4,7 +4,7 @@ import { Searchbar, Button } from "react-native-paper";
 import RecipeList from "../../components/recipes/RecipeList";
 import IngredientsInSearch from "../../components/recipes/IngredientsInSearch";
 import { getRecipes } from "../../providers/ReactQueryProvider";
-import NewIngredientInSearchForm from "../../components/recipes/NewCategoryInSearchForm";
+import NewIngredientInSearchForm from "../../components/recipes/NewIngredientInSearchForm";
 import OutsidePressHandler, { EventProvider } from "react-native-outside-press";
 import { useNavigation } from "@react-navigation/native";
 import AddRecipeForm from "../../components/recipes/AddRecipeForm";

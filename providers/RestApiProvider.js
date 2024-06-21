@@ -139,12 +139,16 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const verify = async (token, login) => {
-    const response = await apiClient.post(`/login/verify?token=${token}&login=${login}`);
+    const response = await apiClient.post(
+      `/login/verify?token=${token}&login=${login}`,
+    );
     return response;
   };
 
   const resendVerification = async (login) => {
-    const response = await apiClient.post(`/login/resendVerification?login=${login}`);
+    const response = await apiClient.post(
+      `/login/resendVerification?login=${login}`,
+    );
     return response;
   };
 
@@ -249,16 +253,20 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const patchFridgeShare = async (fridgeId, username) => {
-    await apiClient.patch(`/fridge/share?fridgeId=${fridgeId}&userLogin=${username}`);
-  }
+    await apiClient.patch(
+      `/fridge/share?fridgeId=${fridgeId}&userLogin=${username}`,
+    );
+  };
 
   const deleteFridgeUnshare = async (fridgeId, username) => {
-    await apiClient.delete(`/fridge/unshare?fridgeId=${fridgeId}&userLogin=${username}`);
-  }
+    await apiClient.delete(
+      `/fridge/unshare?fridgeId=${fridgeId}&userLogin=${username}`,
+    );
+  };
 
   const deleteFridgeBeUnshared = async (fridgeId) => {
     await apiClient.delete(`/fridge/beUnshared?fridgeId=${fridgeId}`);
-  }
+  };
 
   // Shopping
 
@@ -382,11 +390,20 @@ export const RestApiProvider = ({ children }) => {
 
   const addRecipeMainPhoto = async (recipeId, photo) => {
     let body = new FormData();
+
+    // photo = photo.assets[0];
+    console.log(photo);
+    photo = photo.assets;
+    console.log(photo);
+    photo = photo[0];
+    console.log(photo);
+
     const uri = photo.uri;
     const name = photo.fileName;
     const type = photo.mimeType;
 
     try {
+      console.log(photo);
       body.append("image", {
         uri,
         name,
@@ -409,7 +426,6 @@ export const RestApiProvider = ({ children }) => {
     )
       .then((res) => {
         console.log(res.status);
-        console.log(res);
         return res.json();
       })
       // .then((res) => res.json())
@@ -420,23 +436,25 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const getMarkdown = async (path) => {
-    const response = await apiClient.get(`/${path}`);
-
+    const response = await apiClient.get(`/${path}?t=${new Date().getTime()}`);
     // console.log(response.data);
     return response.data;
   };
 
   const updateMarkdown = async (recipeId, content) => {
     console.log(recipeId, content);
-    const response = await apiClient.post(
-      `/recipe/updateMarkdown?recipeId=${recipeId}`,
-      {
-        Markdown: content,
-      },
-    );
 
-    console.log(response.data);
-    return response.data;
+    try {
+      const response = await apiClient.post(
+        `/recipe/updateMarkdown?recipeId=${recipeId}`,
+        {
+          Markdown: content,
+        },
+      );
+      return response;
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const getCategorySuggestion = async (query) => {
@@ -489,13 +507,12 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
-  const updateRecipeIngredient = async (
-    recipeId,
-    ingredientCategory,
-    quantity,
-  ) => {
+  const updateRecipeIngredients = async (recipeId, newIngredients) => {
+    console.log(recipeId);
+    console.log(newIngredients);
     const response = await apiClient.post(
-      `/recipe/updateIngredient?recipeId=${recipeId}&categoryId=${ingredientCategory}&quantity=${quantity}`,
+      `/recipe/replaceIngredients?recipeId=${recipeId}`,
+      newIngredients,
     );
 
     return response.data;
@@ -503,7 +520,7 @@ export const RestApiProvider = ({ children }) => {
 
   const postAddComment = async (recipeId, comment) => {
     const response = await apiClient.post(
-      `/recipe/addComment?recipeId=${recipeId}&comment=${comment}`,
+      `/ recipe / addComment ? recipeId = ${recipeId} & comment=${comment}`,
     );
 
     return response.data;
@@ -511,7 +528,7 @@ export const RestApiProvider = ({ children }) => {
 
   const getCommentsPage = async (recipeId, page, pageSize) => {
     const response = await apiClient.get(
-      `/recipe/getCommentsPaged?recipeId=${recipeId}&page=${page}&pageSize=${pageSize}`,
+      `/ recipe / getCommentsPaged ? recipeId = ${recipeId} & page=${page} & pageSize=${pageSize}`,
     );
 
     return response.data;
@@ -576,7 +593,7 @@ export const RestApiProvider = ({ children }) => {
     recipeLike,
     updateRecipeName,
     updateRecipeDescription,
-    updateRecipeIngredient,
+    updateRecipeIngredients,
     updateMarkdown,
 
     addRecipePhotos,
