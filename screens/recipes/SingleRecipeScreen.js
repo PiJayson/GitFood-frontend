@@ -36,6 +36,7 @@ import RecipeIngredientsEdit from "../../components/recipes/RecipeIngredientsEdi
 import NewIngredientInSearchForm from "../../components/recipes/NewIngredientInSearchForm";
 import ShoppingForm from "../../components/recipes/ShoppingForm";
 import { syncFridgeStore } from "../fridge/FridgeStore";
+import { syncShoppingStore } from "../shopping/ShoppingStore";
 
 const HEADER_HEIGHT = 400;
 
@@ -67,6 +68,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
     addRecipeMainPhoto,
     postForkRecipe,
     postCreateByRecipe,
+    getShoppingLists,
   } = useRestApi();
 
   const [editState, editReducer] = useReducer(
@@ -270,6 +272,9 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
 
   const handleCreateShoppingList = async () => {
     await postCreateByRecipe(recipe.id, []);
+
+    navigation.navigate("Shopping");
+    syncShoppingStore.loadStores(getShoppingLists);
   }
 
   const handleAddMainPhotoAction = async () => {
