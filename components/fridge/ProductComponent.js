@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   productName: {
     flex: 2,
     marginLeft: 15,
-    fontSize: 16,
+    fontSize: 14,
   },
   incrementDecrementContainer: {
     flex: 1,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   productQuantity: {
-    fontSize: 16,
+    fontSize: 14,
     flex: 0.5,
     marginRight: 20,
     fontWeight: 'bold',

@@ -66,6 +66,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
     updateMarkdown,
     addRecipeMainPhoto,
     postForkRecipe,
+    postCreateByRecipe,
   } = useRestApi();
 
   const [editState, editReducer] = useReducer(
@@ -267,6 +268,10 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
     refetchComments();
   };
 
+  const handleCreateShoppingList = async () => {
+    await postCreateByRecipe(recipe.id, []);
+  }
+
   const handleAddMainPhotoAction = async () => {
     console.log("Add photo");
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -410,6 +415,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
             {description}
             <Button mode="contained" onPress={actions.fork}>Fork</Button>
             {ingredients}
+            <Button mode="contained" onPress={handleCreateShoppingList}>Create Shopping List</Button>
             {markdown}
             <View style={styles.commentSection}>
               <AddComment onAddComment={handleAddComment} />

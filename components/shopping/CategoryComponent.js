@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     height: 50,  // Fixed height for header
   },
   categoryName: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "bold",
     marginLeft: 20,
     flex: 2,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   categoryQuantity: {
-    fontSize: 24,
+    fontSize: 20,
     marginLeft: 10,
     flex: 1,
     textAlign: 'right',

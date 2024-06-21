@@ -310,6 +310,12 @@ export const RestApiProvider = ({ children }) => {
     return response.data;
   };
 
+  const postCreateByRecipe = async (recipeId, fridgeIds) => {
+    const response = await apiClient.post(`/shoppingList/createByRecipe?recipeId=${recipeId}`, {});
+
+    return response.data;
+  }
+
   // Recipe
 
   const createRecipe = async (name, description, markdown, ingredients, categories) => {
@@ -587,6 +593,7 @@ export const RestApiProvider = ({ children }) => {
     updateShoppingListQuantity,
     createShoppingList,
     patchAddCategory,
+    postCreateByRecipe,
 
     // Recipe
     createRecipe,
