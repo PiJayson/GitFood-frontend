@@ -2,26 +2,60 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Button } from "react-native-paper";
 
-import { syncFridgeStore } from "../../screens/fridge/FridgeStore";
 import IngredientEdit from "./IngredientEdit";
+import { FlatList } from "react-native";
 
-export default function RecipeIngredientsEdit({ ingredientsList }) {
-  const ingredients = ingredientsList.map((ingredient) => ({
-    ...ingredient,
-    inFridge: syncFridgeStore
-      .elements()
-      .some((el) => el.categoryId === ingredient.id).quantity,
-  }));
+export default function RecipeIngredientsEdit({
+  ingredientsList,
+  updateIngredientsList,
+  addNewIngredient,
+}) {
+  const AddIngredientButton = () => {
+    return (
+      <Button icon="plus" mode="contained" onPress={() => addNewIngredient()}>
+        Add Ingredient
+      </Button>
+    );
+  };
 
-  const fridge = syncFridgeStore.currentStore();
+  const updateIngredient = (actions) => {
+    switch (actions.type) {
+      case "update":
+        console.log("ajfklds", ingredientsList);
+        console.log("actions", actions);
+        const newIngredientsList = ingredientsList.map((ingredient) =>
+          ingredient.categoryId === actions.updatedIngredient.categoryId
+            ? actions.updatedIngredient
+            : ingredient,
+        );
+        console.log("update to", newIngredientsList);
+        updateIngredientsList(newIngredientsList);
+        break;
+      case "delete":
+        updateIngredientsList(
+          ingredientsList.filter(
+            (ingredient) => ingredient.id !== actions.ingredient.id,
+          ),
+        );
+        break;
+      default:
+        break;
+    }
+  };
+
+  console.log("ingredientsList", ingredientsList);
 
   return (
     <View style={styles.container}>
-      {/* <Button>Choose Fridge</Button> */}
       <View style={styles.ingredientsContainer}>
-        {ingredients.map((ingredient) => (
-          <IngredientEdit ingredient={ingredient} />
+        {ingredientsList.map((item) => (
+          <IngredientEdit
+            key={item.categoryId}
+            ingredient={item}
+            updateIngredient={updateIngredient}
+          />
         ))}
+        <AddIngredientButton />
       </View>
     </View>
   );

@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { IconButton, Text } from "react-native-paper";
 
 export default function Ingredient({ ingredient }) {
-  const enough = ingredient.required < ingredient.inFridge;
+  const enough = ingredient.inFridge;
 
   return (
     <View style={styles.container}>
@@ -11,7 +11,7 @@ export default function Ingredient({ ingredient }) {
         icon={enough ? "check-circle-outline" : "checkbox-blank-circle-outline"}
       />
       <Text style={styles.text}>
-        {ingredient.name} ({ingredient.required})
+        {ingredient.categoryName} ({ingredient.quantity})
       </Text>
     </View>
   );

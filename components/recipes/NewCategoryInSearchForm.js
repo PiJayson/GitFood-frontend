@@ -20,6 +20,7 @@ const NewIngredientInSearchForm = ({
   selected,
 }) => {
   const [search, setSearch] = useState("");
+  console.log("selected@!:", selected);
 
   const searchValue = useDeferredValue(search, { timeoutMs: 3000 });
   const { data } = getCategorySuggestion({
@@ -63,12 +64,6 @@ const NewIngredientInSearchForm = ({
           <OutsidePressHandler onOutsidePress={onClose} style={{ flex: 1 }}>
             <Text style={styles.header}>Add ingredient to search</Text>
             <View style={styles.search}>
-              {/* <TextInput
-            style={styles.input}
-            placeholder="Name"
-            value={name}
-            onChangeText={setName}
-          /> */}
               <Searchbar
                 placeholder="Ingredient name"
                 value={search}

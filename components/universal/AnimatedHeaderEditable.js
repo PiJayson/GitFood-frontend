@@ -2,7 +2,6 @@ import React from "react";
 import { Animated, Image, StyleSheet, View } from "react-native";
 import { IconButton, TextInput } from "react-native-paper";
 
-import Title from "./Title";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../assets/theme";
 
