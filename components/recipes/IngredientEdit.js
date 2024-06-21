@@ -15,7 +15,13 @@ export default function IngredientEdit({ ingredient, updateIngredient }) {
         keyboardType="numeric"
         onChangeText={(newQuantityText) => {
           const newQuantity = parseInt(newQuantityText, 10);
-          console.log("newQuantity", newQuantity, "ingredient", ingredient);
+          if (isNaN(newQuantity)) {
+            updateIngredient({
+              type: "update",
+              updatedIngredient: { ...ingredient, quantity: 0 },
+            });
+            return;
+          }
 
           updateIngredient({
             type: "update",

@@ -40,6 +40,10 @@ const ShoppingForm = ({ visible, onClose, ingredient }) => {
                 keyboardType="numeric"
                 onChangeText={(newQuantityText) => {
                   const newQuantity = parseInt(newQuantityText, 10);
+                  if (isNaN(newQuantity)) {
+                    setQuantity(0);
+                    return;
+                  }
                   setQuantity(newQuantity);
                 }}
               />

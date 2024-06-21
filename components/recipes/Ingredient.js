@@ -11,7 +11,7 @@ export default function Ingredient({
   return (
     <View style={styles.container}>
       <Text variant="bodyMedium" style={styles.text}>
-        {ingredient.categoryName} ({ingredient.quantity})
+        {ingredient.categoryName} ({ingredient.quantity} {ingredient.units})
       </Text>
       <IconButton
         icon={enough ? "check-circle-outline" : "checkbox-blank-circle-outline"}
