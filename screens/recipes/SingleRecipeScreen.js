@@ -65,6 +65,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
     updateRecipeIngredients,
     updateMarkdown,
     addRecipeMainPhoto,
+    postForkRecipe,
   } = useRestApi();
 
   const [editState, editReducer] = useReducer(
@@ -191,6 +192,11 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
     // await recipeLike(recipe.id);
   };
 
+  const forkRecipeAction = async () => {
+    console.log("forkRecipeAction");
+    await postForkRecipe(recipe.id);
+  };
+
   actions = recipeState.authorized
     ? {
         title: async () => {
@@ -251,6 +257,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
       }
     : {
         like: likeButtonAction,
+        fork: forkRecipeAction
       };
 
   const handleAddComment = async (comment) => {
@@ -401,6 +408,7 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
         >
           <View style={styles.container}>
             {description}
+            <Button mode="contained" onPress={actions.fork}>Fork</Button>
             {ingredients}
             {markdown}
             <View style={styles.commentSection}>

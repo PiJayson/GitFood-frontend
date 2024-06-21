@@ -1,4 +1,4 @@
-import React, { useDeferredValue } from "react";
+import React, { useEffect, useState, useReducer, useDeferredValue } from "react";
 import { View, StyleSheet, SafeAreaView, FlatList } from "react-native";
 import { Searchbar, Button } from "react-native-paper";
 import RecipeList from "../../components/recipes/RecipeList";
@@ -9,39 +9,24 @@ import OutsidePressHandler, { EventProvider } from "react-native-outside-press";
 import { useNavigation } from "@react-navigation/native";
 import AddRecipeForm from "../../components/recipes/AddRecipeForm";
 import { useRestApi } from "../../providers/RestApiProvider";
+import FridgesInSearchForm from "../../components/recipes/FridgesInSearchForm";
+import FridgesInSearch from "../../components/recipes/FridgesInSearch";
 
 export default function RecipesSearchScreen() {
   const navigation = useNavigation();
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [formVisible, setFormVisible] = React.useState(false);
+  const [fridgeFormVisible, setFridgeFormVisible] = React.useState(false);
   const [recipeFormVisible, setRecipeFormVisible] = React.useState(false);
 
   const { createRecipe, getRecipeDetails, likeRecipe, unlikeRecipe } = useRestApi();
 
   const [active, setActive] = React.useState(false);
-  const searchValue = useDeferredValue(search, { timeoutMs: 3000 });
-  // const { data } = getFoodSuggestion({
-  //   search: searchValue,
-  //   count: 10,
-  // });
-  //
-  data = [
-    { name: "pierogi", type: "class" },
-    { name: "pierogi ruskie jak u mamy", type: "recipe" },
-    { name: "pierogi ruskie jak u babci", type: "recipe" },
-    { name: "pierniczki", type: "class" },
-    { name: "piernik-ciasto", type: "class" },
-    { name: "piernik świąteczny", type: "recipe" },
-    { name: "pierniczki z miodem", type: "recipe" },
-  ];
-
-  const [ingredientsQuery, dispatch] = React.useReducer((state, action) => {
+  const [ingredientsQuery, dispatch] = useReducer((state, action) => {
     switch (action.type) {
       case "add":
-        if (
-          state.find((ingredient) => ingredient.id === action.ingredient.id)
-        ) {
+        if (state.find((ingredient) => ingredient.id === action.ingredient.id)) {
           return state;
         }
         return [...state, action.ingredient];
@@ -52,9 +37,40 @@ export default function RecipesSearchScreen() {
     }
   }, []);
 
-  const addNewIngredient = () => {
-    setFormVisible(true);
+  const [fridgesQuery, fridgesDispatch] = useReducer((state, action) => {
+    switch (action.type) {
+      case "add":
+        if (state.find((fridge) => {fridge.id === action.fridge.id})) {
+          return state;
+        }
+        return [...state, action.fridge];
+      case "remove":
+        return state.filter((fridge) => fridge.id !== action.fridge.id);
+      default:
+        return state;
+    }
+  }, []);
+  
+  const [recipes, setRecipes] = useState([]);
+
+  const query = {
+    search: searchQuery,
+    ingredients: ingredientsQuery,
+    fridges: fridgesQuery,
+    pageSize: 10,
   };
+
+  const dataSource = getRecipes(query);
+
+  useEffect(() => {
+    console.log("refetching", searchQuery, ingredientsQuery, fridgesQuery)
+    const fetchRecipes = async () => {
+      const result = await dataSource.refetch();  // Ensure you refetch data
+      setRecipes(result.data);
+    };
+    fetchRecipes();
+  }, [searchQuery, ingredientsQuery, fridgesQuery]);
+
 
   const addNewRecipe = () => {
     setRecipeFormVisible(true);
@@ -63,7 +79,7 @@ export default function RecipesSearchScreen() {
   const handleAddRecipe = async (recipeName) => {
     const recipeId = await createRecipe(recipeName, "", "", [], []);
     const recipe = await getRecipeDetails(recipeId);
-    
+
     setRecipeFormVisible(false);
     navigation.navigate("Recipe", { recipe })
   }
@@ -78,14 +94,6 @@ export default function RecipesSearchScreen() {
     dataSource.refetch();
   };
 
-  const query = {
-    search: searchQuery,
-    ingredients: ingredientsQuery,
-    pageSize: 10,
-  };
-
-  const dataSource = getRecipes(query);
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.box}>
@@ -94,57 +102,31 @@ export default function RecipesSearchScreen() {
           onChangeText={(query) => {
             setActive(true);
             setSearch(query);
+            setSearchQuery(query);
           }}
           onIconPress={() => {
-            setActive(false);
             setSearchQuery(search);
           }}
           onClearIconPress={() => {
-            console.log("clear");
             setActive(false);
             setSearch("");
             setSearchQuery("");
           }}
-          value={searchValue}
+          value={search}
           style={styles.searchbar}
         />
       </View>
       <View style={styles.content}>
         <EventProvider>
-          {active && (
-            <View style={styles.searchResults}>
-              <OutsidePressHandler
-                onOutsidePress={() => {
-                  setActive(false);
-                  setSearchQuery(search);
-                  console.log("outside");
-                }}
-              >
-                <FlatList
-                  data={data}
-                  ListHeaderComponent={<View style={{ height: 10 }} />}
-                  renderItem={({ item }) => (
-                    <Button
-                      onPress={() => {
-                        setActive(false);
-                        setSearch(item.name);
-                        setSearchQuery(item.name);
-                      }}
-                      mode={item.type === "recipe" ? "contained" : "outlined"}
-                    >
-                      {item.name}
-                    </Button>
-                  )}
-                  keyExtractor={(item) => item.name}
-                />
-              </OutsidePressHandler>
-            </View>
-          )}
-
           <IngredientsInSearch
             state={ingredientsQuery}
             dispatch={dispatch}
-            addNewIngredient={addNewIngredient}
+            addNewIngredient={() => setFormVisible(true)}
+          />
+          <FridgesInSearch
+            state={fridgesQuery}
+            dispatch={fridgesDispatch}
+            addNewFridge={() => setFridgeFormVisible(true)}
           />
           <Button onPress={addNewRecipe} mode="contained" style={styles.addRecipeButton}>
             Add Recipe
@@ -153,9 +135,7 @@ export default function RecipesSearchScreen() {
             <RecipeList
               dataSource={dataSource}
               onLikeRecipe={handleLikeRecipe}
-              onViewRecipe={(recipe) =>
-                navigation.navigate("Recipe", { recipe })
-              }
+              onViewRecipe={(recipe) => navigation.navigate("Recipe", { recipe })}
             />
           </View>
         </EventProvider>
@@ -166,6 +146,13 @@ export default function RecipesSearchScreen() {
         onSubmit={(ingredient) => dispatch({ type: "add", ingredient })}
         onClose={() => setFormVisible(false)}
         selected={ingredientsQuery.map((ingredient) => ingredient.id)}
+      />
+
+      <FridgesInSearchForm
+        visible={fridgeFormVisible}
+        onSubmit={(fridge) => fridgesDispatch({ type: "add", fridge })}
+        onClose={() => setFridgeFormVisible(false)}
+        selected={fridgesQuery.map((fridge) => fridge.id)}
       />
 
       <AddRecipeForm
@@ -191,18 +178,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     zIndex: 200,
   },
-  searchResults: {
-    top: -10,
-    alignSelf: "center",
-    maxHeight: 500,
-    height: 300,
-    width: "90%",
-    maxWidth: 650,
-    position: "absolute",
-    backgroundColor: "white",
-    zIndex: 100,
-    borderEndEndRadius: 10,
-  },
   content: {
     flex: 1,
     width: "95%",
@@ -221,4 +196,3 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
-

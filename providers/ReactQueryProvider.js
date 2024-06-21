@@ -3,6 +3,10 @@ import { useRestApi } from "./RestApiProvider";
 
 const getRecipes = (query) => {
   const { getRecipesPage } = useRestApi();
+
+  const ingredientIds = query.ingredients.map(ingredient => ingredient.id);
+  const fridgesIds = query.fridges.map(fridge => fridge.id);
+
   return useInfiniteQuery({
     queryKey: ["recipes", query],
     queryFn: ({ pageParam = 1 }) =>
@@ -10,7 +14,8 @@ const getRecipes = (query) => {
         pageParam,
         query.pageSize,
         query.search,
-        query.ingredients,
+        ingredientIds,
+        fridgesIds
       ), // this
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < query.pageSize) {

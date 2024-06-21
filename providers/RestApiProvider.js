@@ -325,12 +325,14 @@ export const RestApiProvider = ({ children }) => {
   };
 
 
-  const getRecipesPage = async (page, pageSize, search, ingredients) => {
-    console.log(search, ingredients);
+  const getRecipesPage = async (page, pageSize, search, ingredientsIds, fridgeIds) => {
+    console.log("sending", search, ingredientsIds, fridgeIds);
 
     const response = await apiClient.post(
       `/recipe/getPaged?page=${page}&pageSize=${pageSize}`,
-      { searchName: search, categoryIds: [] },
+      { searchName: search,
+        ingredientsIds: ingredientsIds,
+        fridgeIds: fridgeIds },
     );
 
     console.log(response.data);
@@ -519,17 +521,19 @@ export const RestApiProvider = ({ children }) => {
   };
 
   const postAddComment = async (recipeId, comment) => {
-    const response = await apiClient.post(
-      `/ recipe / addComment ? recipeId = ${recipeId} & comment=${comment}`,
-    );
+    const response = await apiClient.post(`/recipe/addComment?recipeId=${recipeId}&comment=${comment}`);
 
     return response.data;
   };
 
   const getCommentsPage = async (recipeId, page, pageSize) => {
-    const response = await apiClient.get(
-      `/ recipe / getCommentsPaged ? recipeId = ${recipeId} & page=${page} & pageSize=${pageSize}`,
-    );
+    const response = await apiClient.get(`/recipe/getCommentsPaged?recipeId=${recipeId}&page=${page}&pageSize=${pageSize}`);
+
+    return response.data;
+  };
+
+  const postForkRecipe = async (recipeId) => {
+    const response = await apiClient.post(`/recipe/forkRecipe?recipeId=${recipeId}`);
 
     return response.data;
   };
@@ -602,6 +606,7 @@ export const RestApiProvider = ({ children }) => {
     getCategorySuggestion,
     postAddComment,
     getCommentsPage,
+    postForkRecipe,
     likeRecipe,
     unlikeRecipe,
   };
