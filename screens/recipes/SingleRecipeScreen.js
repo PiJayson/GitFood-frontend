@@ -33,7 +33,8 @@ import RecipeIngredients from "../../components/recipes/RecipeIngredients";
 import { theme } from "../../assets/theme";
 import SectionHeader from "../../components/recipes/SectionHeader";
 import RecipeIngredientsEdit from "../../components/recipes/RecipeIngredientsEdit";
-import NewIngredientInSearchForm from "../../components/recipes/NewCategoryInSearchForm";
+import NewIngredientInSearchForm from "../../components/recipes/NewIngredientInSearchForm";
+import ShoppingForm from "../../components/recipes/ShoppingForm";
 import { syncFridgeStore } from "../fridge/FridgeStore";
 
 const HEADER_HEIGHT = 400;
@@ -47,6 +48,9 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
   const deferredUpdate = useDeferredValue(lastUpdated, { timeoutMs: 10000 });
 
   const [formVisible, setFormVisible] = React.useState(false);
+  const [shoppingFormVisible, setShoppingFormVisible] = React.useState(false);
+  const [shoppingFormIngredient, setShoppingFormIngredient] =
+    React.useState(null);
 
   // const { name, description } = recipe;
   const {
@@ -337,6 +341,10 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
           ) : (
             <RecipeIngredients
               ingredientsList={recipeState.ingredients}
+              addIngredientToShoppingList={(ingredient) => {
+                setShoppingFormIngredient(ingredient);
+                setShoppingFormVisible(true);
+              }}
               syncStore={syncFridgeStore}
             />
           )}
@@ -407,6 +415,14 @@ export default function NewSingleRecipeScreen({ route, navigation }) {
             </View>
           </View>
         </ScrollView>
+        <ShoppingForm
+          visible={shoppingFormVisible}
+          ingredient={shoppingFormIngredient}
+          onClose={() => {
+            setShoppingFormVisible(false);
+            setShoppingFormIngredient(null);
+          }}
+        />
         <NewIngredientInSearchForm
           visible={formVisible}
           onSubmit={(ingredient) => {

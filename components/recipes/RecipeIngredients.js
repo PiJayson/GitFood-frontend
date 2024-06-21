@@ -7,7 +7,11 @@ import { useRestApi } from "../../providers/RestApiProvider";
 import Ingredient from "./Ingredient";
 import { FlatList } from "react-native";
 
-export default function RecipeIngredients({ ingredientsList, syncStore }) {
+export default function RecipeIngredients({
+  ingredientsList,
+  syncStore,
+  addIngredientToShoppingList,
+}) {
   const fridgeElements = syncStore.elements();
 
   const ingredients = ingredientsList.map((ingredient) => ({
@@ -21,17 +25,22 @@ export default function RecipeIngredients({ ingredientsList, syncStore }) {
 
   const { getFridgeProducts } = useRestApi();
 
-  const fridge = syncStore.currentStoreId();
+  const fridge = syncStore.currentStore();
   const fridgeName = fridge ? fridge.name : "No fridge selected";
 
   return (
     <View style={styles.container}>
       <ExpandableList
+        title={fridgeName}
         items={syncStore.stores()}
         onSelect={(item) => syncStore.setStore(item, getFridgeProducts)}
       />
       {ingredients.map((item) => (
-        <Ingredient key={item.categoryId} ingredient={item} />
+        <Ingredient
+          key={item.categoryId}
+          ingredient={item}
+          addIngredientToShoppingList={addIngredientToShoppingList}
+        />
       ))}
       {/* <View style={styles.ingredientsContainer}>
         {ingredients.map((ingredient) => (
@@ -45,10 +54,13 @@ export default function RecipeIngredients({ ingredientsList, syncStore }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 5,
+    borderColor: "#d3d3d3",
+    borderWidth: 4,
+    borderRadius: 5,
   },
   ingredientsContainer: {
     flex: 1,
-    padding: 10,
+    padding: 5,
   },
 });

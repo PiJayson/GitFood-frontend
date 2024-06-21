@@ -20,21 +20,12 @@ const NewIngredientInSearchForm = ({
   selected,
 }) => {
   const [search, setSearch] = useState("");
-  console.log("selected@!:", selected);
 
   const searchValue = useDeferredValue(search, { timeoutMs: 3000 });
   const { data } = getCategorySuggestion({
     search: searchValue,
     count: 10 + selected.length,
   });
-  // console.log("data@!:", data);
-
-  // if (data) {
-  //   data.map((item) => {
-  //     console.log(item);
-  //     console.log(typeof item.id);
-  //   });
-  // }
 
   const dataArr = data
     ? data

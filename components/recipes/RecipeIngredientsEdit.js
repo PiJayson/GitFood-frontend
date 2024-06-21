@@ -12,7 +12,11 @@ export default function RecipeIngredientsEdit({
 }) {
   const AddIngredientButton = () => {
     return (
-      <Button icon="plus" mode="contained" onPress={() => addNewIngredient()}>
+      <Button
+        icon="plus"
+        style={styles.addIngredientButton}
+        onPress={() => addNewIngredient()}
+      >
         Add Ingredient
       </Button>
     );
@@ -48,6 +52,7 @@ export default function RecipeIngredientsEdit({
   return (
     <View style={styles.container}>
       <View style={styles.ingredientsContainer}>
+        <AddIngredientButton />
         {ingredientsList.map((item) => (
           <IngredientEdit
             key={item.categoryId}
@@ -55,7 +60,6 @@ export default function RecipeIngredientsEdit({
             updateIngredient={updateIngredient}
           />
         ))}
-        <AddIngredientButton />
       </View>
     </View>
   );
@@ -64,10 +68,17 @@ export default function RecipeIngredientsEdit({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 5,
+    borderColor: "#d3d3d3",
+    borderWidth: 4,
+    borderRadius: 5,
   },
   ingredientsContainer: {
-    flex: 1,
-    padding: 10,
+    flex: 2,
+    padding: 5,
+  },
+  addIngredientButton: {
+    margin: 10,
+    marginBottom: 30,
   },
 });

@@ -45,7 +45,7 @@ const ExpandableList = ({ items, onSelect, onAddNew, onEdit }) => {
                   style={styles.item}
                   onPress={() => handleSelect(item)}
                 >
-                  <List.Icon icon="magnify" />
+                  {/* <List.Icon icon="magnify" /> */}
                   <List.Item title={item.name} />
                 </TouchableOpacity>
                 {onEdit && (
